@@ -48,6 +48,9 @@ cString cIptvTransponderParameters::ToString(char typeP) const
     case eProtocolUDP:
          protocolstr = "UDP";
          break;
+    case eProtocolM3U:
+         protocolstr = "M3U";
+         break;
   }
   return cString::sprintf("S=%d|P=%d|F=%s|U=%s|A=%d", sidScanM, pidScanM, protocolstr, addressM, parameterM);
 }
@@ -104,6 +107,10 @@ bool cIptvTransponderParameters::Parse(const char *strP)
                     protocolM = eProtocolEXT;
                     found_f = true;
                     }
+                 else if (strstr(data, "M3U")) {
+                     protocolM = eProtocolM3U;
+                     found_f = true;
+                 }
                  break;
             case 'U':
                  strn0cpy(addressM, data, sizeof(addressM));
@@ -149,6 +156,7 @@ cIptvSourceParam::cIptvSourceParam(char sourceP, const char *descriptionP)
   protocolsM[cIptvTransponderParameters::eProtocolHTTP] = tr("HTTP");
   protocolsM[cIptvTransponderParameters::eProtocolFILE] = tr("FILE");
   protocolsM[cIptvTransponderParameters::eProtocolEXT]  = tr("EXT");
+  protocolsM[cIptvTransponderParameters::eProtocolM3U]  = tr("M3U");
 }
 
 void cIptvSourceParam::SetData(cChannel *channelP)

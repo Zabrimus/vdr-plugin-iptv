@@ -27,7 +27,7 @@ public:
   cIptvProtocolExt();
   virtual ~cIptvProtocolExt();
   int Read(unsigned char* bufferAddrP, unsigned int bufferLenP);
-  bool SetSource(const char* locationP, const int parameterP, const int indexP);
+  bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber);
   bool SetPid(int pidP, int typeP, bool onP);
   bool Open(void);
   bool Close(void);

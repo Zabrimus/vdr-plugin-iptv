@@ -85,7 +85,7 @@ bool cPluginIptv::ProcessArgs(int argc, char *argv[])
     };
 
   int c;
-  while ((c = getopt_long(argc, argv, "d:", long_options, NULL)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:t:", long_options, NULL)) != -1) {
     switch (c) {
       case 'd':
            deviceCountM = atoi(optarg);

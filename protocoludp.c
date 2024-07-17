@@ -71,7 +71,7 @@ int cIptvProtocolUdp::Read(unsigned char* bufferAddrP, unsigned int bufferLenP)
   return cIptvUdpSocket::Read(bufferAddrP, bufferLenP);
 }
 
-bool cIptvProtocolUdp::SetSource(const char* locationP, const int parameterP, const int indexP)
+bool cIptvProtocolUdp::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber)
 {
   debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
   if (!isempty(locationP)) {

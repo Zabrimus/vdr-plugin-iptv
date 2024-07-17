@@ -595,7 +595,7 @@ int cIptvProtocolCurl::Read(unsigned char* bufferAddrP, unsigned int bufferLenP)
   return len;
 }
 
-bool cIptvProtocolCurl::SetSource(const char* locationP, const int parameterP, const int indexP)
+bool cIptvProtocolCurl::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber)
 {
   debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
   if (!isempty(locationP)) {

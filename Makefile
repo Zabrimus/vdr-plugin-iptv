@@ -14,7 +14,7 @@ PLUGIN = iptv
 
 ### The version number of this plugin (taken from the main source file):
 
-VERSION = $(shell grep 'const char VERSION\[\] *=' $(PLUGIN).c | awk '{ print $$5 }' | sed -e 's/[";]//g')
+VERSION = $(shell grep 'const char VERSION\[\] *=' $(PLUGIN).cpp | awk '{ print $$5 }' | sed -e 's/[";]//g')
 GITTAG  = $(shell git describe --always 2>/dev/null)
 
 ### The directory environment:
@@ -78,6 +78,7 @@ all-redirect: all
 OBJS = $(PLUGIN).o common.o config.o device.o pidscanner.o \
 	protocolcurl.o protocolext.o protocolfile.o protocolhttp.o \
 	protocoludp.o sectionfilter.o setup.o sidscanner.o socket.o \
+	protocolm3u.o m3u8handler.o process.o process_unix.o ffmpeghandler.o \
 	source.o statistics.o streamer.o
 
 ### The main target:
@@ -87,6 +88,10 @@ all: $(SOFILE) i18n
 ### Implicit rules:
 
 %.o: %.c Makefile
+	@echo CC $@
+	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
+
+%.o: %.cpp Makefile
 	@echo CC $@
 	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
@@ -111,7 +116,11 @@ I18Npot   = $(PODIR)/$(PLUGIN).pot
 	@echo MO $@
 	$(Q)msgfmt -c -o $@ $<
 
-$(I18Npot): $(wildcard *.c)
+#$(I18Npot): $(wildcard *.c)
+#	@echo GT $@
+#	$(Q)xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ `ls $^`
+
+$(I18Npot): $(wildcard *.cpp)
 	@echo GT $@
 	$(Q)xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ `ls $^`
 

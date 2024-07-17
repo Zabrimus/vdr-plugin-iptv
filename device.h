@@ -16,6 +16,7 @@
 #include "protocolhttp.h"
 #include "protocolfile.h"
 #include "protocolext.h"
+#include "protocolm3u.h"
 #include "streamer.h"
 #include "sectionfilter.h"
 #include "pidscanner.h"
@@ -46,6 +47,7 @@ private:
   cIptvProtocolHttp *pHttpProtocolM;
   cIptvProtocolFile *pFileProtocolM;
   cIptvProtocolExt *pExtProtocolM;
+  cIptvProtocolM3U *pM3UProtocolM;
   cIptvStreamer *pIptvStreamerM;
   cIptvSectionFilterHandler *pIptvSectionM;
   cPidScanner *pPidScannerM;

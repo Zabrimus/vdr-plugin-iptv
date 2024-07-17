@@ -80,23 +80,24 @@ bool cIptvStreamer::Close(void)
   return true;
 }
 
-bool cIptvStreamer::SetSource(const char* locationP, const int parameterP, const int indexP, cIptvProtocolIf* protocolP)
+bool cIptvStreamer::SetSource(const char *locationP, const int parameterP, const int indexP, cIptvProtocolIf *protocolP, int channelNumber)
 {
-  debug1("%s (%s, %d, %d, )", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+  debug1("%s (%s, %d, %d, ChannelNumber: %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP, channelNumber);
   if (!isempty(locationP)) {
      // Update protocol and set location and parameter; Close the existing one if changed
      if (protocolM != protocolP) {
-        if (protocolM)
-           protocolM->Close();
+        if (protocolM) {
+            protocolM->Close();
+        }
         protocolM = protocolP;
         if (protocolM) {
-           protocolM->SetSource(locationP, parameterP, indexP);
+            protocolM->SetSource(locationP, parameterP, indexP, channelNumber);
            protocolM->Open();
            }
-        }
-     else if (protocolM)
-        protocolM->SetSource(locationP, parameterP, indexP);
+     } else if (protocolM) {
+         protocolM->SetSource(locationP, parameterP, indexP, channelNumber);
      }
+  }
   return true;
 }
 

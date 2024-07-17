@@ -37,6 +37,7 @@ cIptvDevice::cIptvDevice(unsigned int indexP)
   pHttpProtocolM = new cIptvProtocolHttp();
   pFileProtocolM = new cIptvProtocolFile();
   pExtProtocolM = new cIptvProtocolExt();
+  pM3UProtocolM = new  cIptvProtocolM3U();
   pPidScannerM = new cPidScanner();
   // Start section handler for iptv device
   pIptvSectionM = new cIptvSectionFilterHandler(deviceIndexM, bufsize + 1);
@@ -68,6 +69,7 @@ cIptvDevice::~cIptvDevice()
   DELETE_POINTER(pHttpProtocolM);
   DELETE_POINTER(pCurlProtocolM);
   DELETE_POINTER(pUdpProtocolM);
+  DELETE_POINTER(pM3UProtocolM);
   DELETE_POINTER(tsBufferM);
   // Close dvr fifo
   if (dvrFdM >= 0) {
@@ -286,6 +288,9 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP)
     case cIptvTransponderParameters::eProtocolEXT:
          protocol = pExtProtocolM;
          break;
+      case cIptvTransponderParameters::eProtocolM3U:
+         protocol = pM3UProtocolM;
+         break;
     default:
          error("Unrecognized IPTV protocol: %s", channelP->Parameters());
          return false;
@@ -293,7 +298,7 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP)
   }
   sidScanEnabledM = itp.SidScan() ? true : false;
   pidScanEnabledM = itp.PidScan() ? true : false;
-  if (pIptvStreamerM && pIptvStreamerM->SetSource(itp.Address(), itp.Parameter(), deviceIndexM, protocol)) {
+  if (pIptvStreamerM && pIptvStreamerM->SetSource(itp.Address(), itp.Parameter(), deviceIndexM, protocol, channelP->Number())) {
      channelM = *channelP;
      if (sidScanEnabledM && pSidScannerM && IptvConfig.GetSectionFiltering())
         pSidScannerM->SetChannel(channelM.GetChannelID());
