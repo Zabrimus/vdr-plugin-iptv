@@ -102,7 +102,7 @@ bool FFmpegHandler::streamVideo(const m3u_stream& stream) {
 
     streamHandler = new TinyProcessLib::Process(callStr, "",
         [this](const char *bytes, size_t n) {
-            debug4("Queue size %ld\n", tsPackets.size());
+            debug9("Queue size %ld\n", tsPackets.size());
 
             std::lock_guard<std::mutex> guard(queueMutex);
             tsPackets.emplace(bytes, n);
@@ -112,8 +112,8 @@ bool FFmpegHandler::streamVideo(const m3u_stream& stream) {
             // TODO: ffmpeg prints many information on stderr
             //       How to handle this? ignore? filter?
 
-            // std::string msg = std::string(bytes, n);
-            // printf("Error: %s\n", msg.c_str());
+            std::string msg = std::string(bytes, n);
+            debug10("Error: %s\n", msg.c_str());
         },
 
         true
@@ -144,7 +144,7 @@ int FFmpegHandler::popPackets(unsigned char* bufferAddrP, unsigned int bufferLen
             return -1;
         }
 
-        debug4("Read from queue, size %ld\n", front.size());
+        debug9("Read from queue, size %ld\n", front.size());
 
         memcpy(bufferAddrP, front.data(), front.size());
 

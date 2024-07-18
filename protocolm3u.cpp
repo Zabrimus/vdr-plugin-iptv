@@ -6,8 +6,6 @@
 
 #include "log.h"
 
-#define DEBUG 1
-
 cIptvProtocolM3U::cIptvProtocolM3U() : isActiveM(false) {
     debug1("%s", __PRETTY_FUNCTION__);
 }
@@ -57,10 +55,7 @@ bool cIptvProtocolM3U::Open() {
             }
         }
 
-#ifdef DEBUG
         m3u8Handler.printStream(streams);
-#endif
-
         handler.streamVideo(streams);
     }
     return true;
