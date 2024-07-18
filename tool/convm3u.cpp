@@ -15,6 +15,14 @@ std::regex regs[] = {
         std::regex(".*(m3u-url)=\"(.*?)\".*")
 };
 
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
 
 ConvM3U::ConvM3U(std::string inputFileName, std::string outputFileName, std::string channelOutput) : outputFileName(outputFileName), inputFileName(inputFileName), channelOutput(channelOutput) {
 }
@@ -29,10 +37,13 @@ void ConvM3U::convert(std::string transponderId, std::string radio) {
         exit(1);
     }
 
-    FILE* output = fopen(outputFileName.c_str(), "wb");
-    if (output == nullptr) {
-        printf("Unable to open output file %s\n", outputFileName.c_str());
-        exit(1);
+    FILE *output = nullptr;
+    if (radio == "0") {
+        output = fopen(outputFileName.c_str(), "wb");
+        if (output == nullptr) {
+            printf("Unable to open output file %s\n", outputFileName.c_str());
+            exit(1);
+        }
     }
 
     FILE* outputChannel = fopen(channelOutput.c_str(), "wb");
@@ -92,7 +103,13 @@ void ConvM3U::convert(std::string transponderId, std::string radio) {
 
     createCompleteChannel(entries, transponderId, output, outputChannel, outputFileName, radio);
 
-    fclose(output);
+    if (output != nullptr) {
+        fclose(output);
+    }
+
+    if (outputChannel != nullptr) {
+        fclose(outputChannel);
+    }
 }
 
 void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::string transponderId, FILE *cfgOut, FILE *channelOut, std::string cfg, std::string radio) {
@@ -106,7 +123,17 @@ void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::strin
         result_cfg.append(std::to_string(cfgIdx)).append(":").append(m.m3uUrl).append("\n");
 
         result_channel.append(m.tvgName).append(":").append(std::to_string(chanIdx)).append(":");
-        result_channel.append("S=1|P=0|F=M3U|U=").append(cfg).append("|");
+
+        if (strcmp(radio.c_str(), "0") == 0) {
+            result_channel.append("S=1|P=0|F=M3U|U=").append(cfg).append("|");
+        } else {
+            std::string url = m.m3uUrl;
+            url = ReplaceAll(url, ":", "%3A");
+            url = ReplaceAll(url, "|", "%7C");
+
+            result_channel.append("S=1|P=0|F=RADIO|U=").append(url).append("|");
+        }
+
         result_channel.append("A=").append(std::to_string(cfgIdx)).append(":I:0:");
         result_channel.append(std::to_string(pidIdx)).append(":");
         for (int i = 1; i <= 5; ++i) {
@@ -129,5 +156,8 @@ void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::strin
     }
 
     fwrite(result_channel.c_str(), result_channel.length(), 1, channelOut);
-    fwrite(result_cfg.c_str(), result_cfg.length(), 1, cfgOut);
+
+    if (radio == "0") {
+        fwrite(result_cfg.c_str(), result_cfg.length(), 1, cfgOut);
+    }
 }

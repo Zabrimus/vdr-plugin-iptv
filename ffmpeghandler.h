@@ -15,7 +15,8 @@ public:
     ~FFmpegHandler();
 
     bool streamVideo(const m3u_stream& stream);
-    void stopVideo();
+    bool streamAudio(const m3u_stream& stream);
+    void stop();
 
     int popPackets(unsigned char* bufferAddrP, unsigned int bufferLenP);
 
@@ -24,5 +25,6 @@ private:
     std::mutex queueMutex;
 
 private:
-    std::vector<std::string> prepareStreamCmd(const m3u_stream& stream);
+    std::vector<std::string> prepareStreamCmdVideo(const m3u_stream& stream);
+    std::vector<std::string> prepareStreamCmdAudio(const m3u_stream& stream);
 };
