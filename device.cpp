@@ -265,6 +265,8 @@ bool cIptvDevice::MaySwitchTransponder(const cChannel *channelP) const
 
 bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP)
 {
+  if (!channelP) return true;
+
   cIptvProtocolIf *protocol;
   cIptvTransponderParameters itp(channelP->Parameters());
 
