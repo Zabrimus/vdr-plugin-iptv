@@ -58,6 +58,7 @@ bool cIptvProtocolM3U::Open() {
         m3u8Handler.printStream(streams);
         handler.streamVideo(streams);
     }
+
     return true;
 }
 

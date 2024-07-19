@@ -17,6 +17,7 @@ public:
     bool streamVideo(const m3u_stream& stream);
     bool streamAudio(const m3u_stream& stream);
     void stop();
+    bool isRunning(int &exit_status);
 
     int popPackets(unsigned char* bufferAddrP, unsigned int bufferLenP);
 

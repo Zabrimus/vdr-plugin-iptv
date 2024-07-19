@@ -1,8 +1,55 @@
+/**
+ * Example of the ffmpeg call. Just for information and better understanding.
+ *
+ * ffmpeg -hide_banner -re -y
+ *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-1080p-5000.m3u8
+ *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-01u02-st.m3u8
+ *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-05u06-ad.m3u8
+ *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-07u08-ks.m3u8
+ *          -codec copy
+ *          -map 0:v
+ *          -map 1:a
+ *          -map 2:a
+ *          -map 3:a
+ *          -streamid 0:410
+ *          -streamid 1:411
+ *          -streamid 2:412
+ *          -streamid 3:413
+ *          -f mpegts
+ *          -mpegts_transport_stream_id 1
+ *          -mpegts_pmt_start_pid 4096
+ *          -mpegts_service_id 22
+ *          -mpegts_original_network_id 65281
+ *          -mpegts_flags system_b
+ *          -mpegts_flags nit
+ *          -metadata service_name=KiKA
+ *          pipe:1
+ */
+
 #include <string>
 #include <chrono>
 #include <iterator>
 #include "ffmpeghandler.h"
 #include "log.h"
+
+std::thread audioUpdate;
+
+void performAudioInfoUpdate(m3u_stream stream) {
+    int tries = 10;
+
+    auto device = cDevice::PrimaryDevice();
+
+    int ms = 500;
+    while (tries > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+        for (unsigned long i = 0; i < stream.audio.size(); ++i) {
+            device->SetAvailableTrack(eTrackType::ttAudio, i, 0, stream.audio[i].language.c_str(), stream.audio[i].name.c_str());
+        }
+
+        tries--;
+    }
+}
 
 FFmpegHandler::FFmpegHandler() {
     streamHandler = nullptr;
@@ -198,7 +245,14 @@ bool FFmpegHandler::streamVideo(const m3u_stream& stream) {
         true
     );
 
+    audioUpdate = std::thread(performAudioInfoUpdate, stream);
+    audioUpdate.detach();
+
     return true;
+}
+
+bool FFmpegHandler::isRunning(int &exit_status) {
+    return streamHandler->try_get_exit_status(exit_status);
 }
 
 bool FFmpegHandler::streamAudio(const m3u_stream& stream) {
