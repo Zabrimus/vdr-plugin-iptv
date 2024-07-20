@@ -54,7 +54,7 @@ SOFILE = libvdr-$(PLUGIN).so
 
 ### Libraries
 
-LIBS = $(shell curl-config --libs)
+LIBS = $(shell curl-config --libs) -lssl -lcrypto
 
 ### Includes and Defines (add further entries here):
 
