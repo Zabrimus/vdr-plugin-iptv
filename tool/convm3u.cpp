@@ -119,6 +119,8 @@ void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::strin
     int cfgIdx = 1;
     int chanIdx = 10;
     int pidIdx = 200;
+    int tid = atoi(transponderId.c_str());
+
     for (auto m : m3u) {
         result_cfg.append(std::to_string(cfgIdx)).append(":").append(m.m3uUrl).append("\n");
 
@@ -141,7 +143,8 @@ void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::strin
             result_channel.append(std::to_string(pidIdx)).append(":");
         }
 
-        int maxApid = (radio == "1") ? 1 : 5;
+        // int maxApid = (radio == "1") ? 1 : 5;
+        int maxApid = 1;
 
         for (int i = 1; i <= maxApid; ++i) {
             result_channel.append(std::to_string(pidIdx+i));
@@ -149,11 +152,12 @@ void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::strin
                 result_channel.append(",");
             }
         }
-        result_channel.append(":0:0:").append(std::to_string(cfgIdx)).append(":1:").append(transponderId).append(":");
+        result_channel.append(":0:0:").append(std::to_string(cfgIdx)).append(":1:").append("1").append(":");
+
+        tid++;
 
         if (radio == "0") {
-            // set RID always to 1 to prevent obsolete channels
-            result_channel.append("1\n");
+            result_channel.append("0\n");
         } else {
             result_channel.append(std::to_string(cfgIdx)).append("\n");
         }

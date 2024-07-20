@@ -32,6 +32,7 @@
 #include "ffmpeghandler.h"
 #include "log.h"
 
+/* disabled until a better solution is found
 std::thread audioUpdate;
 
 void performAudioInfoUpdate(m3u_stream stream) {
@@ -50,6 +51,7 @@ void performAudioInfoUpdate(m3u_stream stream) {
         tries--;
     }
 }
+*/
 
 FFmpegHandler::FFmpegHandler() {
     streamHandler = nullptr;
@@ -245,8 +247,10 @@ bool FFmpegHandler::streamVideo(const m3u_stream& stream) {
         true
     );
 
+    /*
     audioUpdate = std::thread(performAudioInfoUpdate, stream);
     audioUpdate.detach();
+    */
 
     return true;
 }
