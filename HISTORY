@@ -292,3 +292,11 @@ VDR Plugin 'iptv' Revision History
 2018-04-15: Version 2.4.0
 
 - Updated for vdr-2.4.0.
+
+==================================
+VDR Plugin 'iptv' Revision History
+==================================
+
+2024-07-17: Version 2.6.0
+- Add new stream protocols RADIO and M3U
+

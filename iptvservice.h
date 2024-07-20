@@ -13,7 +13,7 @@
 #define stIptv ('I' << 24)
 
 struct IptvService_v1_0 {
-  unsigned int cardIndex;
+  int cardIndex;
   cString protocol;
   cString bitrate;
   };
