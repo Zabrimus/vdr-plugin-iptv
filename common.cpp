@@ -82,3 +82,15 @@ const section_filter_table_type section_filter_table[SECTION_FILTER_TABLE_SIZE] 
   {trNOOP("EIT (0x4E/0x4F/0x5X/0x6X)"), "EIT", 0x12, 0x40, 0xC0},
   {trNOOP("TDT (0x70)"),                "TDT", 0x14, 0x70, 0xFF},
 };
+
+void printBacktrace() {
+    cStringList stringList;
+
+    cBackTrace::BackTrace(stringList, 0, false);
+    esyslog("[iptv] Backtrace size: %d", stringList.Size());
+    for (int i = 0; i < stringList.Size(); ++i) {
+        esyslog("[iptv] ==> %s", stringList[i]);
+    }
+
+    esyslog("[iptv] ==> Caller: %s", *cBackTrace::GetCaller());
+}

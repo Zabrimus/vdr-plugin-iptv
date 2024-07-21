@@ -63,6 +63,7 @@ uint8_t payload(const uint8_t *bufP);
 const char *id_pid(const u_short pidP);
 int select_single_desc(int descriptorP, const int usecsP, const bool selectWriteP);
 cString ChangeCase(const cString &strP, bool upperP);
+void printBacktrace();
 
 struct section_filter_table_type {
   const char *description;
