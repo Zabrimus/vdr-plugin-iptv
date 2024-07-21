@@ -102,10 +102,22 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     callStr.emplace_back("0:" + std::to_string(stream.vpid));
 
     int aidx = 1;
-    for (auto a: stream.apids) {
+    int maxPid = *max_element(std::begin(stream.apids), std::end(stream.apids));
+
+    // add well known pid
+    for (unsigned long i = 0; i < min(stream.apids.size(), stream.audio.size()); ++i) {
         callStr.emplace_back("-streamid");
-        callStr.emplace_back(std::to_string(aidx) + ":" + std::to_string(a));
+        callStr.emplace_back(std::to_string(aidx) + ":" + std::to_string(stream.apids[i]));
         aidx++;
+    }
+
+    // add missing pid
+    int naidx = 1;
+    for (auto i = stream.apids.size(); i < stream.audio.size(); ++i) {
+        callStr.emplace_back("-streamid");
+        callStr.emplace_back(std::to_string(aidx) + ":" + std::to_string(maxPid + naidx));
+        aidx++;
+        naidx++;
     }
 
     callStr.emplace_back("-f");
@@ -121,7 +133,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     callStr.emplace_back(std::to_string(stream.spid));
 
     callStr.emplace_back("-mpegts_original_network_id");
-    callStr.emplace_back("65281");
+    callStr.emplace_back(std::to_string(stream.nid));
 
     callStr.emplace_back("-mpegts_flags");
     callStr.emplace_back("system_b");

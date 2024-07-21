@@ -28,6 +28,7 @@ typedef struct {
     int vpid;
     int spid;
     int tpid;
+    int nid;
     std::vector<int> apids;
 } m3u_stream;
 
