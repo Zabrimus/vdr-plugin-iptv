@@ -127,13 +127,13 @@ void ConvM3U::createCompleteChannel(const std::vector<m3uEntry>& m3u, std::strin
         result_channel.append(m.tvgName).append(":").append(std::to_string(chanIdx)).append(":");
 
         if (radio == "0") {
-            result_channel.append("S=1|P=0|F=M3U|U=").append(cfg).append("|");
+            result_channel.append("S=1|P=1|F=M3U|U=").append(cfg).append("|");
         } else {
             std::string url = m.m3uUrl;
             url = ReplaceAll(url, ":", "%3A");
             url = ReplaceAll(url, "|", "%7C");
 
-            result_channel.append("S=1|P=1|F=RADIO|U=").append(url).append("|");
+            result_channel.append("S=1|P=0|F=RADIO|U=").append(url).append("|");
         }
 
         result_channel.append("A=").append(std::to_string(cfgIdx)).append(":I:0:");
