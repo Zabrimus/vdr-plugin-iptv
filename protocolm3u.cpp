@@ -42,6 +42,7 @@ bool cIptvProtocolM3U::Open() {
                 streams.vpid = Channel->Vpid();
                 streams.spid = Channel->Sid();
                 streams.tpid = Channel->Tid();
+                streams.nid = Channel->Nid();
 
                 int aidx = 0;
                 while (true) {
