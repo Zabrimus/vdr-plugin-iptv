@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef __IPTV_DEVICE_H
-#define __IPTV_DEVICE_H
+#pragma once
 
 #include <vdr/device.h>
 #include "common.h"
@@ -25,102 +24,100 @@
 #include "statistics.h"
 
 class cIptvDevice : public cDevice, public cIptvPidStatistics, public cIptvBufferStatistics, public cIptvDeviceIf {
-  // static ones
+    // static ones
 public:
-  static unsigned int deviceCount;
-  static bool Initialize(unsigned int DeviceCount);
-  static void Shutdown(void);
-  static unsigned int Count(void);
-  static cIptvDevice *GetIptvDevice(int CardIndex);
+    static unsigned int deviceCount;
+    static bool Initialize(unsigned int DeviceCount);
+    static void Shutdown();
+    static unsigned int Count();
+    static cIptvDevice *GetIptvDevice(int CardIndex);
 
-  // private parts
+    // private parts
 private:
-  unsigned int deviceIndexM;
-  int dvrFdM;
-  bool isPacketDeliveredM;
-  bool isOpenDvrM;
-  bool sidScanEnabledM;
-  bool pidScanEnabledM;
-  cRingBufferLinear *tsBufferM;
-  cChannel channelM;
-  cIptvProtocolUdp *pUdpProtocolM;
-  cIptvProtocolCurl *pCurlProtocolM;
-  cIptvProtocolHttp *pHttpProtocolM;
-  cIptvProtocolFile *pFileProtocolM;
-  cIptvProtocolExt *pExtProtocolM;
-  cIptvProtocolM3U *pM3UProtocolM;
-  cIptvProtocolRadio *pRadioProtocolM;
-  cIptvStreamer *pIptvStreamerM;
-  cIptvSectionFilterHandler *pIptvSectionM;
-  cPidScanner *pPidScannerM;
-  cSidScanner *pSidScannerM;
-  cMutex mutexM;
+    unsigned int deviceIndexM;
+    int dvrFdM;
+    bool isPacketDeliveredM;
+    bool isOpenDvrM;
+    bool sidScanEnabledM;
+    bool pidScanEnabledM;
+    cRingBufferLinear *tsBufferM;
+    cChannel channelM;
+    cIptvProtocolUdp *pUdpProtocolM;
+    cIptvProtocolCurl *pCurlProtocolM;
+    cIptvProtocolHttp *pHttpProtocolM;
+    cIptvProtocolFile *pFileProtocolM;
+    cIptvProtocolExt *pExtProtocolM;
+    cIptvProtocolM3U *pM3UProtocolM;
+    cIptvProtocolRadio *pRadioProtocolM;
+    cIptvStreamer *pIptvStreamerM;
+    cIptvSectionFilterHandler *pIptvSectionM;
+    cPidScanner *pPidScannerM;
+    cSidScanner *pSidScannerM;
+    cMutex mutexM;
 
-  // constructor & destructor
+    // constructor & destructor
 public:
-  cIptvDevice(unsigned int deviceIndexP);
-  virtual ~cIptvDevice();
-  cString GetInformation(unsigned int pageP = IPTV_DEVICE_INFO_ALL);
+    explicit cIptvDevice(unsigned int deviceIndexP);
+    ~cIptvDevice() override;
+    cString GetInformation(unsigned int pageP = IPTV_DEVICE_INFO_ALL);
 
-  // copy and assignment constructors
+    // copy and assignment constructors
 private:
-  cIptvDevice(const cIptvDevice&);
-  cIptvDevice& operator=(const cIptvDevice&);
+    cIptvDevice(const cIptvDevice &);
+    cIptvDevice &operator=(const cIptvDevice &);
 
-  // for statistics and general information
-  cString GetGeneralInformation(void);
-  cString GetPidsInformation(void);
-  cString GetFiltersInformation(void);
+    // for statistics and general information
+    cString GetGeneralInformation();
+    cString GetPidsInformation();
+    cString GetFiltersInformation();
 
-  // for channel info
+    // for channel info
 public:
-  virtual cString DeviceType(void) const;
-  virtual cString DeviceName(void) const;
-  virtual int SignalStrength(void) const;
-  virtual int SignalQuality(void) const;
+    cString DeviceType() const override;
+    cString DeviceName() const override;
+    int SignalStrength() const override;
+    int SignalQuality() const override;
 
-  // for channel selection
+    // for channel selection
 public:
-  virtual bool ProvidesSource(int sourceP) const;
-  virtual bool ProvidesTransponder(const cChannel *channelP) const;
-  virtual bool ProvidesChannel(const cChannel *channelP, int priorityP = -1, bool *needsDetachReceiversP = NULL) const;
-  virtual bool ProvidesEIT(void) const;
-  virtual int NumProvidedSystems(void) const;
-  virtual const cChannel *GetCurrentlyTunedTransponder(void) const;
-  virtual bool IsTunedToTransponder(const cChannel *channelP) const;
-  virtual bool MaySwitchTransponder(const cChannel *channelP) const;
+    bool ProvidesSource(int sourceP) const override;
+    bool ProvidesTransponder(const cChannel *channelP) const override;
+    bool ProvidesChannel(const cChannel *channelP, int priorityP, bool *needsDetachReceiversP) const override;
+    bool ProvidesEIT() const override;
+    int NumProvidedSystems() const override;
+    const cChannel *GetCurrentlyTunedTransponder() const override;
+    bool IsTunedToTransponder(const cChannel *channelP) const override;
+    bool MaySwitchTransponder(const cChannel *channelP) const override;
 
 protected:
-  virtual bool SetChannelDevice(const cChannel *channelP, bool liveViewP);
+    bool SetChannelDevice(const cChannel *channelP, bool liveViewP) override;
 
-  // for recording
+    // for recording
 private:
-  uchar *GetData(int *availableP = NULL);
-  void SkipData(int countP);
+    uchar *GetData(int *availableP = nullptr);
+    void SkipData(int countP);
 
 protected:
-  virtual bool SetPid(cPidHandle *handleP, int typeP, bool onP);
-  virtual bool OpenDvr(void);
-  virtual void CloseDvr(void);
-  virtual bool GetTSPacket(uchar *&dataP);
+    bool SetPid(cPidHandle *handleP, int typeP, bool onP) override;
+    bool OpenDvr() override;
+    void CloseDvr() override;
+    bool GetTSPacket(uchar *&dataP) override;
 
-  // for section filtering
+    // for section filtering
 public:
-  virtual int OpenFilter(u_short pidP, u_char tidP, u_char maskP);
-  virtual void CloseFilter(int handleP);
+    int OpenFilter(u_short pidP, u_char tidP, u_char maskP) override;
+    void CloseFilter(int handleP) override;
 
-  // for transponder lock
+    // for transponder lock
 public:
-  virtual bool HasLock(int timeoutMsP) const;
+    bool HasLock(int timeoutMsP) const override;
 
-  // for common interface
+    // for common interface
 public:
-  virtual bool HasInternalCam(void);
+    bool HasInternalCam() override;
 
-  // for internal device interface
+    // for internal device interface
 public:
-  virtual void WriteData(u_char *bufferP, int lengthP);
-  virtual unsigned int CheckData(void);
+    void WriteData(u_char *bufferP, int lengthP) override;
+    unsigned int CheckData() override;
 };
-
-#endif // __IPTV_DEVICE_H
