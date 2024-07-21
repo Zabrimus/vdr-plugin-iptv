@@ -62,7 +62,7 @@ void cSidScanner::Process(u_short pidP, u_char tidP, const u_char *dataP, int le
             }
         }
      else if ((pidP == 0x10) && (tidP == 0x40)) {
-        debug1("%s (%d, %02X, , %d)", __PRETTY_FUNCTION__, pidP, tidP, lengthP);
+        debug7("%s (%d, %02X, , %d)", __PRETTY_FUNCTION__, pidP, tidP, lengthP);
         SI::NIT nit(dataP, false);
         if (!nit.CheckCRCAndParse())
            return;
