@@ -30,6 +30,8 @@ bool cIptvProtocolM3U::Open() {
 
         auto streams = m3u8Handler.parseM3u(url);
         if (streams.width == 0 || streams.height == 0) {
+            debug1("Unable to read URL '%s'\n", url.c_str());
+
             isActiveM = false;
             return false;
         }
@@ -68,6 +70,7 @@ bool cIptvProtocolM3U::Close() {
 
     isActiveM = false;
     handler.stop();
+
     return true;
 }
 

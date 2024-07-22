@@ -66,6 +66,7 @@ void cIptvStreamer::Action() {
 }
 
 bool cIptvStreamer::Open() {
+    std::lock_guard<std::mutex> guard(streamerMutex);
     debug1("%s", __PRETTY_FUNCTION__);
 
     // Open the protocol
@@ -74,10 +75,12 @@ bool cIptvStreamer::Open() {
 
     // Start thread
     Start();
+
     return true;
 }
 
 bool cIptvStreamer::Close() {
+    std::lock_guard<std::mutex> guard(streamerMutex);
     debug1("%s", __PRETTY_FUNCTION__);
 
     // Stop thread
@@ -96,6 +99,7 @@ bool cIptvStreamer::Close() {
 }
 
 bool cIptvStreamer::SetSource(const char *locationP, const int parameterP, const int indexP, cIptvProtocolIf *protocolP, int channelNumber) {
+    std::lock_guard<std::mutex> guard(streamerMutex);
     debug1("%s (%s, %d, %d, ChannelNumber: %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP, channelNumber);
 
     if (!isempty(locationP)) {

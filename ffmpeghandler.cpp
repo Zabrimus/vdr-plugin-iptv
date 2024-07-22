@@ -138,8 +138,8 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     callStr.emplace_back("-mpegts_flags");
     callStr.emplace_back("system_b");
 
-    callStr.emplace_back("-mpegts_flags");
-    callStr.emplace_back("nit");
+    // callStr.emplace_back("-mpegts_flags");
+    // callStr.emplace_back("nit");
 
     callStr.emplace_back("-metadata");
     callStr.emplace_back("service_name=" + stream.channelName);
@@ -216,8 +216,8 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream& 
     callStr.emplace_back("-mpegts_flags");
     callStr.emplace_back("system_b");
 
-    callStr.emplace_back("-mpegts_flags");
-    callStr.emplace_back("nit");
+    // callStr.emplace_back("-mpegts_flags");
+    // callStr.emplace_back("nit");
 
     callStr.emplace_back("-metadata");
     callStr.emplace_back("service_name=" + stream.channelName);
@@ -277,7 +277,7 @@ bool FFmpegHandler::streamAudio(const m3u_stream& stream) {
 
     streamHandler = new TinyProcessLib::Process(callStr, "",
             [this](const char *bytes, size_t n) {
-                debug9("Queue size %ld\n", tsPackets.size());
+                debug9("Add new packets. Current queue size %ld\n", tsPackets.size());
 
                 std::lock_guard<std::mutex> guard(queueMutex);
                 tsPackets.emplace(bytes, n);
@@ -305,6 +305,7 @@ void FFmpegHandler::stop() {
         streamHandler = nullptr;
     }
 
+    std::lock_guard<std::mutex> guard(queueMutex);
     std::queue<std::string> empty;
     std::swap(tsPackets, empty);
 }
@@ -315,11 +316,14 @@ int FFmpegHandler::popPackets(unsigned char* bufferAddrP, unsigned int bufferLen
         std::string front = tsPackets.front();
 
         if (bufferLenP < front.size()) {
+            // this shall never happen. A possible solution is to use a deque instead
+            // and modify the front element. Unsure, if this is worth the effort, because
+            // a full buffer points to another problem.
             error("WARNING: BufferLen %u < Size %ld\n", bufferLenP, front.size());
-            return -1;
+            return 0;
         }
 
-        debug9("Read from queue, size %ld\n", front.size());
+        debug9("Read from queue: len %ld, size %ld bytes\n", tsPackets.size(), front.size());
 
         memcpy(bufferAddrP, front.data(), front.size());
 
@@ -327,5 +331,5 @@ int FFmpegHandler::popPackets(unsigned char* bufferAddrP, unsigned int bufferLen
         return front.size();
     }
 
-    return -1;
+    return 0;
 }

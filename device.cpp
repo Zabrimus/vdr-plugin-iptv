@@ -21,6 +21,7 @@ cIptvDevice::cIptvDevice(unsigned int indexP)
           sidScanEnabledM(false),
           pidScanEnabledM(false),
           channelM() {
+
     unsigned int bufsize = (unsigned int) IPTV_BUFFER_SIZE;
     bufsize -= (bufsize % TS_SIZE);
     info("Creating IPTV device %d (CardIndex=%d)", deviceIndexM, CardIndex());
@@ -46,6 +47,8 @@ cIptvDevice::cIptvDevice(unsigned int indexP)
     AttachFilter(pSidScannerM = new cSidScanner());
     // Check if dvr fifo exists
     struct stat sb;
+    memset(&sb, 0, sizeof(struct stat));
+
     cString filename = cString::sprintf(IPTV_DVR_FILENAME, deviceIndexM);
     stat(filename, &sb);
     if (S_ISFIFO(sb.st_mode)) {

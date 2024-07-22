@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <arpa/inet.h>
 
 #include <vdr/thread.h>
@@ -22,6 +23,8 @@ private:
     unsigned char *packetBufferM;
     unsigned int packetBufferLenM;
     cIptvProtocolIf *protocolM;
+
+    std::mutex streamerMutex;
 
 protected:
     void Action() override;

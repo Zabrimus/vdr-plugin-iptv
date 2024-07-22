@@ -22,6 +22,9 @@
 #endif
 
 const char VERSION[] = "2.4.0" GITVERSION;
+static const char DESCRIPTION[] = trNOOP("Experience the IPTV");
+
+const char *cPluginIptv::Description() { return tr(DESCRIPTION); }
 
 cPluginIptv::cPluginIptv() : deviceCountM(1) {
     debug16("%s", __PRETTY_FUNCTION__);
