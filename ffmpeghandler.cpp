@@ -7,6 +7,7 @@
  *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-05u06-ad.m3u8
  *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-07u08-ks.m3u8
  *          -codec copy
+ *          -c:s copy
  *          -map 0:v
  *          -map 1:a
  *          -map 2:a
@@ -82,6 +83,10 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     callStr.emplace_back("-codec");
     callStr.emplace_back("copy");
 
+    // copy subtitles
+    // callStr.emplace_back("-c:s");
+    // callStr.emplace_back("copy");
+
     // main input
     if (!stream.audio.empty()) {
         callStr.emplace_back("-map");
@@ -102,7 +107,12 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     callStr.emplace_back("0:" + std::to_string(stream.vpid));
 
     int aidx = 1;
-    int maxPid = *max_element(std::begin(stream.apids), std::end(stream.apids));
+    int maxPid = 0;
+    for (auto i : stream.apids) {
+        if (i > maxPid) {
+            maxPid = i;
+        }
+    }
 
     // add well known pid
     for (unsigned long i = 0; i < min(stream.apids.size(), stream.audio.size()); ++i) {

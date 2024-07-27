@@ -8,6 +8,7 @@
 #ifndef __IPTV_COMMON_H
 #define __IPTV_COMMON_H
 
+#include <string>
 #include <vdr/tools.h>
 #include <vdr/config.h>
 #include <vdr/i18n.h>
@@ -63,6 +64,7 @@ uint8_t payload(const uint8_t *bufP);
 const char *id_pid(const u_short pidP);
 int select_single_desc(int descriptorP, const int usecsP, const bool selectWriteP);
 cString ChangeCase(const cString &strP, bool upperP);
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
 void printBacktrace();
 
 struct section_filter_table_type {

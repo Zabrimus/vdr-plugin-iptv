@@ -32,6 +32,7 @@ public:
     eProtocolEXT,
     eProtocolM3U,
     eProtocolRadio,
+    eProtocolStream,
     eProtocolCount
   };
   cIptvTransponderParameters(const char *parametersP = NULL);

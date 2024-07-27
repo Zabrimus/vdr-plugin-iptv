@@ -83,6 +83,15 @@ const section_filter_table_type section_filter_table[SECTION_FILTER_TABLE_SIZE] 
   {trNOOP("TDT (0x70)"),                "TDT", 0x14, 0x70, 0xFF},
 };
 
+std::string ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
+}
+
 void printBacktrace() {
     cStringList stringList;
 
