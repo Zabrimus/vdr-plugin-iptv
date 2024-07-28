@@ -98,7 +98,7 @@ bool cIptvStreamer::Close() {
     return true;
 }
 
-bool cIptvStreamer::SetSource(const char *locationP, const int parameterP, const int indexP, cIptvProtocolIf *protocolP, int channelNumber) {
+bool cIptvStreamer::SetSource(const char *locationP, const int parameterP, const int indexP, cIptvProtocolIf *protocolP, int channelNumber, int useYtdlp) {
     std::lock_guard<std::mutex> guard(streamerMutex);
     debug1("%s (%s, %d, %d, ChannelNumber: %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP, channelNumber);
 
@@ -111,12 +111,12 @@ bool cIptvStreamer::SetSource(const char *locationP, const int parameterP, const
 
             protocolM = protocolP;
             if (protocolM) {
-                protocolM->SetSource(locationP, parameterP, indexP, channelNumber);
+                protocolM->SetSource(locationP, parameterP, indexP, channelNumber, useYtdlp);
                 protocolM->Open();
             }
 
         } else if (protocolM) {
-            protocolM->SetSource(locationP, parameterP, indexP, channelNumber);
+            protocolM->SetSource(locationP, parameterP, indexP, channelNumber, useYtdlp);
         }
     }
 

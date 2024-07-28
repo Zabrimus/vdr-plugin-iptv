@@ -18,7 +18,7 @@ public:
     cIptvProtocolStream();
     ~cIptvProtocolStream() override;
     int Read(unsigned char* bufferAddrP, unsigned int bufferLenP) override;
-    bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber) override;
+    bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) override;
     bool SetPid(int pidP, int typeP, bool onP) override;
     bool Open() override;
     bool Close() override;

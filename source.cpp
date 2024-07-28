@@ -17,7 +17,8 @@ cIptvTransponderParameters::cIptvTransponderParameters(const char *parametersP)
 : sidScanM(0),
   pidScanM(0),
   protocolM(eProtocolUDP),
-  parameterM(0)
+  parameterM(0),
+  useYtdlp(0)
 {
   debug1("%s (%s)", __PRETTY_FUNCTION__, parametersP);
 
@@ -70,26 +71,26 @@ bool cIptvTransponderParameters::Parse(const char *strP)
      const char *delim = "|";
      char *str = strdup(strP);
      char *p = str;
-     char *saveptr = NULL;
-     char *token = NULL;
+     char *saveptr = nullptr;
+     char *token = nullptr;
      bool found_s = false;
      bool found_p = false;
      bool found_f = false;
      bool found_u = false;
      bool found_a = false;
 
-     while ((token = strtok_r(str, delim, &saveptr)) != NULL) {
+     while ((token = strtok_r(str, delim, &saveptr)) != nullptr) {
        char *data = token;
        ++data;
        if (data && (*data == '=')) {
           ++data;
           switch (toupper(*token)) {
             case 'S':
-                 sidScanM = (int)strtol(data, (char **)NULL, 10);
+                 sidScanM = (int)strtol(data, (char **)nullptr, 10);
                  found_s = true;
                  break;
             case 'P':
-                 pidScanM = (int)strtol(data, (char **)NULL, 10);
+                 pidScanM = (int)strtol(data, (char **)nullptr, 10);
                  found_p = true;
                  break;
             case 'F':
@@ -131,16 +132,20 @@ bool cIptvTransponderParameters::Parse(const char *strP)
                  found_u = true;
                  break;
             case 'A':
-                 parameterM = (int)strtol(data, (char **)NULL, 10);
+                 parameterM = (int)strtol(data, (char **)nullptr, 10);
                  found_a = true;
+                 break;
+              case 'Y':
+                 useYtdlp = (int)strtol(data, (char **)nullptr, 10);
                  break;
             default:
                  break;
             }
           }
-       str = NULL;
+       str = nullptr;
        }
 
+     // Y is optional and therefore not recognized
      if (found_s && found_p && found_f && found_u && found_a)
         result = true;
      else
@@ -188,10 +193,10 @@ void cIptvSourceParam::GetData(cChannel *channelP)
 {
   debug1("%s (%s)", __PRETTY_FUNCTION__, channelP->Parameters());
   channelP->SetTransponderData(channelP->Source(), channelP->Frequency(), dataM.Srate(), itpM.ToString(Source()), true);
-  channelP->SetId(NULL, channelP->Nid(), channelP->Tid(), channelP->Sid(), ridM);
+  channelP->SetId(nullptr, channelP->Nid(), channelP->Tid(), channelP->Sid(), ridM);
 }
 
-cOsdItem *cIptvSourceParam::GetOsdItem(void)
+cOsdItem *cIptvSourceParam::GetOsdItem()
 {
   debug1("%s", __PRETTY_FUNCTION__);
   switch (paramM++) {
@@ -201,7 +206,7 @@ cOsdItem *cIptvSourceParam::GetOsdItem(void)
     case  3: return new cMenuEditStraItem(tr("Protocol"),         &itpM.protocolM,  ELEMENTS(protocolsM),  protocolsM);
     case  4: return new cMenuEditStrItem( tr("Address"),           itpM.addressM,   sizeof(itpM.addressM), allowedProtocolCharsS);
     case  5: return new cMenuEditIntItem( tr("Parameter"),        &itpM.parameterM, 0,                     0xFFFF);
-    default: return NULL;
+    default: return nullptr;
     }
-  return NULL;
+  return nullptr;
 }

@@ -28,7 +28,7 @@ bool cIptvProtocolM3U::Open() {
     if (!isActiveM) {
         isActiveM = true;
 
-        auto streams = m3u8Handler.parseM3u(url);
+        auto streams = m3u8Handler.parseM3u(url, useYtdlp);
         if (streams.width == 0 || streams.height == 0) {
             debug1("Unable to read URL '%s'\n", url.c_str());
 
@@ -74,8 +74,11 @@ bool cIptvProtocolM3U::Close() {
     return true;
 }
 
-bool cIptvProtocolM3U::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber) {
+bool
+cIptvProtocolM3U::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
     debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+
+    this->useYtdlp = useYtDlp;
 
     struct stat stbuf;
     cString configFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), locationP);

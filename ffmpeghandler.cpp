@@ -2,9 +2,13 @@
  * Example of the ffmpeg call. Just for information and better understanding.
  *
  * ffmpeg -hide_banner -re -y
+ *          -thread_queue_size 32
  *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-1080p-5000.m3u8
+ *          -thread_queue_size 32
  *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-01u02-st.m3u8
+ *          -thread_queue_size 32
  *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-05u06-ad.m3u8
+ *          -thread_queue_size 32
  *          -i https://kikageohls.akamaized.net/hls/live/2022693/livetvkika_de/master-audio-07u08-ks.m3u8
  *          -codec copy
  *          -c:s copy

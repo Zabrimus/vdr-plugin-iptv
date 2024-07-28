@@ -12,16 +12,17 @@ private:
     int channelId;
     std::string url;
     bool isActiveM;
+    int useYtdlp;
     M3u8Handler m3u8Handler;
     FFmpegHandler handler;
 
 public:
     cIptvProtocolM3U();
-    virtual ~cIptvProtocolM3U();
-    int Read(unsigned char* bufferAddrP, unsigned int bufferLenP);
-    bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber);
-    bool SetPid(int pidP, int typeP, bool onP);
-    bool Open(void);
-    bool Close(void);
-    cString GetInformation(void);
+    ~cIptvProtocolM3U() override;
+    int Read(unsigned char* bufferAddrP, unsigned int bufferLenP) override;
+    bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) override;
+    bool SetPid(int pidP, int typeP, bool onP) override;
+    bool Open() override;
+    bool Close() override;
+    cString GetInformation() override;
 };

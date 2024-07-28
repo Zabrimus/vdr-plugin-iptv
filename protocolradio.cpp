@@ -65,7 +65,8 @@ bool cIptvProtocolRadio::Close() {
     return true;
 }
 
-bool cIptvProtocolRadio::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber) {
+bool
+cIptvProtocolRadio::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
     debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
 
     url = locationP;

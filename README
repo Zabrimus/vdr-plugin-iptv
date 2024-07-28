@@ -19,6 +19,7 @@ Requirements:
 
 - Libcurl - the multiprotocol file transfer library
   http://curl.haxx.se/libcurl/
+- yt-dlp  - optional. Used for protocol M3U.
 
 Description:
 
@@ -74,10 +75,17 @@ Information menu:
 - [Yellow:Filters]                 Opens the section filter statistics page.
 - [Blue:Bits/bytes]                Toggles between bits and bytes mode.
 
+Plugin parameters:
+   -d <num>,  --devices=<number>            number of devices to be created
+   -t <mode>, --trace=<mode>               set the tracing mode
+   -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size
+   -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp
+
 Configuration:
 
 - channels.conf
 
+  TV8;IPTV:70:S=1|P=0|F=M3U|U=other.cfg|A=2|Y=1:I:0:200:201,202,203,204,205:0:0:11:1:100:0
   ST1:IPTV:90:S=1|P=0|F=STREAM|U=http%3A//locahost/stream?id=10|A=1:I:0:514:670:2321:0:5:0:200:0
   RD1:IPTV:80:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=8:I:0:270:271,272,273,274,275:0:0:8:1:9:8
   TV7;IPTV:70:S=1|P=0|F=M3U|U=list1.cfg|A=5:I:0:200:201,202,203,204,205:0:0:11:1:100:0
@@ -88,6 +96,7 @@ Configuration:
   TV2;IPTV:20:S=1|P=0|F=UDP|U=127.0.0.1@127.0.0.1|A=1234:I:0:512:650:2321:0:2:0:0:0
   TV1;IPTV:10:S=1|P=0|F=UDP|U=127.0.0.1|A=1234:I:0:512:650:2321:0:1:0:0:0
            ^  ^   ^   ^     ^           ^      ^
+           |  |   |   |     |           |      |
            |  |   |   |     |           |      Source type ("I")
            |  |   |   |     |           Stream parameter
            |  |   |   |     |            UDP:  multicast port
@@ -95,6 +104,7 @@ Configuration:
            |  |   |   |     |            HTTP: HTTP port number
            |  |   |   |     |            FILE: file delay (ms)
            |  |   |   |     |            EXT:  script parameter
+           |  |   |   |     |            M3U:  Y=1 uses yt-dlp to determine the video URL
            |  |   |   |     Stream address
            |  |   |   |      UDP:  multicast [source@]group address
            |  |   |   |      CURL: HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded
@@ -156,6 +166,9 @@ External streaming:
   NID  = 1    (doesn't matter, but must be set)
   TID  = 100  Select a transponder.
   RID  = 0    (Radio only 1)
+
+  It is possible to use parameter Y=1 to use yt-dlp to determine the m3u8 URL.
+  Useful e.g. for youtube videos. Needs yt-dlp.
 
 Notes:
 

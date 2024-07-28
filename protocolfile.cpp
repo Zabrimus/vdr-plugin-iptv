@@ -96,7 +96,8 @@ bool cIptvProtocolFile::Close(void)
   return true;
 }
 
-bool cIptvProtocolFile::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber)
+bool
+cIptvProtocolFile::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp)
 {
   debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
   if (!isempty(locationP)) {

@@ -15,7 +15,8 @@ cIptvConfig::cIptvConfig(void)
   protocolBasePortM(4321),
   useBytesM(1),
   sectionFilteringM(1),
-  threadQueueSize(32)
+  threadQueueSize(32),
+  ytdlpPath("/usr/local/bin/yt-dlp")
 {
   for (unsigned int i = 0; i < ARRAY_SIZE(disabledFiltersM); ++i)
       disabledFiltersM[i] = -1;

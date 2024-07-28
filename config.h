@@ -22,6 +22,7 @@ private:
   int disabledFiltersM[SECTION_FILTER_TABLE_SIZE];
   char configDirectoryM[PATH_MAX];
   char resourceDirectoryM[PATH_MAX];
+  std::string ytdlpPath;
 
 public:
   enum eTraceMode {
@@ -45,24 +46,27 @@ public:
     eTraceModeMask    = 0xFFFF
   };
   cIptvConfig();
-  unsigned int GetTraceMode(void) const { return traceModeM; }
-  unsigned int GetThreadQueueSize() const { return threadQueueSize; }
-  bool IsTraceMode(eTraceMode modeP) const { return (traceModeM & modeP); }
-  unsigned int GetProtocolBasePort(void) const { return protocolBasePortM; }
-  unsigned int GetUseBytes(void) const { return useBytesM; }
-  unsigned int GetSectionFiltering(void) const { return sectionFilteringM; }
-  const char *GetConfigDirectory(void) const { return configDirectoryM; }
-  const char *GetResourceDirectory(void) const { return resourceDirectoryM; }
-  unsigned int GetDisabledFiltersCount(void) const;
+  unsigned int GetTraceMode() const { return traceModeM; };
+  unsigned int GetThreadQueueSize() const { return threadQueueSize; };
+  bool IsTraceMode(eTraceMode modeP) const { return (traceModeM & modeP); };
+  unsigned int GetProtocolBasePort() const { return protocolBasePortM; };
+  unsigned int GetUseBytes() const { return useBytesM; };
+  unsigned int GetSectionFiltering() const { return sectionFilteringM; };
+  const char *GetConfigDirectory() const { return configDirectoryM; };
+  const char *GetResourceDirectory() const { return resourceDirectoryM; };
+  unsigned int GetDisabledFiltersCount() const;
+  std::string GetYtdlpPath() { return ytdlpPath; };
   int GetDisabledFilters(unsigned int indexP) const;
-  void SetTraceMode(unsigned int modeP) { traceModeM = (modeP & eTraceModeMask); }
-  void SetThreadQueueSize(unsigned int tqs) { threadQueueSize = tqs; }
-  void SetProtocolBasePort(unsigned int portNumberP) { protocolBasePortM = portNumberP; }
-  void SetUseBytes(unsigned int onOffP) { useBytesM = onOffP; }
-  void SetSectionFiltering(unsigned int onOffP) { sectionFilteringM = onOffP; }
+
+  void SetTraceMode(unsigned int modeP) { traceModeM = (modeP & eTraceModeMask); };
+  void SetThreadQueueSize(unsigned int tqs) { threadQueueSize = tqs; };
+  void SetProtocolBasePort(unsigned int portNumberP) { protocolBasePortM = portNumberP; };
+  void SetUseBytes(unsigned int onOffP) { useBytesM = onOffP; };
+  void SetSectionFiltering(unsigned int onOffP) { sectionFilteringM = onOffP; };
   void SetDisabledFilters(unsigned int indexP, int numberP);
   void SetConfigDirectory(const char *directoryP);
   void SetResourceDirectory(const char *directoryP);
+  void SetYtdlpPath(std::string p) { ytdlpPath = p; };
 };
 
 extern cIptvConfig IptvConfig;

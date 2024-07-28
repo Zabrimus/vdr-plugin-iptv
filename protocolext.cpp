@@ -153,7 +153,8 @@ int cIptvProtocolExt::Read(unsigned char* bufferAddrP, unsigned int bufferLenP)
   return cIptvUdpSocket::Read(bufferAddrP, bufferLenP);
 }
 
-bool cIptvProtocolExt::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber)
+bool
+cIptvProtocolExt::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp)
 {
   debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
   if (!isempty(locationP)) {

@@ -292,7 +292,7 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
     sidScanEnabledM = itp.SidScan() != 0;
     pidScanEnabledM = itp.PidScan() != 0;
     if (pIptvStreamerM &&
-        pIptvStreamerM->SetSource(itp.Address(), itp.Parameter(), deviceIndexM, protocol, channelP->Number())) {
+            pIptvStreamerM->SetSource(itp.Address(), itp.Parameter(), deviceIndexM, protocol, channelP->Number(), itp.UseYtdlp())) {
         channelM = *channelP;
         if (sidScanEnabledM && pSidScannerM && IptvConfig.GetSectionFiltering())
             pSidScannerM->SetChannel(channelM.GetChannelID());

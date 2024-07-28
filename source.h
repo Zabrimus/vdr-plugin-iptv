@@ -22,6 +22,7 @@ private:
   int protocolM;
   char addressM[NAME_MAX + 1];
   int parameterM;
+  int useYtdlp;
 
 public:
   enum {
@@ -35,17 +36,21 @@ public:
     eProtocolStream,
     eProtocolCount
   };
-  cIptvTransponderParameters(const char *parametersP = NULL);
-  int SidScan(void) const { return sidScanM; }
-  int PidScan(void) const { return pidScanM; }
-  int Protocol(void) const { return protocolM; }
-  const char *Address(void) const { return addressM; }
-  int Parameter(void) const { return parameterM; }
-  void SetSidScan(int sidScanP) { sidScanM = sidScanP; }
-  void SetPidScan(int pidScanP) { pidScanM = pidScanP; }
-  void SetProtocol(int protocolP) { protocolM = protocolP; }
-  void SetAddress(const char *addressP) { strncpy(addressM, addressP, sizeof(addressM)); }
-  void SetParameter(int parameterP) { parameterM = parameterP; }
+  explicit cIptvTransponderParameters(const char *parametersP = nullptr);
+  int SidScan() const { return sidScanM; };
+  int PidScan() const { return pidScanM; };
+  int Protocol() const { return protocolM; };
+  const char *Address() const { return addressM; };
+  int Parameter() const { return parameterM; };
+  int UseYtdlp() const { return useYtdlp; };
+
+  void SetSidScan(int sidScanP) { sidScanM = sidScanP; };
+  void SetPidScan(int pidScanP) { pidScanM = pidScanP; };
+  void SetProtocol(int protocolP) { protocolM = protocolP; };
+  void SetAddress(const char *addressP) { strncpy(addressM, addressP, sizeof(addressM)); };
+  void SetParameter(int parameterP) { parameterM = parameterP; };
+  void SetYtdlp(int value) { useYtdlp = value; };
+
   cString ToString(char typeP) const;
   bool Parse(const char *strP);
 };
@@ -66,7 +71,7 @@ public:
   cIptvSourceParam(char sourceP, const char *descriptionP);
   virtual void SetData(cChannel *channelP);
   virtual void GetData(cChannel *channelP);
-  virtual cOsdItem *GetOsdItem(void);
+  virtual cOsdItem *GetOsdItem();
 };
 
 #endif // __IPTV_SOURCE_H

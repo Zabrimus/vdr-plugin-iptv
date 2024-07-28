@@ -41,9 +41,10 @@ cPluginIptv::~cPluginIptv() {
 const char *cPluginIptv::CommandLineHelp(void) {
     debug1("%s", __PRETTY_FUNCTION__);
     // Return a string that describes all known command line options.
-    return "  -d <num>, --devices=<number>            number of devices to be created\n"
+    return "  -d <num>,  --devices=<number>           number of devices to be created\n"
            "  -t <mode>, --trace=<mode>               set the tracing mode\n"
-           "  -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size\n";
+           "  -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size\n"
+           "  -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp\n";
 }
 
 bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
@@ -53,11 +54,12 @@ bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
             {"devices",           required_argument, nullptr, 'd'},
             {"trace",             required_argument, nullptr, 't'},
             {"thread-queue-size", required_argument, nullptr, 's'},
+            {"ytdlp",             required_argument, nullptr, 'y'},
             {nullptr,             no_argument,       nullptr, 0}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "d:t:s:", long_options, nullptr)) != -1) {
+    while ((c = getopt_long(argc, argv, "d:t:s:y:", long_options, nullptr)) != -1) {
         switch (c) {
             case 'd':
                 deviceCountM = atoi(optarg);
@@ -67,6 +69,9 @@ bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
                 break;
             case 's':
                 IptvConfig.SetThreadQueueSize(strtol(optarg, nullptr, 0));
+                break;
+            case 'y':
+                IptvConfig.SetYtdlpPath(std::string(optarg));
                 break;
             default:
                 return false;

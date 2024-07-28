@@ -1,5 +1,7 @@
 #include "m3u8handler.h"
 #include "log.h"
+#include "config.h"
+#include "process.hpp"
 
 M3u8Handler::M3u8Handler() {
 }
@@ -20,8 +22,45 @@ std::vector<std::string> M3u8Handler::split(const std::string &s, char delim) {
     return result;
 }
 
-m3u_stream M3u8Handler::parseM3u(std::string webUri) {
-    auto uri = uri::parse_uri(webUri);
+m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
+    std::string useUri;
+
+    // if useYtdlp == 1 then use yt-dlp to get the real m3u8 URL
+    if (useYtdlp) {
+        std::vector<std::string> callStr {
+            IptvConfig.GetYtdlpPath(), "--get-url", webUri
+        };
+
+        std::string newUri;
+        auto handler = new TinyProcessLib::Process(callStr, "",
+                              [&newUri](const char *bytes, size_t n) {
+                                  std::string result = std::string(bytes, n);
+                                  debug1("yt-dlp found URL %s\n", result.c_str());
+                                  newUri = std::string(bytes, n);
+                              },
+
+                              [](const char *bytes, size_t n) {
+                                    std::string msg = std::string(bytes, n);
+                                    debug1("yt-dlp Error: %s\n", msg.c_str());
+                              },
+
+                              true
+        );
+
+        int exitStatus = handler->get_exit_status();
+        if (exitStatus != 0) {
+            debug1("yt-dlp throws an error, abort\n");
+            m3u_stream result;
+            result.width = result.height = 0;
+            return result;
+        }
+
+        useUri = newUri;
+    } else {
+        useUri = webUri;
+    }
+
+    auto uri = uri::parse_uri(useUri);
 
     httplib::Client cli(uri.scheme + "://" + uri.authority.host + (uri.authority.port > 0 ? std::to_string(uri.authority.port) : ""));
     auto res = cli.Get(uri.path);
@@ -58,6 +97,8 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
                     int w, h;
                     sscanf(t.c_str() + 11, "%dx%d", &w, &h);
 
+                    debug2("Found Resolution: %dx%d\n", w, h);
+
                     if (w > maxW) {
                         maxW = w;
                         maxH = h;
@@ -65,8 +106,8 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
 
                         if (!startsWith(m3uMax, "http://") && !startsWith(m3uMax, "https://")) {
                             // this is a relative URL -> construct absolute URL
-                            auto last = webUri.find_last_of('/');
-                            m3uMax = webUri.substr(0, last+1).append(m3uMax);
+                            auto last = useUri.find_last_of('/');
+                            m3uMax = useUri.substr(0, last+1).append(m3uMax);
                         }
                     }
                 } else if (startsWith(t, "AUDIO=")) {
@@ -101,8 +142,8 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
             if (addThis) {
                 if (!startsWith(m.uri, "http://") && !startsWith(m.uri, "https://")) {
                     // this is a relative URL -> construct absolute URL
-                    auto last = webUri.find_last_of('/');
-                    m.uri = webUri.substr(0, last+1).append(m.uri);
+                    auto last = useUri.find_last_of('/');
+                    m.uri = useUri.substr(0, last+1).append(m.uri);
                 }
 
                 result.audio.push_back(m);
@@ -111,7 +152,7 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
             // this is already a usable m3u8. Don't process anymore but return a useful result
             result.width = 1920;
             result.height = 1080;
-            result.url = webUri;
+            result.url = useUri;
             return result;
         }
     }

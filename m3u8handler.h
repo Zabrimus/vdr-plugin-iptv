@@ -35,7 +35,7 @@ typedef struct {
 class M3u8Handler {
 public:
     explicit M3u8Handler();
-    m3u_stream parseM3u(std::string uri);
+    m3u_stream parseM3u(const std::string &uri, int useYtdlp);
 
     void printStream(m3u_stream stream);
 
