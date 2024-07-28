@@ -18,6 +18,7 @@ private:
   unsigned int protocolBasePortM;
   unsigned int useBytesM;
   unsigned int sectionFilteringM;
+  unsigned int threadQueueSize;
   int disabledFiltersM[SECTION_FILTER_TABLE_SIZE];
   char configDirectoryM[PATH_MAX];
   char resourceDirectoryM[PATH_MAX];
@@ -45,6 +46,7 @@ public:
   };
   cIptvConfig();
   unsigned int GetTraceMode(void) const { return traceModeM; }
+  unsigned int GetThreadQueueSize() const { return threadQueueSize; }
   bool IsTraceMode(eTraceMode modeP) const { return (traceModeM & modeP); }
   unsigned int GetProtocolBasePort(void) const { return protocolBasePortM; }
   unsigned int GetUseBytes(void) const { return useBytesM; }
@@ -54,6 +56,7 @@ public:
   unsigned int GetDisabledFiltersCount(void) const;
   int GetDisabledFilters(unsigned int indexP) const;
   void SetTraceMode(unsigned int modeP) { traceModeM = (modeP & eTraceModeMask); }
+  void SetThreadQueueSize(unsigned int tqs) { threadQueueSize = tqs; }
   void SetProtocolBasePort(unsigned int portNumberP) { protocolBasePortM = portNumberP; }
   void SetUseBytes(unsigned int onOffP) { useBytesM = onOffP; }
   void SetSectionFiltering(unsigned int onOffP) { sectionFilteringM = onOffP; }

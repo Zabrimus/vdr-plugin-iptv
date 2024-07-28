@@ -14,7 +14,8 @@ cIptvConfig::cIptvConfig(void)
 : traceModeM(eTraceModeNormal),
   protocolBasePortM(4321),
   useBytesM(1),
-  sectionFilteringM(1)
+  sectionFilteringM(1),
+  threadQueueSize(32)
 {
   for (unsigned int i = 0; i < ARRAY_SIZE(disabledFiltersM); ++i)
       disabledFiltersM[i] = -1;

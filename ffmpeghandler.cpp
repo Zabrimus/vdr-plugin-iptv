@@ -32,6 +32,7 @@
 #include <iterator>
 #include "ffmpeghandler.h"
 #include "log.h"
+#include "config.h"
 
 /* disabled until a better solution is found
 std::thread audioUpdate;
@@ -69,12 +70,16 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     };
 
     // add main input
+    callStr.emplace_back("-thread_queue_size");
+    callStr.emplace_back(std::to_string(IptvConfig.GetThreadQueueSize()));
     callStr.emplace_back("-i");
     callStr.emplace_back(stream.url);
 
     // add optional audio input
     std::vector<std::string> audioMetadata;
     for (auto a : stream.audio) {
+        callStr.emplace_back("-thread_queue_size");
+        callStr.emplace_back(std::to_string(IptvConfig.GetThreadQueueSize()));
         callStr.emplace_back("-i");
         callStr.emplace_back(a.uri);
     }
@@ -330,6 +335,10 @@ int FFmpegHandler::popPackets(unsigned char* bufferAddrP, unsigned int bufferLen
             // and modify the front element. Unsure, if this is worth the effort, because
             // a full buffer points to another problem.
             error("WARNING: BufferLen %u < Size %ld\n", bufferLenP, front.size());
+
+            // remove packet from queue to prevent queue overload
+            tsPackets.pop();
+
             return 0;
         }
 

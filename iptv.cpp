@@ -41,27 +41,32 @@ cPluginIptv::~cPluginIptv() {
 const char *cPluginIptv::CommandLineHelp(void) {
     debug1("%s", __PRETTY_FUNCTION__);
     // Return a string that describes all known command line options.
-    return "  -d <num>, --devices=<number>  number of devices to be created\n"
-           "  -t <mode>, --trace=<mode>     set the tracing mode\n";
+    return "  -d <num>, --devices=<number>            number of devices to be created\n"
+           "  -t <mode>, --trace=<mode>               set the tracing mode\n"
+           "  -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size\n";
 }
 
 bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
     debug1("%s", __PRETTY_FUNCTION__);
     // Implement command line argument processing here if applicable.
     static const struct option long_options[] = {
-            {"devices", required_argument, nullptr, 'd'},
-            {"trace",   required_argument, nullptr, 't'},
-            {nullptr,   no_argument,       nullptr, 0}
+            {"devices",           required_argument, nullptr, 'd'},
+            {"trace",             required_argument, nullptr, 't'},
+            {"thread-queue-size", required_argument, nullptr, 's'},
+            {nullptr,             no_argument,       nullptr, 0}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "d:t:", long_options, nullptr)) != -1) {
+    while ((c = getopt_long(argc, argv, "d:t:s:", long_options, nullptr)) != -1) {
         switch (c) {
             case 'd':
                 deviceCountM = atoi(optarg);
                 break;
             case 't':
                 IptvConfig.SetTraceMode(strtol(optarg, nullptr, 0));
+                break;
+            case 's':
+                IptvConfig.SetThreadQueueSize(strtol(optarg, nullptr, 0));
                 break;
             default:
                 return false;
