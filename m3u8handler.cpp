@@ -3,6 +3,21 @@
 #include "config.h"
 #include "process.hpp"
 
+std::pair<std::string, std::string> splitUri(std::string uri) {
+    auto yturi = uri::parse_uri(uri);
+    std::string host = yturi.scheme + "://" + yturi.authority.host + (yturi.authority.port > 0 ? std::to_string(yturi.authority.port) : "");
+
+    std::string query;
+    for (auto a : yturi.query) {
+        query.append(a.first).append("=").append(a.second).append("&");
+    }
+
+    std::string path = yturi.path + "?" + query;
+
+    return std::make_pair(host, path);
+
+}
+
 M3u8Handler::M3u8Handler() {
 }
 
@@ -58,11 +73,11 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
 
         useUri = newUri;
     } else if (useYtdlp == 2) {
-        auto yturi = uri::parse_uri(webUri);
-        httplib::Client ytcli(yturi.scheme + "://" + yturi.authority.host + (yturi.authority.port > 0 ? std::to_string(yturi.authority.port) : ""));
-        ytcli.set_follow_location(true);
+        auto yturi = splitUri(webUri);
 
-        auto ytres = ytcli.Get(yturi.path);
+        httplib::Client ytcli(yturi.first);
+        ytcli.set_follow_location(true);
+        auto ytres = ytcli.Get(yturi.second);
 
         m3u_stream ytresult;
         ytresult.width = ytresult.height = 0;
@@ -84,10 +99,11 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
         useUri = webUri;
     }
 
-    auto uri = uri::parse_uri(useUri);
+    auto uri = splitUri(useUri);
 
-    httplib::Client cli(uri.scheme + "://" + uri.authority.host + (uri.authority.port > 0 ? std::to_string(uri.authority.port) : ""));
-    auto res = cli.Get(uri.path);
+    httplib::Client cli(uri.first);
+    cli.set_follow_location(true);
+    auto res = cli.Get(uri.second);
 
     m3u_stream result;
     result.width = result.height = 0;
