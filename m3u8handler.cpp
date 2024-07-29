@@ -26,7 +26,8 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     std::string useUri;
 
     // if useYtdlp == 1 then use yt-dlp to get the real m3u8 URL
-    if (useYtdlp) {
+    // if useYtdlp == 2 then get the page and try to find the real m3u8 URL
+    if (useYtdlp == 1) {
         std::vector<std::string> callStr {
             IptvConfig.GetYtdlpPath(), "--get-url", webUri
         };
@@ -56,6 +57,29 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
         }
 
         useUri = newUri;
+    } else if (useYtdlp == 2) {
+        auto yturi = uri::parse_uri(webUri);
+        httplib::Client ytcli(yturi.scheme + "://" + yturi.authority.host + (yturi.authority.port > 0 ? std::to_string(yturi.authority.port) : ""));
+        ytcli.set_follow_location(true);
+
+        auto ytres = ytcli.Get(yturi.path);
+
+        m3u_stream ytresult;
+        ytresult.width = ytresult.height = 0;
+
+        if (ytres == nullptr) {
+            error("Got no result for request %s\n", webUri.c_str());
+            return ytresult;
+        }
+
+        if (ytres->status != 200) {
+            debug1("Got HTTP result code %d\n", ytres->status);
+            return ytresult;
+        }
+
+        auto m = ytres->body.find(".m3u");
+        auto index = ytres->body.rfind("http", m);
+        useUri = ytres->body.substr(index, m + 4 - index);
     } else {
         useUri = webUri;
     }

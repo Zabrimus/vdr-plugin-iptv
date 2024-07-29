@@ -105,6 +105,7 @@ Configuration:
            |  |   |   |     |            FILE: file delay (ms)
            |  |   |   |     |            EXT:  script parameter
            |  |   |   |     |            M3U:  Y=1 uses yt-dlp to determine the video URL
+           |  |   |   |     |                  Y=2 tries to find the video URL internally
            |  |   |   |     Stream address
            |  |   |   |      UDP:  multicast [source@]group address
            |  |   |   |      CURL: HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded
