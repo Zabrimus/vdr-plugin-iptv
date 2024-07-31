@@ -81,7 +81,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream &
 
     // add optional audio input
     std::vector<std::string> audioMetadata;
-    for (auto a : stream.audio) {
+    for (const auto& a : stream.audio) {
         callStr.emplace_back("-thread_queue_size");
         callStr.emplace_back(std::to_string(IptvConfig.GetThreadQueueSize()));
         callStr.emplace_back("-i");
@@ -188,7 +188,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream &
 
     // add optional audio input
     std::vector<std::string> audioMetadata;
-    for (auto a : stream.audio) {
+    for (const auto& a : stream.audio) {
         callStr.emplace_back("-i");
         callStr.emplace_back(a.uri);
     }

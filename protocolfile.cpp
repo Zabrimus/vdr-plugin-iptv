@@ -5,9 +5,6 @@
  *
  */
 
-#include <fcntl.h>
-#include <unistd.h>
-
 #include <vdr/device.h>
 
 #include "common.h"

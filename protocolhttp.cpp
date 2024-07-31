@@ -5,12 +5,7 @@
  *
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
+#include <cstring>
 
 #include <vdr/device.h>
 

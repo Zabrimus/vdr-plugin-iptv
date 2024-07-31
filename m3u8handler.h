@@ -37,7 +37,7 @@ public:
     explicit M3u8Handler();
     static m3u_stream parseM3u(const std::string &uri, int useYtdlp);
 
-    static void printStream(m3u_stream stream);
+    static void printStream(const m3u_stream& stream);
 
 private:
     static bool startsWith(const std::string &str, const std::string &prefix);

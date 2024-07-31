@@ -5,9 +5,7 @@
  *
  */
 
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <net/if.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -41,7 +39,7 @@ cIptvSocket::~cIptvSocket() {
 bool cIptvSocket::OpenSocket(const int portP, const bool isUdpP) {
     debug1("%s (%d, %d)", __PRETTY_FUNCTION__, portP, isUdpP);
 
-    // If socket is there already and it is bound to a different port, it must
+    // If socket is there already, and it is bound to a different port, it must
     // be closed first
     if (portP != socketPortM) {
         debug1("%s (%d, %d) Socket tear-down", __PRETTY_FUNCTION__, portP, isUdpP);
@@ -102,7 +100,7 @@ void cIptvSocket::CloseSocket() {
     if (packetErrorsM) {
         info("Detected %d RTP packet errors", packetErrorsM);
         packetErrorsM = 0;
-        lastErrorReportM = time(NULL);
+        lastErrorReportM = time(nullptr);
     }
 }
 
@@ -286,10 +284,10 @@ int cIptvUdpSocket::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
         if (len > 0) {
 #ifndef __FreeBSD__
             // Process auxiliary received data and validate source address
-            for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msgh); cmsg!=NULL; cmsg = CMSG_NXTHDR(&msgh, cmsg)) {
-                if ((cmsg->cmsg_level==SOL_IP) && (cmsg->cmsg_type==IP_PKTINFO)) {
+            for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msgh); cmsg !=nullptr; cmsg = CMSG_NXTHDR(&msgh, cmsg)) {
+                if ((cmsg->cmsg_level == SOL_IP) && (cmsg->cmsg_type == IP_PKTINFO)) {
                     struct in_pktinfo *i = (struct in_pktinfo *) CMSG_DATA(cmsg);
-                    if ((i->ipi_addr.s_addr==streamAddrM) || (htonl(INADDR_ANY)==streamAddrM)) {
+                    if ((i->ipi_addr.s_addr == streamAddrM) || (htonl(INADDR_ANY) == streamAddrM)) {
 #endif // __FreeBSD__
                         if (bufferAddrP[0] == TS_SYNC_BYTE) {
                             return len;
@@ -310,7 +308,7 @@ int cIptvUdpSocket::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
                                 sequenceNumberM = -1;
                             } else if ((sequenceNumberM >= 0) && (((sequenceNumberM + 1)%0xFFFF)!=seq)) {
                                 packetErrorsM++;
-                                if (time(NULL) - lastErrorReportM > eReportIntervalS) {
+                                if (time(nullptr) - lastErrorReportM > eReportIntervalS) {
                                     info("Detected %d RTP packet errors", packetErrorsM);
                                     packetErrorsM = 0;
                                     lastErrorReportM = time(nullptr);

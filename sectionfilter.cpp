@@ -13,7 +13,7 @@ cIptvSectionFilter::cIptvSectionFilter(int deviceIndexP, uint16_t pidP, uint8_t 
     : pusiSeenM(0),
       feedCcM(0),
       doneqM(0),
-      secBufM(NULL),
+      secBufM(nullptr),
       secBufpM(0),
       secLenM(0),
       tsFeedpM(0),
@@ -21,6 +21,7 @@ cIptvSectionFilter::cIptvSectionFilter(int deviceIndexP, uint16_t pidP, uint8_t 
       ringBufferM(new cRingBufferFrame(eDmxMaxSectionCount*eDmxMaxSectionSize)),
       deviceIndexM(deviceIndexP) {
     debug16("%s (%d, %d)", __PRETTY_FUNCTION__, deviceIndexM, pidM);
+
     int i;
 
     memset(secBufBaseM, 0, sizeof(secBufBaseM));
@@ -74,7 +75,7 @@ cIptvSectionFilter::~cIptvSectionFilter() {
     socketM[0] = -1;
     if (tmp >= 0)
         close(tmp);
-    secBufM = NULL;
+    secBufM = nullptr;
     DELETENULL(ringBufferM);
 }
 
@@ -82,12 +83,12 @@ inline uint16_t cIptvSectionFilter::GetLength(const uint8_t *dataP) {
     return (uint16_t) (3 + ((dataP[1] & 0x0f) << 8) + dataP[2]);
 }
 
-void cIptvSectionFilter::New(void) {
+void cIptvSectionFilter::New() {
     tsFeedpM = secBufpM = secLenM = 0;
     secBufM = secBufBaseM;
 }
 
-int cIptvSectionFilter::Filter(void) {
+int cIptvSectionFilter::Filter() {
     if (secBufM) {
         int i;
         uint8_t neq = 0;
@@ -108,7 +109,7 @@ int cIptvSectionFilter::Filter(void) {
     return 0;
 }
 
-inline int cIptvSectionFilter::Feed(void) {
+inline int cIptvSectionFilter::Feed() {
     if (Filter() < 0)
         return -1;
     secLenM = 0;
@@ -205,7 +206,7 @@ void cIptvSectionFilter::Process(const uint8_t *dataP) {
     }
 }
 
-bool cIptvSectionFilter::Send(void) {
+bool cIptvSectionFilter::Send() {
     bool result = false;
     cFrame *section = ringBufferM->Get();
     if (section) {
@@ -261,7 +262,7 @@ cIptvSectionFilterHandler::~cIptvSectionFilterHandler() {
         Delete(i);
 }
 
-void cIptvSectionFilterHandler::Action(void) {
+void cIptvSectionFilterHandler::Action() {
     debug1("%s Entering [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
     bool processed = false;
     // Do the thread loop
@@ -315,7 +316,7 @@ void cIptvSectionFilterHandler::Action(void) {
     debug1("%s Exiting [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
 }
 
-cString cIptvSectionFilterHandler::GetInformation(void) {
+cString cIptvSectionFilterHandler::GetInformation() {
     debug16("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
     // loop through active section filters
     cMutexLock MutexLock(&mutexM);
@@ -338,7 +339,7 @@ bool cIptvSectionFilterHandler::Delete(unsigned int indexP) {
     if ((indexP < eMaxSecFilterCount) && filtersM[indexP]) {
         debug16("%s (%d) Found [device %d]", __PRETTY_FUNCTION__, indexP, deviceIndexM);
         cIptvSectionFilter *tmp = filtersM[indexP];
-        filtersM[indexP] = NULL;
+        filtersM[indexP] = nullptr;
         delete tmp;
         return true;
     }

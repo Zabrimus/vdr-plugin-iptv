@@ -1,5 +1,3 @@
-#include <fstream>
-
 #include "protocolradio.h"
 #include "common.h"
 #include "config.h"

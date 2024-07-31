@@ -5,15 +5,8 @@
  *
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <unistd.h>
-
 #include <vdr/device.h>
 
-#include "common.h"
 #include "config.h"
 #include "log.h"
 #include "socket.h"

@@ -224,7 +224,7 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
             return device->GetInformation(page);
         } else {
             replyCodeP = 550; // Requested action not taken
-            return cString("IPTV information not available!");
+            return {"IPTV information not available!"};
         }
     } else if (strcasecmp(commandP, "MODE")==0) {
         unsigned int mode = !IptvConfig.GetUseBytes();

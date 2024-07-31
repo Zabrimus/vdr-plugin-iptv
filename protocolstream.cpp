@@ -1,5 +1,3 @@
-#include <fstream>
-
 #include "protocolstream.h"
 #include "common.h"
 #include "config.h"

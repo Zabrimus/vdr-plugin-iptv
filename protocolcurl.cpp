@@ -161,7 +161,7 @@ size_t cIptvProtocolCurl::DescribeCallback(void *ptrP, size_t sizeP, size_t nmem
             found = true;
         }
 
-        // ... and find out its' attribute
+        // ... and find out its attribute
         if (found && strstr(r, "a=control")) {
             char *s = nullptr;
             if (sscanf(r, "a=control:%255ms", &s)==1)

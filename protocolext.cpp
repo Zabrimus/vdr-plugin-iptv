@@ -6,14 +6,10 @@
  */
 
 #include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <vdr/device.h>
-#include <vdr/plugin.h>
 
 #include "common.h"
 #include "config.h"
@@ -187,7 +183,7 @@ cIptvProtocolExt::SetSource(const char *locationP,
         // Update script file and parameter
         scriptFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), locationP);
 
-        if ((stat(*scriptFileM, &stbuf) != 0) || (strstr(*scriptFileM, "..") != 0)) {
+        if ((stat(*scriptFileM, &stbuf) != 0) || (strstr(*scriptFileM, "..") != nullptr)) {
             error("Non-existent or relative path script '%s'", *scriptFileM);
 
             return false;

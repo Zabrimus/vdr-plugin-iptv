@@ -3,13 +3,13 @@
 #include "config.h"
 #include "process.hpp"
 
-std::pair<std::string, std::string> splitUri(std::string uri) {
+std::pair<std::string, std::string> splitUri(const std::string& uri) {
     auto yturi = uri::parse_uri(uri);
     std::string host = yturi.scheme + "://" + yturi.authority.host
         + (yturi.authority.port > 0 ? std::to_string(yturi.authority.port) : "");
 
     std::string query;
-    for (auto a : yturi.query) {
+    for (const auto& a : yturi.query) {
         query.append(a.first).append("=").append(a.second).append("&");
     }
 
@@ -222,12 +222,12 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     return result;
 }
 
-void M3u8Handler::printStream(m3u_stream stream) {
+void M3u8Handler::printStream(const m3u_stream& stream) {
     debug2("Url: %s\n", stream.url.c_str());
     debug2("   Width: %d, Height: %d\n", stream.width, stream.height);
     if (! stream.audio.empty()) {
         debug2("   Audio:\n");
-        for (auto s : stream.audio) {
+        for (const auto& s : stream.audio) {
             debug2("      Type: %s\n", s.type.c_str());
             debug2("      Lang: %s\n", s.language.c_str());
             debug2("      Name: %s\n", s.name.c_str());
