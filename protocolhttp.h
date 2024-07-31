@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef __IPTV_PROTOCOLHTTP_H
-#define __IPTV_PROTOCOLHTTP_H
+#pragma once
 
 #include <arpa/inet.h>
 #include "protocolif.h"
@@ -14,26 +13,24 @@
 
 class cIptvProtocolHttp : public cIptvTcpSocket, public cIptvProtocolIf {
 private:
-  char* streamAddrM;
-  char* streamPathM;
-  int streamPortM;
+    char *streamAddrM;
+    char *streamPathM;
+    int streamPortM;
 
 private:
-  bool Connect(void);
-  bool Disconnect(void);
-  bool GetHeaderLine(char* destP, unsigned int destLenP, unsigned int &recvLenP);
-  bool ProcessHeaders(void);
+    bool Connect();
+    bool Disconnect();
+    bool GetHeaderLine(char *destP, unsigned int destLenP, unsigned int &recvLenP);
+    bool ProcessHeaders();
 
 public:
-  cIptvProtocolHttp();
-  virtual ~cIptvProtocolHttp();
-  int Read(unsigned char* bufferAddrP, unsigned int bufferLenP);
-  bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp);
-  bool SetPid(int pidP, int typeP, bool onP);
-  bool Open(void);
-  bool Close(void);
-  cString GetInformation(void);
+    cIptvProtocolHttp();
+    ~cIptvProtocolHttp() override;
+    int Read(unsigned char *bufferAddrP, unsigned int bufferLenP) override;
+    bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) override;
+    bool SetPid(int pidP, int typeP, bool onP) override;
+    bool Open() override;
+    bool Close() override;
+    cString GetInformation() override;
 };
-
-#endif // __IPTV_PROTOCOLHTTP_H
 

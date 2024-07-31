@@ -17,8 +17,9 @@ cIptvProtocolStream::~cIptvProtocolStream() {
     cIptvProtocolStream::Close();
 }
 
-int cIptvProtocolStream::Read(unsigned char* bufferAddrP, unsigned int bufferLenP) {
+int cIptvProtocolStream::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
+
     return handler.popPackets(bufferAddrP, bufferLenP);
 }
 
@@ -44,9 +45,10 @@ bool cIptvProtocolStream::Open() {
                 int aidx = 0;
                 while (true) {
                     int apid = Channel->Apid(aidx);
-                    if (apid == 0) {
+                    if (apid==0) {
                         break;
                     }
+
                     streams.apids.push_back(apid);
                     aidx++;
                 }
@@ -66,7 +68,11 @@ bool cIptvProtocolStream::Close() {
     return true;
 }
 
-bool cIptvProtocolStream::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
+bool cIptvProtocolStream::SetSource(const char *locationP,
+                                    const int parameterP,
+                                    const int indexP,
+                                    int channelNumber,
+                                    int useYtDlp) {
     debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
 
     url = locationP;
@@ -84,10 +90,12 @@ bool cIptvProtocolStream::SetSource(const char *locationP, const int parameterP,
 
 bool cIptvProtocolStream::SetPid(int pidP, int typeP, bool onP) {
     debug16("%s (%d, %d, %d)", __PRETTY_FUNCTION__, pidP, typeP, onP);
+
     return true;
 }
 
 cString cIptvProtocolStream::GetInformation() {
     debug16("%s", __PRETTY_FUNCTION__);
+
     return cString::sprintf("%s", url.c_str());
 }

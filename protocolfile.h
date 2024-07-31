@@ -5,33 +5,30 @@
  *
  */
 
-#ifndef __IPTV_PROTOCOLFILE_H
-#define __IPTV_PROTOCOLFILE_H
+#pragma once
 
 #include <arpa/inet.h>
 #include "protocolif.h"
 
 class cIptvProtocolFile : public cIptvProtocolIf {
 private:
-  char* fileLocationM;
-  int fileDelayM;
-  FILE* fileStreamM;
-  bool isActiveM;
+    char *fileLocationM;
+    int fileDelayM;
+    FILE *fileStreamM;
+    bool isActiveM;
 
 private:
-  bool OpenFile(void);
-  void CloseFile(void);
+    bool OpenFile();
+    void CloseFile();
 
 public:
-  cIptvProtocolFile();
-  virtual ~cIptvProtocolFile();
-  int Read(unsigned char* bufferAddrP, unsigned int bufferLenP);
-  bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp);
-  bool SetPid(int pidP, int typeP, bool onP);
-  bool Open(void);
-  bool Close(void);
-  cString GetInformation(void);
+    cIptvProtocolFile();
+    ~cIptvProtocolFile() override;
+    int Read(unsigned char *bufferAddrP, unsigned int bufferLenP) override;
+    bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) override;
+    bool SetPid(int pidP, int typeP, bool onP) override;
+    bool Open() override;
+    bool Close() override;
+    cString GetInformation() override;
 };
-
-#endif // __IPTV_PROTOCOLFILE_H
 

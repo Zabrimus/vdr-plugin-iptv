@@ -61,6 +61,7 @@ private:
 public:
     explicit cIptvDevice(unsigned int deviceIndexP);
     ~cIptvDevice() override;
+
     cString GetInformation(unsigned int pageP = IPTV_DEVICE_INFO_ALL);
 
     // copy and assignment constructors
@@ -103,6 +104,7 @@ protected:
     bool SetPid(cPidHandle *handleP, int typeP, bool onP) override;
     bool OpenDvr() override;
     void CloseDvr() override;
+
     bool GetTSPacket(uchar *&dataP) override;
 
     // for section filtering

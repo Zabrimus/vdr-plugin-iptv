@@ -14,18 +14,18 @@ public:
     FFmpegHandler();
     ~FFmpegHandler();
 
-    bool streamVideo(const m3u_stream& stream);
-    bool streamAudio(const m3u_stream& stream);
+    bool streamVideo(const m3u_stream &stream);
+    bool streamAudio(const m3u_stream &stream);
     void stop();
     bool isRunning(int &exit_status);
 
-    int popPackets(unsigned char* bufferAddrP, unsigned int bufferLenP);
+    int popPackets(unsigned char *bufferAddrP, unsigned int bufferLenP);
 
 private:
     std::queue<std::string> tsPackets;
     std::mutex queueMutex;
 
 private:
-    std::vector<std::string> prepareStreamCmdVideo(const m3u_stream& stream);
-    std::vector<std::string> prepareStreamCmdAudio(const m3u_stream& stream);
+    static std::vector<std::string> prepareStreamCmdVideo(const m3u_stream &stream);
+    static std::vector<std::string> prepareStreamCmdAudio(const m3u_stream &stream);
 };

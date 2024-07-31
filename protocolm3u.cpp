@@ -17,7 +17,7 @@ cIptvProtocolM3U::~cIptvProtocolM3U() {
     cIptvProtocolM3U::Close();
 }
 
-int cIptvProtocolM3U::Read(unsigned char* bufferAddrP, unsigned int bufferLenP) {
+int cIptvProtocolM3U::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
     return handler.popPackets(bufferAddrP, bufferLenP);
 }
@@ -29,7 +29,7 @@ bool cIptvProtocolM3U::Open() {
         isActiveM = true;
 
         auto streams = m3u8Handler.parseM3u(url, useYtdlp);
-        if (streams.width == 0 || streams.height == 0) {
+        if (streams.width==0 || streams.height==0) {
             debug1("Unable to read URL '%s'\n", url.c_str());
 
             isActiveM = false;
@@ -49,7 +49,7 @@ bool cIptvProtocolM3U::Open() {
                 int aidx = 0;
                 while (true) {
                     int apid = Channel->Apid(aidx);
-                    if (apid == 0) {
+                    if (apid==0) {
                         break;
                     }
                     streams.apids.push_back(apid);
@@ -75,15 +75,20 @@ bool cIptvProtocolM3U::Close() {
 }
 
 bool
-cIptvProtocolM3U::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
+cIptvProtocolM3U::SetSource(const char *locationP,
+                            const int parameterP,
+                            const int indexP,
+                            int channelNumber,
+                            int useYtDlp) {
     debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
 
     this->useYtdlp = useYtDlp;
 
     struct stat stbuf;
     cString configFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), locationP);
-    if ((stat(*configFileM, &stbuf) != 0) || (strstr(*configFileM, "..") != 0)) {
+    if ((stat(*configFileM, &stbuf)!=0) || (strstr(*configFileM, "..")!=0)) {
         error("Non-existent or relative configuration file '%s'", *configFileM);
+
         return false;
     }
 
@@ -94,10 +99,11 @@ cIptvProtocolM3U::SetSource(const char *locationP, const int parameterP, const i
             unsigned long idx = line.find(':');
             if (idx > 0) {
                 std::string nr = line.substr(0, idx);
-                if (nr == std::to_string(parameterP)) {
-                    url = line.substr(idx+1);
+                if (nr==std::to_string(parameterP)) {
+                    url = line.substr(idx + 1);
                     if (url.empty()) {
                         error("URL with index %d in file %s not found", parameterP, *configFileM);
+
                         file.close();
                         return false;
                     }
@@ -107,6 +113,7 @@ cIptvProtocolM3U::SetSource(const char *locationP, const int parameterP, const i
                 }
             }
         }
+
         file.close();
     }
 
@@ -120,10 +127,12 @@ cIptvProtocolM3U::SetSource(const char *locationP, const int parameterP, const i
 
 bool cIptvProtocolM3U::SetPid(int pidP, int typeP, bool onP) {
     debug16("%s (%d, %d, %d)", __PRETTY_FUNCTION__, pidP, typeP, onP);
+
     return true;
 }
 
 cString cIptvProtocolM3U::GetInformation() {
     debug16("%s", __PRETTY_FUNCTION__);
+
     return cString::sprintf("%s", url.c_str());
 }

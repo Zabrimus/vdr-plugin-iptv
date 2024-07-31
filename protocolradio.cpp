@@ -17,8 +17,9 @@ cIptvProtocolRadio::~cIptvProtocolRadio() {
     cIptvProtocolRadio::Close();
 }
 
-int cIptvProtocolRadio::Read(unsigned char* bufferAddrP, unsigned int bufferLenP) {
+int cIptvProtocolRadio::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
+
     return handler.popPackets(bufferAddrP, bufferLenP);
 }
 
@@ -43,7 +44,7 @@ bool cIptvProtocolRadio::Open() {
                 int aidx = 0;
                 while (true) {
                     int apid = Channel->Apid(aidx);
-                    if (apid == 0) {
+                    if (apid==0) {
                         break;
                     }
                     streams.apids.push_back(apid);
@@ -54,6 +55,7 @@ bool cIptvProtocolRadio::Open() {
 
         handler.streamAudio(streams);
     }
+
     return true;
 }
 
@@ -79,15 +81,18 @@ cIptvProtocolRadio::SetSource(const char *locationP, const int parameterP, const
     }
 
     channelId = channelNumber;
+
     return true;
 }
 
 bool cIptvProtocolRadio::SetPid(int pidP, int typeP, bool onP) {
     debug16("%s (%d, %d, %d)", __PRETTY_FUNCTION__, pidP, typeP, onP);
+
     return true;
 }
 
 cString cIptvProtocolRadio::GetInformation() {
     debug16("%s", __PRETTY_FUNCTION__);
+
     return cString::sprintf("%s", url.c_str());
 }

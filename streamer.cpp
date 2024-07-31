@@ -10,11 +10,11 @@
 #include "streamer.h"
 
 cIptvStreamer::cIptvStreamer(cIptvDeviceIf &deviceP, unsigned int packetLenP)
-        : cThread("IPTV streamer"),
-          sleepM(),
-          deviceM(&deviceP),
-          packetBufferLenM(packetLenP),
-          protocolM(nullptr) {
+    : cThread("IPTV streamer"),
+      sleepM(),
+      deviceM(&deviceP),
+      packetBufferLenM(packetLenP),
+      protocolM(nullptr) {
 
     debug1("%s (, %d)", __PRETTY_FUNCTION__, packetBufferLenM);
 
@@ -98,13 +98,18 @@ bool cIptvStreamer::Close() {
     return true;
 }
 
-bool cIptvStreamer::SetSource(const char *locationP, const int parameterP, const int indexP, cIptvProtocolIf *protocolP, int channelNumber, int useYtdlp) {
+bool cIptvStreamer::SetSource(const char *locationP,
+                              const int parameterP,
+                              const int indexP,
+                              cIptvProtocolIf *protocolP,
+                              int channelNumber,
+                              int useYtdlp) {
     std::lock_guard<std::mutex> guard(streamerMutex);
     debug1("%s (%s, %d, %d, ChannelNumber: %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP, channelNumber);
 
     if (!isempty(locationP)) {
         // Update protocol and set location and parameter; Close the existing one if changed
-        if (protocolM != protocolP) {
+        if (protocolM!=protocolP) {
             if (protocolM) {
                 protocolM->Close();
             }

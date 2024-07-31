@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef __IPTV_PROTOCOLEXT_H
-#define __IPTV_PROTOCOLEXT_H
+#pragma once
 
 #include <arpa/inet.h>
 #include "protocolif.h"
@@ -14,25 +13,22 @@
 
 class cIptvProtocolExt : public cIptvUdpSocket, public cIptvProtocolIf {
 private:
-  int pidM;
-  cString scriptFileM;
-  int scriptParameterM;
-  int streamPortM;
+    int pidM;
+    cString scriptFileM;
+    int scriptParameterM;
+    int streamPortM;
 
 private:
-  void TerminateScript(void);
-  void ExecuteScript(void);
+    void TerminateScript();
+    void ExecuteScript();
 
 public:
-  cIptvProtocolExt();
-  virtual ~cIptvProtocolExt();
-  int Read(unsigned char* bufferAddrP, unsigned int bufferLenP);
-  bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp);
-  bool SetPid(int pidP, int typeP, bool onP);
-  bool Open(void);
-  bool Close(void);
-  cString GetInformation(void);
+    cIptvProtocolExt();
+    ~cIptvProtocolExt() override;
+    int Read(unsigned char *bufferAddrP, unsigned int bufferLenP) override;
+    bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) override;
+    bool SetPid(int pidP, int typeP, bool onP) override;
+    bool Open() override;
+    bool Close() override;
+    cString GetInformation() override;
 };
-
-#endif // __IPTV_PROTOCOLEXT_H
-

@@ -5,19 +5,17 @@
  *
  */
 
-#ifndef __IPTV_DEVICEIF_H
-#define __IPTV_DEVICEIF_H
+#pragma once
 
 class cIptvDeviceIf {
 public:
-  cIptvDeviceIf() {}
-  virtual ~cIptvDeviceIf() {}
-  virtual void WriteData(u_char *bufferP, int lengthP) = 0;
-  virtual unsigned int CheckData(void) = 0;
+    cIptvDeviceIf() = default;
+    virtual ~cIptvDeviceIf() = default;
+
+    virtual void WriteData(u_char *bufferP, int lengthP) = 0;
+    virtual unsigned int CheckData() = 0;
 
 private:
-  cIptvDeviceIf(const cIptvDeviceIf&);
-  cIptvDeviceIf& operator=(const cIptvDeviceIf&);
+    cIptvDeviceIf(const cIptvDeviceIf &);
+    cIptvDeviceIf &operator=(const cIptvDeviceIf &);
 };
-
-#endif // __IPTV_DEVICEIF_H

@@ -67,10 +67,10 @@ FFmpegHandler::~FFmpegHandler() {
     stop();
 }
 
-std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& stream) {
+std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream &stream) {
     // create parameter list
-    std::vector<std::string> callStr {
-            "ffmpeg", "-hide_banner", "-re", "-y"
+    std::vector<std::string> callStr{
+        "ffmpeg", "-hide_banner", "-re", "-y"
     };
 
     // add main input
@@ -102,7 +102,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
         callStr.emplace_back("0:v");
 
         int idx = 1;
-        for (auto a: stream.audio) {
+        for (auto a : stream.audio) {
             callStr.emplace_back("-map");
             callStr.emplace_back(std::to_string(idx) + ":a");
             idx++;
@@ -176,10 +176,10 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream& 
     return callStr;
 }
 
-std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream& stream) {
+std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream &stream) {
     // create parameter list
-    std::vector<std::string> callStr {
-            "ffmpeg", "-hide_banner", "-re", "-y"
+    std::vector<std::string> callStr{
+        "ffmpeg", "-hide_banner", "-re", "-y"
     };
 
     // add main input
@@ -200,7 +200,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream& 
     // main input
     if (!stream.audio.empty()) {
         int idx = 0;
-        for (auto a: stream.audio) {
+        for (auto a : stream.audio) {
             callStr.emplace_back("-map");
             callStr.emplace_back(std::to_string(idx) + ":a");
             idx++;
@@ -211,7 +211,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream& 
     }
 
     int aidx = 0;
-    for (auto a: stream.apids) {
+    for (auto a : stream.apids) {
         callStr.emplace_back("-streamid");
         callStr.emplace_back(std::to_string(aidx) + ":" + std::to_string(a));
         aidx++;
@@ -254,28 +254,27 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream& 
     return callStr;
 }
 
-
-bool FFmpegHandler::streamVideo(const m3u_stream& stream) {
+bool FFmpegHandler::streamVideo(const m3u_stream &stream) {
     // create parameter list
     std::vector<std::string> callStr = prepareStreamCmdVideo(stream);
 
     streamHandler = new TinyProcessLib::Process(callStr, "",
-        [this](const char *bytes, size_t n) {
-            debug9("Queue size %ld\n", tsPackets.size());
+                                                [this](const char *bytes, size_t n) {
+                                                  debug9("Queue size %ld\n", tsPackets.size());
 
-            std::lock_guard<std::mutex> guard(queueMutex);
-            tsPackets.emplace(bytes, n);
-        },
+                                                  std::lock_guard<std::mutex> guard(queueMutex);
+                                                  tsPackets.emplace(bytes, n);
+                                                },
 
-        [this](const char *bytes, size_t n) {
-            // TODO: ffmpeg prints many information on stderr
-            //       How to handle this? ignore? filter?
+                                                [this](const char *bytes, size_t n) {
+                                                  // TODO: ffmpeg prints many information on stderr
+                                                  //       How to handle this? ignore? filter?
 
-            std::string msg = std::string(bytes, n);
-            debug10("Error: %s\n", msg.c_str());
-        },
+                                                  std::string msg = std::string(bytes, n);
+                                                  debug10("Error: %s\n", msg.c_str());
+                                                },
 
-        true
+                                                true
     );
 
     /*
@@ -290,34 +289,34 @@ bool FFmpegHandler::isRunning(int &exit_status) {
     return streamHandler->try_get_exit_status(exit_status);
 }
 
-bool FFmpegHandler::streamAudio(const m3u_stream& stream) {
+bool FFmpegHandler::streamAudio(const m3u_stream &stream) {
     // create parameter list
     std::vector<std::string> callStr = prepareStreamCmdAudio(stream);
 
     streamHandler = new TinyProcessLib::Process(callStr, "",
-            [this](const char *bytes, size_t n) {
-                debug9("Add new packets. Current queue size %ld\n", tsPackets.size());
+                                                [this](const char *bytes, size_t n) {
+                                                  debug9("Add new packets. Current queue size %ld\n", tsPackets.size());
 
-                std::lock_guard<std::mutex> guard(queueMutex);
-                tsPackets.emplace(bytes, n);
-            },
+                                                  std::lock_guard<std::mutex> guard(queueMutex);
+                                                  tsPackets.emplace(bytes, n);
+                                                },
 
-            [this](const char *bytes, size_t n) {
-                // TODO: ffmpeg prints many information on stderr
-                //       How to handle this? ignore? filter?
+                                                [this](const char *bytes, size_t n) {
+                                                  // TODO: ffmpeg prints many information on stderr
+                                                  //       How to handle this? ignore? filter?
 
-                std::string msg = std::string(bytes, n);
-                debug10("Error: %s\n", msg.c_str());
-            },
+                                                  std::string msg = std::string(bytes, n);
+                                                  debug10("Error: %s\n", msg.c_str());
+                                                },
 
-            true
+                                                true
     );
 
     return true;
 }
 
 void FFmpegHandler::stop() {
-    if (streamHandler != nullptr) {
+    if (streamHandler!=nullptr) {
         streamHandler->kill(true);
         streamHandler->get_exit_status();
         delete streamHandler;
@@ -329,7 +328,7 @@ void FFmpegHandler::stop() {
     std::swap(tsPackets, empty);
 }
 
-int FFmpegHandler::popPackets(unsigned char* bufferAddrP, unsigned int bufferLenP) {
+int FFmpegHandler::popPackets(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     std::lock_guard<std::mutex> guard(queueMutex);
     if (!tsPackets.empty()) {
         std::string front = tsPackets.front();

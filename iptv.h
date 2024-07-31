@@ -13,8 +13,6 @@
 #include "device.h"
 #include "iptvservice.h"
 
-
-
 class cPluginIptv : public cPlugin {
 private:
     unsigned int deviceCountM;

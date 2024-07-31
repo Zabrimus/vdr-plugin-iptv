@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef __SIDSCANNER_H
-#define __SIDSCANNER_H
+#pragma once
 
 #include <vdr/channels.h>
 #include <vdr/filter.h>
@@ -15,21 +14,27 @@
 
 class cSidScanner : public cFilter {
 private:
-  tChannelID channelIdM;
-  bool sidFoundM;
-  bool nidFoundM;
-  bool tidFoundM;
-  bool isActiveM;
+    tChannelID channelIdM;
+    bool sidFoundM;
+    bool nidFoundM;
+    bool tidFoundM;
+    bool isActiveM;
 
 protected:
-  virtual void Process(u_short pidP, u_char tidP, const u_char *dataP, int lengthP);
+    void Process(u_short pidP, u_char tidP, const u_char *dataP, int lengthP) override;
 
 public:
-  cSidScanner(void);
-  ~cSidScanner();
-  void SetChannel(const tChannelID &channelIdP);
-  void Open()  { debug1("%s", __PRETTY_FUNCTION__); isActiveM = true; }
-  void Close() { debug1("%s", __PRETTY_FUNCTION__); isActiveM = false; }
-};
+    cSidScanner();
+    ~cSidScanner() override;
+    void SetChannel(const tChannelID &channelIdP);
+    void Open() {
+        debug1("%s", __PRETTY_FUNCTION__);
 
-#endif // __SIDSCANNER_H
+        isActiveM = true;
+    }
+    void Close() {
+        debug1("%s", __PRETTY_FUNCTION__);
+
+        isActiveM = false;
+    }
+};
