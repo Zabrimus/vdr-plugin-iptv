@@ -5,18 +5,14 @@
  *
  */
 
-#ifndef __IPTVSERVICE_H
-#define __IPTVSERVICE_H
-
+#pragma once
 #include <vdr/tools.h>
 
 #define stIptv ('I' << 24)
 
 struct IptvService_v1_0 {
-  int cardIndex;
-  cString protocol;
-  cString bitrate;
-  };
-
-#endif //__IPTVSERVICE_H
+    int cardIndex;
+    cString protocol;
+    cString bitrate;
+};
 

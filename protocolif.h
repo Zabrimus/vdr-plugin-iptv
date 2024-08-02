@@ -5,23 +5,20 @@
  *
  */
 
-#ifndef __IPTV_PROTOCOLIF_H
-#define __IPTV_PROTOCOLIF_H
+#pragma once
 
 class cIptvProtocolIf {
 public:
-  cIptvProtocolIf() {}
-  virtual ~cIptvProtocolIf() {}
-  virtual int Read(unsigned char* bufferAddrP, unsigned int bufferLenP) = 0;
-  virtual bool SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber) = 0;
-  virtual bool SetPid(int pidP, int typeP, bool onP) = 0;
-  virtual bool Open(void) = 0;
-  virtual bool Close(void) = 0;
-  virtual cString GetInformation(void) = 0;
+    cIptvProtocolIf() = default;
+    virtual ~cIptvProtocolIf() = default;
+    virtual int Read(unsigned char *bufferAddrP, unsigned int bufferLenP) = 0;
+    virtual bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) = 0;
+    virtual bool SetPid(int pidP, int typeP, bool onP) = 0;
+    virtual bool Open() = 0;
+    virtual bool Close() = 0;
+    virtual cString GetInformation() = 0;
 
 private:
-  cIptvProtocolIf(const cIptvProtocolIf&);
-  cIptvProtocolIf& operator=(const cIptvProtocolIf&);
+    cIptvProtocolIf(const cIptvProtocolIf &);
+    cIptvProtocolIf &operator=(const cIptvProtocolIf &);
 };
-
-#endif // __IPTV_PROTOCOLIF_H

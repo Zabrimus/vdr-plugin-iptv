@@ -2,6 +2,7 @@
 // Created by paul on 12/27/23.
 //
 
+#include <string>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>

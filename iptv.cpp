@@ -22,6 +22,9 @@
 #endif
 
 const char VERSION[] = "2.4.0" GITVERSION;
+static const char DESCRIPTION[] = trNOOP("Experience the IPTV");
+
+const char *cPluginIptv::Description() { return tr(DESCRIPTION); }
 
 cPluginIptv::cPluginIptv() : deviceCountM(1) {
     debug16("%s", __PRETTY_FUNCTION__);
@@ -35,33 +38,38 @@ cPluginIptv::~cPluginIptv() {
     // Clean up after yourself!
 }
 
-const char *cPluginIptv::CommandLineHelp(void) {
+const char *cPluginIptv::CommandLineHelp() {
     debug1("%s", __PRETTY_FUNCTION__);
     // Return a string that describes all known command line options.
-    return "  -d <num>, --devices=<number>  number of devices to be created\n"
-           "  -t <mode>, --trace=<mode>     set the tracing mode\n";
+    return "  -d <num>,  --devices=<number>           number of devices to be created\n"
+           "  -t <mode>, --trace=<mode>               set the tracing mode\n"
+           "  -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size\n"
+           "  -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp\n";
 }
 
 bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
     debug1("%s", __PRETTY_FUNCTION__);
     // Implement command line argument processing here if applicable.
     static const struct option long_options[] = {
-            {"devices", required_argument, nullptr, 'd'},
-            {"trace",   required_argument, nullptr, 't'},
-            {nullptr,   no_argument,       nullptr, 0}
+        {"devices", required_argument, nullptr, 'd'},
+        {"trace", required_argument, nullptr, 't'},
+        {"thread-queue-size", required_argument, nullptr, 's'},
+        {"ytdlp", required_argument, nullptr, 'y'},
+        {nullptr, no_argument, nullptr, 0}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "d:t:", long_options, nullptr)) != -1) {
+    while ((c = getopt_long(argc, argv, "d:t:s:y:", long_options, nullptr))!=-1) {
         switch (c) {
-            case 'd':
-                deviceCountM = atoi(optarg);
-                break;
-            case 't':
-                IptvConfig.SetTraceMode(strtol(optarg, nullptr, 0));
-                break;
-            default:
-                return false;
+        case 'd':deviceCountM = atoi(optarg);
+            break;
+        case 't':IptvConfig.SetTraceMode(strtol(optarg, nullptr, 0));
+            break;
+        case 's':IptvConfig.SetThreadQueueSize(strtol(optarg, nullptr, 0));
+            break;
+        case 'y':IptvConfig.SetYtdlpPath(std::string(optarg));
+            break;
+        default:return false;
         }
     }
     return true;
@@ -78,7 +86,7 @@ bool cPluginIptv::Initialize() {
 bool cPluginIptv::Start() {
     debug1("%s", __PRETTY_FUNCTION__);
     // Start any background activities the plugin shall perform.
-    if (curl_global_init(CURL_GLOBAL_ALL) == CURLE_OK) {
+    if (curl_global_init(CURL_GLOBAL_ALL)==CURLE_OK) {
         curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
         cString info = cString::sprintf("Using CURL %s", data->version);
         for (int i = 0; data->protocols[i]; ++i) {
@@ -145,7 +153,7 @@ int cPluginIptv::ParseFilters(const char *valueP, int *filtersP) {
         debug16("%s (%s, ) filters[%d]=%d", __PRETTY_FUNCTION__, valueP, n, i);
         if (i >= 0)
             filtersP[n++] = i;
-        if ((valueP = strchr(valueP, ' ')) != nullptr)
+        if ((valueP = strchr(valueP, ' '))!=nullptr)
             valueP++;
     }
     return n;
@@ -172,7 +180,7 @@ bool cPluginIptv::SetupParse(const char *nameP, const char *valueP) {
 
 bool cPluginIptv::Service(const char *idP, void *dataP) {
     debug1("%s (%s, )", __PRETTY_FUNCTION__, idP);
-    if (strcmp(idP, "IptvService-v1.0") == 0) {
+    if (strcmp(idP, "IptvService-v1.0")==0) {
         if (dataP) {
             IptvService_v1_0 *data = reinterpret_cast<IptvService_v1_0 *>(dataP);
             cIptvDevice *dev = cIptvDevice::GetIptvDevice(data->cardIndex);
@@ -189,22 +197,22 @@ bool cPluginIptv::Service(const char *idP, void *dataP) {
 const char **cPluginIptv::SVDRPHelpPages() {
     debug1("%s", __PRETTY_FUNCTION__);
     static const char *HelpPages[] = {
-            "INFO [ <page> ]\n"
-            "    Print IPTV device information and statistics.\n"
-            "    The output can be narrowed using optional \"page\""
-            "    option: 1=general 2=pids 3=section filters.\n",
-            "MODE\n"
-            "    Toggles between bit or byte information mode.\n",
-            "TRAC [ <mode> ]\n"
-            "    Gets and/or sets used tracing mode.\n",
-            nullptr
+        "INFO [ <page> ]\n"
+        "    Print IPTV device information and statistics.\n"
+        "    The output can be narrowed using optional \"page\""
+        "    option: 1=general 2=pids 3=section filters.\n",
+        "MODE\n"
+        "    Toggles between bit or byte information mode.\n",
+        "TRAC [ <mode> ]\n"
+        "    Gets and/or sets used tracing mode.\n",
+        nullptr
     };
     return HelpPages;
 }
 
 cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int &replyCodeP) {
     debug1("%s (%s, %s, )", __PRETTY_FUNCTION__, commandP, optionP);
-    if (strcasecmp(commandP, "INFO") == 0) {
+    if (strcasecmp(commandP, "INFO")==0) {
         cIptvDevice *device = cIptvDevice::GetIptvDevice(cDevice::ActualDevice()->CardIndex());
         if (device) {
             int page = IPTV_DEVICE_INFO_ALL;
@@ -216,13 +224,13 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
             return device->GetInformation(page);
         } else {
             replyCodeP = 550; // Requested action not taken
-            return cString("IPTV information not available!");
+            return {"IPTV information not available!"};
         }
-    } else if (strcasecmp(commandP, "MODE") == 0) {
+    } else if (strcasecmp(commandP, "MODE")==0) {
         unsigned int mode = !IptvConfig.GetUseBytes();
         IptvConfig.SetUseBytes(mode);
         return cString::sprintf("IPTV information mode is: %s\n", mode ? "bytes" : "bits");
-    } else if (strcasecmp(commandP, "TRAC") == 0) {
+    } else if (strcasecmp(commandP, "TRAC")==0) {
         if (optionP && *optionP)
             IptvConfig.SetTraceMode(strtol(optionP, nullptr, 0));
         return cString::sprintf("IPTV tracing mode: 0x%04X\n", IptvConfig.GetTraceMode());

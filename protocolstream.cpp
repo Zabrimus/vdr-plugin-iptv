@@ -1,27 +1,27 @@
-#include "protocolradio.h"
+#include "protocolstream.h"
 #include "common.h"
 #include "config.h"
 
 #include "log.h"
 
-cIptvProtocolRadio::cIptvProtocolRadio() : isActiveM(false) {
+cIptvProtocolStream::cIptvProtocolStream() : channelId(0), isActiveM(false) {
     debug1("%s", __PRETTY_FUNCTION__);
 }
 
-cIptvProtocolRadio::~cIptvProtocolRadio() {
+cIptvProtocolStream::~cIptvProtocolStream() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     // Drop open handles
-    cIptvProtocolRadio::Close();
+    cIptvProtocolStream::Close();
 }
 
-int cIptvProtocolRadio::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
+int cIptvProtocolStream::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
 
     return handler.popPackets(bufferAddrP, bufferLenP);
 }
 
-bool cIptvProtocolRadio::Open() {
+bool cIptvProtocolStream::Open() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     if (!isActiveM) {
@@ -35,9 +35,10 @@ bool cIptvProtocolRadio::Open() {
             if (Channel) {
                 streams.url = url;
                 streams.channelName = Channel->Name();
-                streams.vpid = 0;
+                streams.vpid = Channel->Vpid();
                 streams.spid = Channel->Sid();
                 streams.tpid = Channel->Tid();
+                streams.nid = Channel->Nid();
 
                 int aidx = 0;
                 while (true) {
@@ -45,19 +46,19 @@ bool cIptvProtocolRadio::Open() {
                     if (apid==0) {
                         break;
                     }
+
                     streams.apids.push_back(apid);
                     aidx++;
                 }
             }
         }
 
-        handler.streamAudio(streams);
+        handler.streamVideo(streams);
     }
-
     return true;
 }
 
-bool cIptvProtocolRadio::Close() {
+bool cIptvProtocolStream::Close() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     isActiveM = false;
@@ -65,8 +66,11 @@ bool cIptvProtocolRadio::Close() {
     return true;
 }
 
-bool
-cIptvProtocolRadio::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
+bool cIptvProtocolStream::SetSource(const char *locationP,
+                                    const int parameterP,
+                                    const int indexP,
+                                    int channelNumber,
+                                    int useYtDlp) {
     debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
 
     url = locationP;
@@ -79,17 +83,16 @@ cIptvProtocolRadio::SetSource(const char *locationP, const int parameterP, const
     }
 
     channelId = channelNumber;
-
     return true;
 }
 
-bool cIptvProtocolRadio::SetPid(int pidP, int typeP, bool onP) {
+bool cIptvProtocolStream::SetPid(int pidP, int typeP, bool onP) {
     debug16("%s (%d, %d, %d)", __PRETTY_FUNCTION__, pidP, typeP, onP);
 
     return true;
 }
 
-cString cIptvProtocolRadio::GetInformation() {
+cString cIptvProtocolStream::GetInformation() {
     debug16("%s", __PRETTY_FUNCTION__);
 
     return cString::sprintf("%s", url.c_str());

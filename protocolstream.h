@@ -1,29 +1,22 @@
-/*
- * protocolfile.h: IPTV plugin for the Video Disk Recorder
- *
- * See the README file for copyright information and how to reach the author.
- *
- */
-
 #pragma once
 
-#include <arpa/inet.h>
+#include <string>
+#include <vdr/tools.h>
+#include <vdr/channels.h>
 #include "protocolif.h"
+#include "m3u8handler.h"
+#include "ffmpeghandler.h"
 
-class cIptvProtocolFile : public cIptvProtocolIf {
+class cIptvProtocolStream : public cIptvProtocolIf {
 private:
-    char *fileLocationM;
-    int fileDelayM;
-    FILE *fileStreamM;
+    int channelId;
+    std::string url;
     bool isActiveM;
-
-private:
-    bool OpenFile();
-    void CloseFile();
+    FFmpegHandler handler;
 
 public:
-    cIptvProtocolFile();
-    ~cIptvProtocolFile() override;
+    cIptvProtocolStream();
+    ~cIptvProtocolStream() override;
     int Read(unsigned char *bufferAddrP, unsigned int bufferLenP) override;
     bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) override;
     bool SetPid(int pidP, int typeP, bool onP) override;
@@ -31,4 +24,3 @@ public:
     bool Close() override;
     cString GetInformation() override;
 };
-

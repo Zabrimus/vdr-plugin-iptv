@@ -1,39 +1,118 @@
 #include "m3u8handler.h"
 #include "log.h"
+#include "config.h"
+#include "process.hpp"
 
-M3u8Handler::M3u8Handler() {
+std::pair<std::string, std::string> splitUri(const std::string& uri) {
+    auto yturi = uri::parse_uri(uri);
+    std::string host = yturi.scheme + "://" + yturi.authority.host
+        + (yturi.authority.port > 0 ? std::to_string(yturi.authority.port) : "");
+
+    std::string query;
+    for (const auto& a : yturi.query) {
+        query.append(a.first).append("=").append(a.second).append("&");
+    }
+
+    std::string path = yturi.path + "?" + query;
+
+    return std::make_pair(host, path);
+
 }
 
-bool M3u8Handler::startsWith(const std::string& str, const std::string& prefix) {
-    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
+M3u8Handler::M3u8Handler() = default;
+
+bool M3u8Handler::startsWith(const std::string &str, const std::string &prefix) {
+    return str.size() >= prefix.size() && 0==str.compare(0, prefix.size(), prefix);
 }
 
 std::vector<std::string> M3u8Handler::split(const std::string &s, char delim) {
     std::vector<std::string> result;
-    std::stringstream ss (s);
+    std::stringstream ss(s);
     std::string item;
 
-    while (getline (ss, item, delim)) {
-        result.push_back (item);
+    while (getline(ss, item, delim)) {
+        result.push_back(item);
     }
 
     return result;
 }
 
-m3u_stream M3u8Handler::parseM3u(std::string webUri) {
-    auto uri = uri::parse_uri(webUri);
+m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
+    std::string useUri;
 
-    httplib::Client cli(uri.scheme + "://" + uri.authority.host + (uri.authority.port > 0 ? std::to_string(uri.authority.port) : ""));
-    auto res = cli.Get(uri.path);
+    // if useYtdlp == 1 then use yt-dlp to get the real m3u8 URL
+    // if useYtdlp == 2 then get the page and try to find the real m3u8 URL
+    if (useYtdlp==1) {
+        std::vector<std::string> callStr{
+            IptvConfig.GetYtdlpPath(), "--get-url", webUri
+        };
+
+        std::string newUri;
+        auto handler = new TinyProcessLib::Process(callStr, "",
+                                                   [&newUri](const char *bytes, size_t n) {
+                                                     std::string result = std::string(bytes, n);
+                                                     debug1("yt-dlp found URL %s\n", result.c_str());
+                                                     newUri = std::string(bytes, n);
+                                                   },
+
+                                                   [](const char *bytes, size_t n) {
+                                                     std::string msg = std::string(bytes, n);
+                                                     debug1("yt-dlp Error: %s\n", msg.c_str());
+                                                   },
+
+                                                   true
+        );
+
+        int exitStatus = handler->get_exit_status();
+        if (exitStatus!=0) {
+            debug1("yt-dlp throws an error, abort\n");
+            m3u_stream result;
+            result.width = result.height = 0;
+            return result;
+        }
+
+        useUri = newUri;
+    } else if (useYtdlp==2) {
+        auto yturi = splitUri(webUri);
+
+        httplib::Client ytcli(yturi.first);
+        ytcli.set_follow_location(true);
+        auto ytres = ytcli.Get(yturi.second);
+
+        m3u_stream ytresult;
+        ytresult.width = ytresult.height = 0;
+
+        if (ytres==nullptr) {
+            error("Got no result for request %s\n", webUri.c_str());
+            return ytresult;
+        }
+
+        if (ytres->status!=200) {
+            debug1("Got HTTP result code %d\n", ytres->status);
+            return ytresult;
+        }
+
+        auto m = ytres->body.find(".m3u");
+        auto index = ytres->body.rfind("http", m);
+        useUri = ytres->body.substr(index, m + 4 - index);
+    } else {
+        useUri = webUri;
+    }
+
+    auto uri = splitUri(useUri);
+
+    httplib::Client cli(uri.first);
+    cli.set_follow_location(true);
+    auto res = cli.Get(uri.second);
 
     m3u_stream result;
     result.width = result.height = 0;
 
-    if (res == nullptr) {
+    if (res==nullptr) {
         return result;
     }
 
-    if (res->status != 200) {
+    if (res->status!=200) {
         return result;
     }
 
@@ -53,10 +132,12 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
         if (startsWith(line, starterStream)) {
             auto splitted = split(line.substr(starterStream.length()), ',');
 
-            for (const auto& t : splitted) {
+            for (const auto &t : splitted) {
                 if (startsWith(t, "RESOLUTION=")) {
                     int w, h;
                     sscanf(t.c_str() + 11, "%dx%d", &w, &h);
+
+                    debug2("Found Resolution: %dx%d\n", w, h);
 
                     if (w > maxW) {
                         maxW = w;
@@ -65,12 +146,12 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
 
                         if (!startsWith(m3uMax, "http://") && !startsWith(m3uMax, "https://")) {
                             // this is a relative URL -> construct absolute URL
-                            auto last = webUri.find_last_of('/');
-                            m3uMax = webUri.substr(0, last+1).append(m3uMax);
+                            auto last = useUri.find_last_of('/');
+                            m3uMax = useUri.substr(0, last + 1).append(m3uMax);
                         }
                     }
                 } else if (startsWith(t, "AUDIO=")) {
-                    audioGroup = t.substr(7, t.length()-8);
+                    audioGroup = t.substr(7, t.length() - 8);
                 }
             }
         } else if (startsWith(line, starterMedia)) {
@@ -79,30 +160,30 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
             bool addThis = true;
             media m;
 
-            for (const auto& t : splitted) {
+            for (const auto &t : splitted) {
                 if (startsWith(t, "TYPE=")) {
                     m.type = t.substr(5);
-                    if (m.type != "AUDIO") {
+                    if (m.type!="AUDIO") {
                         // no audio -> skip
                         addThis = false;
                         break;
                     }
                 } else if (startsWith(t, "LANGUAGE=")) {
-                    m.language = t.substr(10, t.length()-11);
+                    m.language = t.substr(10, t.length() - 11);
                 } else if (startsWith(t, "NAME=")) {
-                    m.name = t.substr(6, t.length()-7);
+                    m.name = t.substr(6, t.length() - 7);
                 } else if (startsWith(t, "GROUP-ID=")) {
-                    m.groupId = t.substr(10, t.length()-11);
+                    m.groupId = t.substr(10, t.length() - 11);
                 } else if (startsWith(t, "URI=")) {
-                    m.uri = t.substr(5, t.length()-6);
+                    m.uri = t.substr(5, t.length() - 6);
                 }
             }
 
             if (addThis) {
                 if (!startsWith(m.uri, "http://") && !startsWith(m.uri, "https://")) {
                     // this is a relative URL -> construct absolute URL
-                    auto last = webUri.find_last_of('/');
-                    m.uri = webUri.substr(0, last+1).append(m.uri);
+                    auto last = useUri.find_last_of('/');
+                    m.uri = useUri.substr(0, last + 1).append(m.uri);
                 }
 
                 result.audio.push_back(m);
@@ -111,7 +192,7 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
             // this is already a usable m3u8. Don't process anymore but return a useful result
             result.width = 1920;
             result.height = 1080;
-            result.url = webUri;
+            result.url = useUri;
             return result;
         }
     }
@@ -119,8 +200,8 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
     // remove all unwanted audio streams with wrong group-id
     if (!audioGroup.empty() && !result.audio.empty()) {
         auto it = result.audio.begin();
-        while(it != result.audio.end()) {
-            if(it->groupId != audioGroup) {
+        while (it!=result.audio.end()) {
+            if (it->groupId!=audioGroup) {
                 it = result.audio.erase(it);
             } else {
                 ++it;
@@ -141,12 +222,12 @@ m3u_stream M3u8Handler::parseM3u(std::string webUri) {
     return result;
 }
 
-void M3u8Handler::printStream(m3u_stream stream) {
+void M3u8Handler::printStream(const m3u_stream& stream) {
     debug2("Url: %s\n", stream.url.c_str());
     debug2("   Width: %d, Height: %d\n", stream.width, stream.height);
-    if (stream.audio.size() > 0) {
+    if (! stream.audio.empty()) {
         debug2("   Audio:\n");
-        for (auto s: stream.audio) {
+        for (const auto& s : stream.audio) {
             debug2("      Type: %s\n", s.type.c_str());
             debug2("      Lang: %s\n", s.language.c_str());
             debug2("      Name: %s\n", s.name.c_str());

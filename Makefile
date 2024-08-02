@@ -78,7 +78,8 @@ all-redirect: all
 OBJS = $(PLUGIN).o common.o config.o device.o pidscanner.o \
 	protocolcurl.o protocolext.o protocolfile.o protocolhttp.o \
 	protocoludp.o sectionfilter.o setup.o sidscanner.o socket.o \
-	protocolm3u.o protocolradio.o m3u8handler.o process.o process_unix.o ffmpeghandler.o \
+	protocolm3u.o protocolradio.o protocolstream.o \
+	m3u8handler.o process.o process_unix.o ffmpeghandler.o \
 	source.o statistics.o streamer.o
 
 ### The main target:
@@ -86,10 +87,6 @@ OBJS = $(PLUGIN).o common.o config.o device.o pidscanner.o \
 all: $(SOFILE) i18n
 
 ### Implicit rules:
-
-%.o: %.c Makefile
-	@echo CC $@
-	$(Q)$(CXX) $(CXXFLAGS) -c $(DEFINES) $(INCLUDES) -o $@ $<
 
 %.o: %.cpp Makefile
 	@echo CC $@
@@ -100,7 +97,7 @@ all: $(SOFILE) i18n
 MAKEDEP = $(CXX) -MM -MG
 DEPFILE = .dependencies
 $(DEPFILE): Makefile
-	$(Q)$(MAKEDEP) $(CXXFLAGS) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.c) > $@
+	$(Q)$(MAKEDEP) $(CXXFLAGS) $(DEFINES) $(INCLUDES) $(OBJS:%.o=%.cpp) > $@
 
 -include $(DEPFILE)
 
@@ -115,10 +112,6 @@ I18Npot   = $(PODIR)/$(PLUGIN).pot
 %.mo: %.po
 	@echo MO $@
 	$(Q)msgfmt -c -o $@ $<
-
-#$(I18Npot): $(wildcard *.c)
-#	@echo GT $@
-#	$(Q)xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --package-name=vdr-$(PLUGIN) --package-version=$(VERSION) --msgid-bugs-address='<see README>' -o $@ `ls $^`
 
 $(I18Npot): $(wildcard *.cpp)
 	@echo GT $@
@@ -170,4 +163,4 @@ clean:
 
 .PHONY: cppcheck
 cppcheck:
-	$(Q)cppcheck --language=c++ --enable=all -v -f $(OBJS:%.o=%.c)
+	$(Q)cppcheck --language=c++ --enable=all -v -f $(OBJS:%.o=%.cpp)

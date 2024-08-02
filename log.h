@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef __IPTV_LOG_H
-#define __IPTV_LOG_H
+#pragma once
 
 #include "config.h"
 
@@ -44,5 +43,3 @@
 #define debug15(x...) void( IptvConfig.IsTraceMode(cIptvConfig::eTraceModeDebug15) ? dsyslog("IPTV15: " x) : void() )
 // 0x8000; Extra call stack
 #define debug16(x...) void( IptvConfig.IsTraceMode(cIptvConfig::eTraceModeDebug16) ? dsyslog("IPTV16: " x) : void() )
-
-#endif // __IPTV_LOG_H

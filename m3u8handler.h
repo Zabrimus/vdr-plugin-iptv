@@ -35,11 +35,11 @@ typedef struct {
 class M3u8Handler {
 public:
     explicit M3u8Handler();
-    m3u_stream parseM3u(std::string uri);
+    static m3u_stream parseM3u(const std::string &uri, int useYtdlp);
 
-    void printStream(m3u_stream stream);
+    static void printStream(const m3u_stream& stream);
 
 private:
-    bool startsWith(const std::string& str, const std::string& prefix);
-    std::vector<std::string> split(const std::string &s, char delim);
+    static bool startsWith(const std::string &str, const std::string &prefix);
+    static std::vector<std::string> split(const std::string &s, char delim);
 };

@@ -5,33 +5,29 @@
  *
  */
 
-#ifndef __IPTV_SETUP_H
-#define __IPTV_SETUP_H
+#pragma once
 
 #include <vdr/menuitems.h>
 #include <vdr/sourceparams.h>
 #include "common.h"
 
-class cIptvPluginSetup : public cMenuSetupPage
-{
+class cIptvPluginSetup : public cMenuSetupPage {
 private:
-  int protocolBasePortM;
-  int sectionFilteringM;
-  int numDisabledFiltersM;
-  int disabledFilterIndexesM[SECTION_FILTER_TABLE_SIZE];
-  const char *disabledFilterNamesM[SECTION_FILTER_TABLE_SIZE];
-  cVector<const char*> helpM;
+    int protocolBasePortM;
+    int sectionFilteringM;
+    int numDisabledFiltersM;
+    int disabledFilterIndexesM[SECTION_FILTER_TABLE_SIZE];
+    const char *disabledFilterNamesM[SECTION_FILTER_TABLE_SIZE];
+    cVector<const char *> helpM;
 
-  eOSState ShowInfo(void);
-  void Setup(void);
-  void StoreFilters(const char *nameP, int *valuesP);
+    eOSState ShowInfo();
+    void Setup();
+    void StoreFilters(const char *nameP, int *valuesP);
 
 protected:
-  virtual eOSState ProcessKey(eKeys keyP);
-  virtual void Store(void);
+    eOSState ProcessKey(eKeys keyP) override;
+    void Store() override;
 
 public:
-  cIptvPluginSetup();
+    cIptvPluginSetup();
 };
-
-#endif // __IPTV_SETUP_H

@@ -13,8 +13,6 @@
 #include "device.h"
 #include "iptvservice.h"
 
-static const char DESCRIPTION[] = trNOOP("Experience the IPTV");
-
 class cPluginIptv : public cPlugin {
 private:
     unsigned int deviceCountM;
@@ -25,7 +23,7 @@ public:
     ~cPluginIptv() override;
 
     const char *Version() override { return VERSION; }
-    const char *Description() override { return tr(DESCRIPTION); }
+    const char *Description() override;
     const char *CommandLineHelp() override;
 
     bool ProcessArgs(int argc, char *argv[]) override;

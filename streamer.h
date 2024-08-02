@@ -5,9 +5,9 @@
  *
  */
 
-#ifndef __IPTV_STREAMER_H
-#define __IPTV_STREAMER_H
+#pragma once
 
+#include <mutex>
 #include <arpa/inet.h>
 
 #include <vdr/thread.h>
@@ -18,24 +18,24 @@
 
 class cIptvStreamer : public cThread, public cIptvStreamerStatistics {
 private:
-  cCondWait sleepM;
-  cIptvDeviceIf* deviceM;
-  unsigned char* packetBufferM;
-  unsigned int packetBufferLenM;
-  cIptvProtocolIf* protocolM;
+    cCondWait sleepM;
+    cIptvDeviceIf *deviceM;
+    unsigned char *packetBufferM;
+    unsigned int packetBufferLenM;
+    cIptvProtocolIf *protocolM;
+
+    std::mutex streamerMutex;
 
 protected:
-  virtual void Action(void);
+    void Action() override;
 
 public:
-  cIptvStreamer(cIptvDeviceIf &deviceP, unsigned int packetLenP);
-  virtual ~cIptvStreamer();
-  bool
-  SetSource(const char *locationP, const int parameterP, const int indexP, cIptvProtocolIf *protocolP, int channelNumber);
-  bool SetPid(int pidP, int typeP, bool onP);
-  bool Open(void);
-  bool Close(void);
-  cString GetInformation(void);
-};
+    cIptvStreamer(cIptvDeviceIf &deviceP, unsigned int packetLenP);
+    ~cIptvStreamer() override;
 
-#endif // __IPTV_STREAMER_H
+    bool SetSource(const char *locationP, int parameterP, int indexP, cIptvProtocolIf *protocolP, int channelNumber, int useYtdlp);
+    bool SetPid(int pidP, int typeP, bool onP);
+    bool Open();
+    bool Close();
+    cString GetInformation();
+};

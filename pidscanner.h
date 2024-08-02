@@ -39,12 +39,14 @@ public:
 
     void Open() {
         debug1("%s", __PRETTY_FUNCTION__);
+
         audioPids.clear();
         timeoutM.Set(PIDSCANNER_TIMEOUT_IN_MS);
     }
 
     void Close() {
         debug1("%s", __PRETTY_FUNCTION__);
+
         audioPids.clear();
         timeoutM.Set(0);
     }

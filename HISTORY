@@ -300,3 +300,10 @@ VDR Plugin 'iptv' Revision History
 2024-07-17: Version 2.6.0
 - Add new stream protocols RADIO and M3U
 
+2024-07-22: Version 2.6.1
+- fix multithreading issue
+
+2024-xx-xx: Version xxx
+- Add new stream protocol STREAM
+- set the default thread-queue-size from 8 to 32
+- New plugin parameter -s to set the thread-queue-size

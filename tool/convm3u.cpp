@@ -1,7 +1,5 @@
 #include <regex>
 #include <sstream>
-#include <iostream>
-#include <set>
 #include "m3upipe.h"
 #include "convm3u.h"
 
