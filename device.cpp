@@ -328,8 +328,7 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
     pidScanEnabledM = itp.PidScan()!=0;
 
     if (pIptvStreamerM &&
-        pIptvStreamerM->SetSource(itp.Address(), itp.Parameter(), deviceIndexM, protocol, channelP->Number(),
-                                  itp.UseYtdlp())) {
+        pIptvStreamerM->SetSource(protocol, { itp.Address(), itp.Parameter(), deviceIndexM, channelP->Number(), itp.UseYtdlp(), itp.HandlerType() })) {
         channelM = *channelP;
 
         if (sidScanEnabledM && pSidScannerM && IptvConfig.GetSectionFiltering()) {

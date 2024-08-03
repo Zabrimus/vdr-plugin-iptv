@@ -27,7 +27,7 @@ public:
     cIptvProtocolHttp();
     ~cIptvProtocolHttp() override;
     int Read(unsigned char *bufferAddrP, unsigned int bufferLenP) override;
-    bool SetSource(const char *locationP, int parameterP, int indexP, int channelNumber, int useYtDlp) override;
+    bool SetSource(SourceParameter parameter) override;
     bool SetPid(int pidP, int typeP, bool onP) override;
     bool Open() override;
     bool Close() override;

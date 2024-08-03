@@ -7,10 +7,10 @@
 #include "m3u8handler.h"
 #include "streambasehandler.h"
 
-class FFmpegHandler : public StreamBaseHandler {
+class VlcHandler : public StreamBaseHandler {
 public:
-    FFmpegHandler();
-    ~FFmpegHandler();
+    VlcHandler();
+    ~VlcHandler() override;
 
 protected:
     std::vector<std::string> prepareStreamCmdVideo(const m3u_stream &stream) override;

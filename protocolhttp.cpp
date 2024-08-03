@@ -194,15 +194,15 @@ int cIptvProtocolHttp::Read(unsigned char *bufferAddrP, unsigned int bufferLenP)
     return cIptvTcpSocket::Read(bufferAddrP, bufferLenP);
 }
 
-bool cIptvProtocolHttp::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+bool cIptvProtocolHttp::SetSource(SourceParameter parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    if (!isempty(locationP)) {
+    if (!isempty(parameter.locationP)) {
         // Disconnect the current socket
         Disconnect();
 
         // Update stream address, path and port
-        streamAddrM = strcpyrealloc(streamAddrM, locationP);
+        streamAddrM = strcpyrealloc(streamAddrM, parameter.locationP);
         char *path = strstr(streamAddrM, "/");
 
         if (path) {
@@ -212,7 +212,7 @@ bool cIptvProtocolHttp::SetSource(const char *locationP, const int parameterP, c
             streamPathM = strcpyrealloc(streamPathM, "/");
         }
 
-        streamPortM = parameterP;
+        streamPortM = parameter.parameterP;
 
         // Re-connect the socket
         Connect();

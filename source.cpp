@@ -18,7 +18,8 @@ cIptvTransponderParameters::cIptvTransponderParameters(const char *parametersP)
       pidScanM(0),
       protocolM(eProtocolUDP),
       parameterM(0),
-      useYtdlp(0) {
+      useYtdlp(0),
+      handlerType('F') {
     debug1("%s (%s)", __PRETTY_FUNCTION__, parametersP);
 
     memset(&addressM, 0, sizeof(addressM));
@@ -83,11 +84,13 @@ bool cIptvTransponderParameters::Parse(const char *strP) {
                 ++data;
 
                 switch (toupper(*token)) {
-                case 'S':sidScanM = (int) strtol(data, (char **) nullptr, 10);
+                case 'S':
+                    sidScanM = (int) strtol(data, (char **) nullptr, 10);
                     found_s = true;
                     break;
 
-                case 'P':pidScanM = (int) strtol(data, (char **) nullptr, 10);
+                case 'P':
+                    pidScanM = (int) strtol(data, (char **) nullptr, 10);
                     found_p = true;
                     break;
 
@@ -119,15 +122,24 @@ bool cIptvTransponderParameters::Parse(const char *strP) {
                     }
                     break;
 
-                case 'U':strn0cpy(addressM, data, sizeof(addressM));
+                case 'U':
+                    strn0cpy(addressM, data, sizeof(addressM));
                     found_u = true;
                     break;
 
-                case 'A':parameterM = (int) strtol(data, (char **) nullptr, 10);
+                case 'A':
+                    parameterM = (int) strtol(data, (char **) nullptr, 10);
                     found_a = true;
                     break;
 
-                case 'Y':useYtdlp = (int) strtol(data, (char **) nullptr, 10);
+                case 'Y':
+                    useYtdlp = (int) strtol(data, (char **) nullptr, 10);
+                    break;
+
+                case 'H':
+                    if (data[0] == 'F' || data[0] == 'V') {
+                        handlerType = data[0];
+                    }
                     break;
 
                 default:

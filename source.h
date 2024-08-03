@@ -21,6 +21,7 @@ private:
     char addressM[NAME_MAX + 1];
     int parameterM;
     int useYtdlp;
+    char handlerType;
 
 public:
     enum {
@@ -41,6 +42,7 @@ public:
     const char *Address() const { return addressM; };
     int Parameter() const { return parameterM; };
     int UseYtdlp() const { return useYtdlp; };
+    char HandlerType() const { return handlerType; };
 
     void SetSidScan(int sidScanP) { sidScanM = sidScanP; };
     void SetPidScan(int pidScanP) { pidScanM = pidScanP; };
@@ -48,6 +50,7 @@ public:
     void SetAddress(const char *addressP) { strncpy(addressM, addressP, sizeof(addressM)); };
     void SetParameter(int parameterP) { parameterM = parameterP; };
     void SetYtdlp(int value) { useYtdlp = value; };
+    void SetHandlerType(char type) { handlerType = type; };
 
     cString ToString(char typeP) const;
     bool Parse(const char *strP);

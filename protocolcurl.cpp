@@ -626,18 +626,14 @@ int cIptvProtocolCurl::Read(unsigned char *bufferAddrP, unsigned int bufferLenP)
 }
 
 bool
-cIptvProtocolCurl::SetSource(const char *locationP,
-                             const int parameterP,
-                             const int indexP,
-                             int channelNumber,
-                             int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+cIptvProtocolCurl::SetSource(SourceParameter  parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    if (!isempty(locationP)) {
+    if (!isempty(parameter.locationP)) {
         // Disconnect
         Disconnect();
         // Update stream URL
-        streamUrlM = locationP;
+        streamUrlM = parameter.locationP;
         cString protocol = ChangeCase(streamUrlM, false).Truncate(5);
 
         if (startswith(*protocol, "rtsp")) {
@@ -652,13 +648,13 @@ cIptvProtocolCurl::SetSource(const char *locationP,
             modeM = eModeUnknown;
         }
 
-        debug1("%s (%s, %d, %d) protocol=%s mode=%d", __PRETTY_FUNCTION__, locationP, parameterP, indexP, *protocol, modeM);
+        debug1("%s (%s, %d, %d) protocol=%s mode=%d", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP, *protocol, modeM);
 
         // Update stream parameter - force UDP mode for RTSP
-        streamParamM = (modeM==eModeRtsp) ? 0 : parameterP;
+        streamParamM = (modeM==eModeRtsp) ? 0 : parameter.parameterP;
 
         // Update listen port
-        streamPortM = IptvConfig.GetProtocolBasePort() + indexP*2;
+        streamPortM = IptvConfig.GetProtocolBasePort() + parameter.indexP*2;
 
         // Reconnect
         Connect();

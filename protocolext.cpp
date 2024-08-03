@@ -171,17 +171,13 @@ int cIptvProtocolExt::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) 
 }
 
 bool
-cIptvProtocolExt::SetSource(const char *locationP,
-                            const int parameterP,
-                            const int indexP,
-                            int channelNumber,
-                            int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+cIptvProtocolExt::SetSource(SourceParameter parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    if (!isempty(locationP)) {
+    if (!isempty(parameter.locationP)) {
         struct stat stbuf;
         // Update script file and parameter
-        scriptFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), locationP);
+        scriptFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), parameter.locationP);
 
         if ((stat(*scriptFileM, &stbuf) != 0) || (strstr(*scriptFileM, "..") != nullptr)) {
             error("Non-existent or relative path script '%s'", *scriptFileM);
@@ -189,9 +185,9 @@ cIptvProtocolExt::SetSource(const char *locationP,
             return false;
         }
 
-        scriptParameterM = parameterP;
+        scriptParameterM = parameter.parameterP;
         // Update listen port
-        streamPortM = IptvConfig.GetProtocolBasePort() + indexP*2;
+        streamPortM = IptvConfig.GetProtocolBasePort() + parameter.indexP*2;
     }
     return true;
 }

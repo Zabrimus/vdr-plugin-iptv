@@ -3,10 +3,11 @@
 #include "protocolm3u.h"
 #include "common.h"
 #include "config.h"
-
+#include "ffmpeghandler.h"
+#include "vlchandler.h"
 #include "log.h"
 
-cIptvProtocolM3U::cIptvProtocolM3U() : isActiveM(false) {
+cIptvProtocolM3U::cIptvProtocolM3U() : isActiveM(false), handler(nullptr) {
     debug1("%s", __PRETTY_FUNCTION__);
 }
 
@@ -15,11 +16,14 @@ cIptvProtocolM3U::~cIptvProtocolM3U() {
 
     // Drop open handles
     cIptvProtocolM3U::Close();
+
+    delete handler;
+    handler = nullptr;
 }
 
 int cIptvProtocolM3U::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
-    return handler.popPackets(bufferAddrP, bufferLenP);
+    return handler->popPackets(bufferAddrP, bufferLenP);
 }
 
 bool cIptvProtocolM3U::Open() {
@@ -59,7 +63,7 @@ bool cIptvProtocolM3U::Open() {
         }
 
         m3u8Handler.printStream(streams);
-        handler.streamVideo(streams);
+        handler->streamVideo(streams);
     }
 
     return true;
@@ -69,23 +73,19 @@ bool cIptvProtocolM3U::Close() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     isActiveM = false;
-    handler.stop();
+    handler->stop();
 
     return true;
 }
 
 bool
-cIptvProtocolM3U::SetSource(const char *locationP,
-                            const int parameterP,
-                            const int indexP,
-                            int channelNumber,
-                            int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+cIptvProtocolM3U::SetSource(SourceParameter parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    this->useYtdlp = useYtDlp;
+    this->useYtdlp = parameter.useYtDlp;
 
     struct stat stbuf;
-    cString configFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), locationP);
+    cString configFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), parameter.locationP);
     if ((stat(*configFileM, &stbuf)!=0) || (strstr(*configFileM, "..") != nullptr)) {
         error("Non-existent or relative configuration file '%s'", *configFileM);
 
@@ -99,10 +99,10 @@ cIptvProtocolM3U::SetSource(const char *locationP,
             unsigned long idx = line.find(':');
             if (idx > 0) {
                 std::string nr = line.substr(0, idx);
-                if (nr==std::to_string(parameterP)) {
+                if (nr==std::to_string(parameter.parameterP)) {
                     url = line.substr(idx + 1);
                     if (url.empty()) {
-                        error("URL with index %d in file %s not found", parameterP, *configFileM);
+                        error("URL with index %d in file %s not found", parameter.parameterP, *configFileM);
 
                         file.close();
                         return false;
@@ -118,10 +118,17 @@ cIptvProtocolM3U::SetSource(const char *locationP,
     }
 
     if (url.empty()) {
-        error("URL with index %d in file %s not found", parameterP, *configFileM);
+        error("URL with index %d in file %s not found", parameter.parameterP, *configFileM);
     }
 
-    channelId = channelNumber;
+    channelId = parameter.channelNumber;
+
+    if (parameter.handlerType == 'F') {
+        handler = new FFmpegHandler();
+    } else if (parameter.handlerType == 'V') {
+        handler = new VlcHandler();
+    }
+
     return true;
 }
 

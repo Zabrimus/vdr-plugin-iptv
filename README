@@ -85,8 +85,8 @@ Configuration:
 
 - channels.conf
 
-  TV8;IPTV:70:S=1|P=0|F=M3U|U=other.cfg|A=2|Y=1:I:0:200:201,202,203,204,205:0:0:11:1:100:0
-  ST1:IPTV:90:S=1|P=0|F=STREAM|U=http%3A//locahost/stream?id=10|A=1:I:0:514:670:2321:0:5:0:200:0
+  TV8;IPTV:70:S=1|P=0|F=M3U|U=other.cfg|A=2|Y=1|H=F:I:0:200:201,202,203,204,205:0:0:11:1:100:0
+  ST1:IPTV:90:S=1|P=0|F=STREAM|U=http%3A//locahost/stream?id=10|A=1|H=V:I:0:514:670:2321:0:5:0:200:0
   RD1:IPTV:80:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=8:I:0:270:271,272,273,274,275:0:0:8:1:9:8
   TV7;IPTV:70:S=1|P=0|F=M3U|U=list1.cfg|A=5:I:0:200:201,202,203,204,205:0:0:11:1:100:0
   TV6;IPTV:60:S=1|P=0|F=EXT|U=iptvstream.sh|A=0:I:0:0:680:0:0:6:0:0:0
@@ -99,13 +99,19 @@ Configuration:
            |  |   |   |     |           |      |
            |  |   |   |     |           |      Source type ("I")
            |  |   |   |     |           Stream parameter
-           |  |   |   |     |            UDP:  multicast port
-           |  |   |   |     |            CURL: <<to be defined>>
-           |  |   |   |     |            HTTP: HTTP port number
-           |  |   |   |     |            FILE: file delay (ms)
-           |  |   |   |     |            EXT:  script parameter
-           |  |   |   |     |            M3U:  Y=1 uses yt-dlp to determine the video URL
-           |  |   |   |     |                  Y=2 tries to find the video URL internally
+           |  |   |   |     |            UDP:    multicast port
+           |  |   |   |     |            CURL:   <<to be defined>>
+           |  |   |   |     |            HTTP:   HTTP port number
+           |  |   |   |     |            FILE:   file delay (ms)
+           |  |   |   |     |            EXT:    script parameter
+           |  |   |   |     |            M3U:    Y=1 uses yt-dlp to determine the video URL
+           |  |   |   |     |                    Y=2 tries to find the video URL internally
+           |  |   |   |     |                    H=F uses ffmpeg
+           |  |   |   |     |                    H=V uses vlc
+           |  |   |   |     |            STREAM: H=F uses ffmpeg
+           |  |   |   |     |                    H=V uses vlc
+           |  |   |   |     |            RADIO:  H=F uses ffmpeg
+           |  |   |   |     |                    H=V uses vlc
            |  |   |   |     Stream address
            |  |   |   |      UDP:  multicast [source@]group address
            |  |   |   |      CURL: HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded

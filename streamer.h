@@ -33,7 +33,7 @@ public:
     cIptvStreamer(cIptvDeviceIf &deviceP, unsigned int packetLenP);
     ~cIptvStreamer() override;
 
-    bool SetSource(const char *locationP, int parameterP, int indexP, cIptvProtocolIf *protocolP, int channelNumber, int useYtdlp);
+    bool SetSource(cIptvProtocolIf *protocolP, SourceParameter parameter);
     bool SetPid(int pidP, int typeP, bool onP);
     bool Open();
     bool Close();

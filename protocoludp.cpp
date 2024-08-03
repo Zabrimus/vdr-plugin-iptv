@@ -67,10 +67,10 @@ int cIptvProtocolUdp::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) 
     return cIptvUdpSocket::Read(bufferAddrP, bufferLenP);
 }
 
-bool cIptvProtocolUdp::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+bool cIptvProtocolUdp::SetSource(SourceParameter parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    if (!isempty(locationP)) {
+    if (!isempty(parameter.locationP)) {
         // Drop the multicast group
         if (!isempty(streamAddrM)) {
             OpenSocket(streamPortM, streamAddrM, sourceAddrM, isIGMPv3M);
@@ -78,7 +78,7 @@ bool cIptvProtocolUdp::SetSource(const char *locationP, const int parameterP, co
         }
 
         // Update stream address and port
-        streamAddrM = strcpyrealloc(streamAddrM, locationP);
+        streamAddrM = strcpyrealloc(streamAddrM, parameter.locationP);
         // <group address> or <source address>@<group address>
 
         char *p = strstr(streamAddrM, "@");
@@ -92,7 +92,7 @@ bool cIptvProtocolUdp::SetSource(const char *locationP, const int parameterP, co
             isIGMPv3M = false;
         }
 
-        streamPortM = parameterP;
+        streamPortM = parameter.parameterP;
 
         // Join a new multicast group
         if (!isempty(streamAddrM)) {

@@ -1,10 +1,12 @@
 #include "protocolradio.h"
 #include "common.h"
 #include "config.h"
+#include "ffmpeghandler.h"
+#include "vlchandler.h"
 
 #include "log.h"
 
-cIptvProtocolRadio::cIptvProtocolRadio() : isActiveM(false) {
+cIptvProtocolRadio::cIptvProtocolRadio() : isActiveM(false), handler(nullptr) {
     debug1("%s", __PRETTY_FUNCTION__);
 }
 
@@ -13,12 +15,15 @@ cIptvProtocolRadio::~cIptvProtocolRadio() {
 
     // Drop open handles
     cIptvProtocolRadio::Close();
+
+    delete handler;
+    handler = nullptr;
 }
 
 int cIptvProtocolRadio::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
 
-    return handler.popPackets(bufferAddrP, bufferLenP);
+    return handler->popPackets(bufferAddrP, bufferLenP);
 }
 
 bool cIptvProtocolRadio::Open() {
@@ -51,7 +56,7 @@ bool cIptvProtocolRadio::Open() {
             }
         }
 
-        handler.streamAudio(streams);
+        handler->streamAudio(streams);
     }
 
     return true;
@@ -61,24 +66,33 @@ bool cIptvProtocolRadio::Close() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     isActiveM = false;
-    handler.stop();
+    handler->stop();
+
     return true;
 }
 
 bool
-cIptvProtocolRadio::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+cIptvProtocolRadio::SetSource(SourceParameter parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    url = locationP;
+    url = parameter.locationP;
 
     url = ReplaceAll(url, "%3A", ":");
     url = ReplaceAll(url, "%7C", "|");
 
     if (url.empty()) {
-        error("URL %s not found", locationP);
+        error("URL %s not found", parameter.locationP);
     }
 
-    channelId = channelNumber;
+    channelId = parameter.channelNumber;
+
+    delete handler;
+
+    if (parameter.handlerType == 'F') {
+        handler = new FFmpegHandler();
+    } else if (parameter.handlerType == 'V') {
+        handler = new VlcHandler();
+    }
 
     return true;
 }

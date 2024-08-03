@@ -5,7 +5,10 @@
  *
  */
 
-#include <ctype.h>
+#include <cctype>
+#include <memory>
+#include <string>
+#include <stdexcept>
 #include <vdr/tools.h>
 #include "common.h"
 

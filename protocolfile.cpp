@@ -103,16 +103,16 @@ bool cIptvProtocolFile::Close() {
     return true;
 }
 
-bool cIptvProtocolFile::SetSource(const char *locationP, const int parameterP, const int indexP, int channelNumber, int useYtDlp) {
-    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, locationP, parameterP, indexP);
+bool cIptvProtocolFile::SetSource(SourceParameter parameter) {
+    debug1("%s (%s, %d, %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP);
 
-    if (!isempty(locationP)) {
+    if (!isempty(parameter.locationP)) {
         // Close the file stream
         CloseFile();
 
         // Update stream address and port
-        fileLocationM = strcpyrealloc(fileLocationM, locationP);
-        fileDelayM = parameterP;
+        fileLocationM = strcpyrealloc(fileLocationM, parameter.locationP);
+        fileDelayM = parameter.parameterP;
 
         // Open the file for input
         OpenFile();
