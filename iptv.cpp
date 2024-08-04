@@ -44,34 +44,51 @@ const char *cPluginIptv::CommandLineHelp() {
     return "  -d <num>,  --devices=<number>           number of devices to be created\n"
            "  -t <mode>, --trace=<mode>               set the tracing mode\n"
            "  -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size\n"
-           "  -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp\n";
+           "  -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp\n"
+           "  -m <path>, --m3u-config-path=<path>     sets the path to m3u cfg files\n";
 }
 
 bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
     debug1("%s", __PRETTY_FUNCTION__);
+
     // Implement command line argument processing here if applicable.
     static const struct option long_options[] = {
         {"devices", required_argument, nullptr, 'd'},
         {"trace", required_argument, nullptr, 't'},
         {"thread-queue-size", required_argument, nullptr, 's'},
         {"ytdlp", required_argument, nullptr, 'y'},
+        {"m3u-config-path", required_argument, nullptr, 'm'},
         {nullptr, no_argument, nullptr, 0}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "d:t:s:y:", long_options, nullptr))!=-1) {
+    while ((c = getopt_long(argc, argv, "d:t:s:y:m:", long_options, nullptr))!=-1) {
         switch (c) {
-        case 'd':deviceCountM = atoi(optarg);
+        case 'd':
+            deviceCountM = atoi(optarg);
             break;
-        case 't':IptvConfig.SetTraceMode(strtol(optarg, nullptr, 0));
+
+        case 't':
+            IptvConfig.SetTraceMode(strtol(optarg, nullptr, 0));
             break;
-        case 's':IptvConfig.SetThreadQueueSize(strtol(optarg, nullptr, 0));
+
+        case 's':
+            IptvConfig.SetThreadQueueSize(strtol(optarg, nullptr, 0));
             break;
-        case 'y':IptvConfig.SetYtdlpPath(std::string(optarg));
+
+        case 'y':
+            IptvConfig.SetYtdlpPath(optarg);
             break;
-        default:return false;
+
+        case 'm':
+            IptvConfig.SetM3uCfgPath(optarg);
+            break;
+
+        default:
+            return false;
         }
     }
+
     return true;
 }
 
@@ -80,6 +97,12 @@ bool cPluginIptv::Initialize() {
     // Initialize any background activities the plugin shall perform.
     IptvConfig.SetConfigDirectory(cPlugin::ConfigDirectory(PLUGIN_NAME_I18N));
     IptvConfig.SetResourceDirectory(cPlugin::ResourceDirectory(PLUGIN_NAME_I18N));
+
+    // set some default values
+    if (strlen(IptvConfig.GetM3uCfgPath()) == 0) {
+        IptvConfig.SetM3uCfgPath(cPlugin::ResourceDirectory(PLUGIN_NAME_I18N));
+    }
+
     return cIptvDevice::Initialize(deviceCountM);
 }
 

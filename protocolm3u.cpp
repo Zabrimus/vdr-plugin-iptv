@@ -85,7 +85,7 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
     this->useYtdlp = parameter.useYtDlp;
 
     struct stat stbuf;
-    cString configFileM = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), parameter.locationP);
+    cString configFileM = cString::sprintf("%s/%s", IptvConfig.GetM3uCfgPath(), parameter.locationP);
     if ((stat(*configFileM, &stbuf)!=0) || (strstr(*configFileM, "..") != nullptr)) {
         error("Non-existent or relative configuration file '%s'", *configFileM);
 

@@ -303,7 +303,12 @@ VDR Plugin 'iptv' Revision History
 2024-07-22: Version 2.6.1
 - fix multithreading issue
 
-2024-xx-xx: Version xxx
+2024-07-29: Version 2.6.2
 - Add new stream protocol STREAM
 - set the default thread-queue-size from 8 to 32
 - New plugin parameter -s to set the thread-queue-size
+
+2024-08-04: Version 2.6.3
+- add new channel parameter H=V or H=F (use FFmpeg or vlc)
+- new plugin parameter: -m/--m3u-config-path to set the path for m3u config files
+

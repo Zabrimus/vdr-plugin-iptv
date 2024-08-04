@@ -24,6 +24,9 @@ cIptvConfig::cIptvConfig()
 
     memset(configDirectoryM, 0, sizeof(configDirectoryM));
     memset(resourceDirectoryM, 0, sizeof(resourceDirectoryM));
+    memset(resourceDirectoryM, 0, sizeof(resourceDirectoryM));
+    memset(m3uCfgPath, 0, sizeof(m3uCfgPath));
+    memset(ytdlpPath, 0, sizeof(ytdlpPath));
 }
 
 unsigned int cIptvConfig::GetDisabledFiltersCount() const {
@@ -54,4 +57,15 @@ void cIptvConfig::SetConfigDirectory(const char *directoryP) {
 void cIptvConfig::SetResourceDirectory(const char *directoryP) {
     debug1("%s (%s)", __PRETTY_FUNCTION__, directoryP);
     ERROR_IF(!realpath(directoryP, resourceDirectoryM), "Cannot canonicalize resource directory");
+}
+
+void cIptvConfig::SetYtdlpPath(const char *path) {
+    debug1("%s (%s)", __PRETTY_FUNCTION__, path);
+    ERROR_IF(!realpath(path, ytdlpPath), "Cannot canonicalize resource directory");
+
+}
+
+void cIptvConfig::SetM3uCfgPath(const char *directoryP) {
+    debug1("%s (%s)", __PRETTY_FUNCTION__, directoryP);
+    ERROR_IF(!realpath(directoryP, m3uCfgPath), "Cannot canonicalize resource directory");
 }

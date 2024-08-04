@@ -20,7 +20,8 @@ private:
     int disabledFiltersM[SECTION_FILTER_TABLE_SIZE];
     char configDirectoryM[PATH_MAX];
     char resourceDirectoryM[PATH_MAX];
-    std::string ytdlpPath;
+    char m3uCfgPath[PATH_MAX];
+    char ytdlpPath[PATH_MAX];
 
 public:
     enum eTraceMode {
@@ -55,7 +56,8 @@ public:
     const char *GetConfigDirectory() const { return configDirectoryM; };
     const char *GetResourceDirectory() const { return resourceDirectoryM; };
     unsigned int GetDisabledFiltersCount() const;
-    std::string GetYtdlpPath() { return ytdlpPath; };
+    const char *GetYtdlpPath() { return ytdlpPath; };
+    const char *GetM3uCfgPath() { return m3uCfgPath; };
     int GetDisabledFilters(unsigned int indexP) const;
 
     void SetTraceMode(unsigned int modeP) { traceModeM = (modeP & eTraceModeMask); };
@@ -66,7 +68,8 @@ public:
     void SetDisabledFilters(unsigned int indexP, int numberP);
     void SetConfigDirectory(const char *directoryP);
     void SetResourceDirectory(const char *directoryP);
-    void SetYtdlpPath(std::string p) { ytdlpPath = p; };
+    void SetYtdlpPath(const char* path);
+    void SetM3uCfgPath(const char* directoryP);
 };
 
 extern cIptvConfig IptvConfig;
