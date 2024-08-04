@@ -22,6 +22,7 @@ private:
     int parameterM;
     int useYtdlp;
     char handlerType;
+    std::string xmltvId;
 
 public:
     enum {
@@ -43,6 +44,7 @@ public:
     int Parameter() const { return parameterM; };
     int UseYtdlp() const { return useYtdlp; };
     char HandlerType() const { return handlerType; };
+    std::string XmlTVId() const { return xmltvId; };
 
     void SetSidScan(int sidScanP) { sidScanM = sidScanP; };
     void SetPidScan(int pidScanP) { pidScanM = pidScanP; };
@@ -50,6 +52,7 @@ public:
     void SetAddress(const char *addressP) { strncpy(addressM, addressP, sizeof(addressM)); };
     void SetParameter(int parameterP) { parameterM = parameterP; };
     void SetYtdlp(int value) { useYtdlp = value; };
+    void SetXmlTvId(std::string id) { xmltvId = id; };
     void SetHandlerType(char type) { handlerType = type; };
 
     cString ToString(char typeP) const;

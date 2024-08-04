@@ -142,6 +142,10 @@ bool cIptvTransponderParameters::Parse(const char *strP) {
                     }
                     break;
 
+                case 'X':
+                    xmltvId = std::string(data);
+                    break;
+
                 default:
                     break;
                 }
