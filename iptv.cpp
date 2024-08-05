@@ -12,6 +12,7 @@
 #include "setup.h"
 #include "device.h"
 #include "iptvservice.h"
+#include "source.h"
 
 #if defined(APIVERSNUM) && APIVERSNUM < 20400
 #error "VDR-2.4.0 API version or greater is required!"
@@ -228,6 +229,12 @@ const char **cPluginIptv::SVDRPHelpPages() {
         "    Toggles between bit or byte information mode.\n",
         "TRAC [ <mode> ]\n"
         "    Gets and/or sets used tracing mode.\n",
+        "LXML\n"
+        "    List all xmltv ids in channels.conf.\n",
+        "LIPT [ <type> ]\n"
+        "    List all iptv channels of <type>.\n",
+        "CHPA <number> <name> <value>\n"
+        "    Change the parameter with name <name> to <value> of channel with number <number>",
         nullptr
     };
     return HelpPages;
@@ -235,7 +242,7 @@ const char **cPluginIptv::SVDRPHelpPages() {
 
 cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int &replyCodeP) {
     debug1("%s (%s, %s, )", __PRETTY_FUNCTION__, commandP, optionP);
-    if (strcasecmp(commandP, "INFO")==0) {
+    if (strcasecmp(commandP, "INFO") == 0) {
         cIptvDevice *device = cIptvDevice::GetIptvDevice(cDevice::ActualDevice()->CardIndex());
         if (device) {
             int page = IPTV_DEVICE_INFO_ALL;
@@ -249,14 +256,163 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
             replyCodeP = 550; // Requested action not taken
             return {"IPTV information not available!"};
         }
-    } else if (strcasecmp(commandP, "MODE")==0) {
+    } else if (strcasecmp(commandP, "MODE") == 0) {
         unsigned int mode = !IptvConfig.GetUseBytes();
         IptvConfig.SetUseBytes(mode);
         return cString::sprintf("IPTV information mode is: %s\n", mode ? "bytes" : "bits");
-    } else if (strcasecmp(commandP, "TRAC")==0) {
+    } else if (strcasecmp(commandP, "TRAC") == 0) {
         if (optionP && *optionP)
             IptvConfig.SetTraceMode(strtol(optionP, nullptr, 0));
         return cString::sprintf("IPTV tracing mode: 0x%04X\n", IptvConfig.GetTraceMode());
+    } else if (strcasecmp(commandP, "LXML") == 0) {
+        LOCK_CHANNELS_READ;
+        std::string result;
+        for (const cChannel *Channel = Channels->First(); Channel; Channel = Channels->Next(Channel)) {
+            if (Channel->IsSourceType('I')) {
+                cIptvTransponderParameters params(Channel->Parameters());
+                if (!params.XmlTVId().empty()) {
+                    result.append(std::to_string(Channel->Number())).append(" ").append(Channel->GetChannelID().ToString()).append(":").append(Channel->Name()).append(":").append(
+                        params.XmlTVId()).append("\n");
+                }
+            }
+        }
+
+        if (result.empty()) {
+            replyCodeP = 550;
+            return { "No channels with xmltv id found\n" };
+        }
+
+        replyCodeP = 250;
+        return { result.c_str() };
+    } else if (strcasecmp(commandP, "LIPT") == 0) {
+        int type = -1;
+
+        if (*optionP) {
+            std::string typeStr = std::string(optionP);
+            trim(typeStr);
+            type = cIptvTransponderParameters::StrToProtocol(typeStr.c_str());
+        }
+
+        LOCK_CHANNELS_READ;
+        std::string result;
+        for (const cChannel *Channel = Channels->First(); Channel; Channel = Channels->Next(Channel)) {
+            if (Channel->IsSourceType('I')) {
+                cIptvTransponderParameters params(Channel->Parameters());
+
+                if (type == -1 || params.Protocol() == type) {
+                    result.append(std::to_string(Channel->Number())).append(" ").append(Channel->GetChannelID().ToString()).append(":").append(Channel->Name()).append(":").append(cIptvTransponderParameters::ProtocolToStr(params.Protocol())).append("\n");
+                }
+            }
+        }
+
+        if (result.empty()) {
+            replyCodeP = 550;
+            return { "No iptv channels found\n" };
+        }
+
+        replyCodeP = 250;
+        return { result.c_str() };
+    }  else if (strcasecmp(commandP, "CHPA") == 0) {
+        int number = -1;
+        std::string name;
+        std::string value;
+
+        if (*optionP) {
+            char buf[strlen(optionP) + 1];
+            char *p = strcpy(buf, optionP);
+            char *strtok_next = nullptr;
+
+            if ((p = strtok_r(p, " \t", &strtok_next)) != nullptr) {
+                if (isnumber(p)) {
+                    number = atoi(p);
+                } else {
+                    replyCodeP = 501;
+                    return { "Invalid channel number" };
+                }
+
+                if ((p = strtok_r(nullptr, " \t", &strtok_next)) != nullptr) {
+                    name = p;
+                } else {
+                    replyCodeP = 501;
+                    return { "Invalid parameter name" };
+                }
+
+                if ((p = strtok_r(nullptr, " \t", &strtok_next)) != nullptr) {
+                    value = p;
+                } else {
+                    replyCodeP = 501;
+                    return { "Invalid parameter value" };
+                }
+            }
+
+            printf("Number: %d\n", number);
+            printf("Name: %s\n", name.c_str());
+            printf("Value: %s\n", value.c_str());
+        } else {
+            replyCodeP = 501;
+            return { "Missing parameters" };
+        }
+
+        LOCK_CHANNELS_WRITE;
+        cChannel *Channel = Channels->GetByNumber(number);
+        if (Channel->IsSourceType('I')) {
+            cIptvTransponderParameters params(Channel->Parameters());
+
+            if (name == "S") {
+                if ((value == "0") || (value == "1")) {
+                    params.SetSidScan(atoi(value.c_str()));
+                } else {
+                    replyCodeP = 501;
+                    return { "Only 1 or 0 are allowed for parameter S" };
+                }
+            } else if (name == "P") {
+                if ((value == "0") || (value == "1")) {
+                    params.SetPidScan(atoi(value.c_str()));
+                } else {
+                    replyCodeP = 501;
+                    return { "Only 1 or 0 are allowed for parameter P" };
+                }
+            } else if (name == "F") {
+                int prot = cIptvTransponderParameters::StrToProtocol(value.c_str());
+                if (prot == -1) {
+                    replyCodeP = 501;
+                    return { "Value for parameter F is illegal" };
+                }
+                params.SetProtocol(prot);
+            } else if (name == "U") {
+                params.SetAddress(value.c_str());
+            } else if (name == "A") {
+                params.SetAddress(value.c_str());
+            } else if (name == "Y") {
+                if ((value ==  "1") || (value == "2")) {
+                    params.SetYtdlp(atoi(value.c_str()));
+                } else {
+                    replyCodeP = 501;
+                    return { "Only 1 or 2 are allowed for parameter Y" };
+                }
+            } else if (name == "H") {
+                if ((value == "F") || (value == "V")) {
+                    params.SetHandlerType(value.at(0));
+                } else {
+                    replyCodeP = 501;
+                    return { "Only F or H are allowed for parameter F" };
+                }
+            } else if (name == "X") {
+                params.SetXmlTvId(value);
+            } else {
+                replyCodeP = 501;
+                return { "Parameter name is illegal" };
+            }
+
+            // Update channel
+            Channel->SetTransponderData(Channel->Source(), Channel->Frequency(), Channel->Srate(), params.ToString('I').c_str());
+        } else {
+            replyCodeP = 501;
+            return { "Channel is not an iptv channel" };
+        }
+
+        replyCodeP = 250;
+        return { "OK" };
     }
 
     return nullptr;

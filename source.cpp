@@ -26,44 +26,104 @@ cIptvTransponderParameters::cIptvTransponderParameters(const char *parametersP)
     Parse(parametersP);
 }
 
-cString cIptvTransponderParameters::ToString(char typeP) const {
+std::string cIptvTransponderParameters::ToString(char typeP) const {
     debug1("%s (%c)", __PRETTY_FUNCTION__, typeP);
 
-    const char *protocolstr;
+    std::string tostr;
 
-    switch (protocolM) {
-    case eProtocolEXT:protocolstr = "EXT";
+    tostr.append("S=").append(std::to_string(sidScanM));
+    tostr.append("|P=").append(std::to_string(pidScanM));
+    tostr.append("|F=").append(ProtocolToStr(protocolM));
+    tostr.append("|U=").append(addressM);
+    tostr.append("|A=").append(std::to_string(parameterM));
+
+    if (useYtdlp > 0) {
+        tostr.append("|Y=").append(std::to_string(useYtdlp));
+    }
+
+    // tostr.append("|H=").append(std::to_string(handlerType));
+    tostr.append("|H=").append(std::string(1 , handlerType));
+
+    if (!xmltvId.empty()) {
+        tostr.append("|X=").append(xmltvId);
+    }
+
+    return { tostr };
+
+    // return cString::sprintf("S=%d|P=%d|F=%s|U=%s|A=%d", sidScanM, pidScanM, protocolstr.c_str(), addressM, parameterM);
+}
+
+int cIptvTransponderParameters::StrToProtocol(const char *prot) {
+    int protocolM = -1;
+
+    if (strstr(prot, "UDP")) {
+        protocolM = eProtocolUDP;
+    } else if (strstr(prot, "CURL")) {
+        protocolM = eProtocolCURL;
+    } else if (strstr(prot, "HTTP")) {
+        protocolM = eProtocolHTTP;
+    } else if (strstr(prot, "FILE")) {
+        protocolM = eProtocolFILE;
+    } else if (strstr(prot, "EXT")) {
+        protocolM = eProtocolEXT;
+    } else if (strstr(prot, "M3U")) {
+        protocolM = eProtocolM3U;
+    } else if (strstr(prot, "RADIO")) {
+        protocolM = eProtocolRadio;
+    } else if (strstr(prot, "STREAM")) {
+        protocolM = eProtocolStream;
+    }
+
+    return protocolM;
+}
+
+std::string cIptvTransponderParameters::ProtocolToStr(int prot) {
+    std::string protocolstr;
+
+    switch (prot) {
+    case eProtocolEXT:
+        protocolstr = "EXT";
         break;
 
-    case eProtocolCURL:protocolstr = "CURL";
+    case eProtocolCURL:
+        protocolstr = "CURL";
         break;
 
-    case eProtocolHTTP:protocolstr = "HTTP";
+    case eProtocolHTTP:
+        protocolstr = "HTTP";
         break;
 
-    case eProtocolFILE:protocolstr = "FILE";
+    case eProtocolFILE:
+        protocolstr = "FILE";
+        break;
+
+    case eProtocolM3U:
+        protocolstr = "M3U";
+        break;
+
+    case eProtocolRadio:
+        protocolstr = "RADIO";
+        break;
+
+    case eProtocolStream:
+        protocolstr = "STREAM";
         break;
 
     default:
-    case eProtocolUDP:protocolstr = "UDP";
+    case eProtocolUDP:
+        protocolstr = "UDP";
         break;
 
-    case eProtocolM3U:protocolstr = "M3U";
-        break;
-
-    case eProtocolRadio:protocolstr = "RADIO";
-        break;
-
-    case eProtocolStream:protocolstr = "STREAM";
-        break;
     }
-    return cString::sprintf("S=%d|P=%d|F=%s|U=%s|A=%d", sidScanM, pidScanM, protocolstr, addressM, parameterM);
+
+    return protocolstr;
 }
 
 bool cIptvTransponderParameters::Parse(const char *strP) {
     debug1("%s (%s)", __PRETTY_FUNCTION__, strP);
 
     bool result = false;
+    int tmpProto;
 
     if (strP && *strP) {
         const char *delim = "|";
@@ -95,29 +155,9 @@ bool cIptvTransponderParameters::Parse(const char *strP) {
                     break;
 
                 case 'F':
-                    if (strstr(data, "UDP")) {
-                        protocolM = eProtocolUDP;
-                        found_f = true;
-                    } else if (strstr(data, "CURL")) {
-                        protocolM = eProtocolCURL;
-                        found_f = true;
-                    } else if (strstr(data, "HTTP")) {
-                        protocolM = eProtocolHTTP;
-                        found_f = true;
-                    } else if (strstr(data, "FILE")) {
-                        protocolM = eProtocolFILE;
-                        found_f = true;
-                    } else if (strstr(data, "EXT")) {
-                        protocolM = eProtocolEXT;
-                        found_f = true;
-                    } else if (strstr(data, "M3U")) {
-                        protocolM = eProtocolM3U;
-                        found_f = true;
-                    } else if (strstr(data, "RADIO")) {
-                        protocolM = eProtocolRadio;
-                        found_f = true;
-                    } else if (strstr(data, "STREAM")) {
-                        protocolM = eProtocolStream;
+                    tmpProto = StrToProtocol(data);
+                    if (tmpProto != -1) {
+                        protocolM = tmpProto;
                         found_f = true;
                     }
                     break;
@@ -204,7 +244,7 @@ void cIptvSourceParam::GetData(cChannel *channelP) {
     channelP->SetTransponderData(channelP->Source(),
                                  channelP->Frequency(),
                                  dataM.Srate(),
-                                 itpM.ToString(Source()),
+                                 itpM.ToString(Source()).c_str(),
                                  true);
     channelP->SetId(nullptr, channelP->Nid(), channelP->Tid(), channelP->Sid(), ridM);
 }

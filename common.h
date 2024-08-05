@@ -58,6 +58,24 @@ const char *id_pid(const u_short pidP);
 int select_single_desc(int descriptorP, const int usecsP, const bool selectWriteP);
 cString ChangeCase(const cString &strP, bool upperP);
 std::string ReplaceAll(std::string str, const std::string &from, const std::string &to);
+
+inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+      return !std::isspace(ch);
+    }));
+}
+
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+      return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+inline void trim(std::string &s) {
+    rtrim(s);
+    ltrim(s);
+}
+
 void printBacktrace();
 
 struct section_filter_table_type {

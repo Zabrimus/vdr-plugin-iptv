@@ -55,8 +55,11 @@ public:
     void SetXmlTvId(std::string id) { xmltvId = id; };
     void SetHandlerType(char type) { handlerType = type; };
 
-    cString ToString(char typeP) const;
+    std::string ToString(char typeP) const;
     bool Parse(const char *strP);
+
+    static int StrToProtocol(const char *prot);
+    static std::string ProtocolToStr(int prot);
 };
 
 class cIptvSourceParam : public cSourceParam {
