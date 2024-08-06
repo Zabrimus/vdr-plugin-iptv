@@ -66,7 +66,10 @@ bool cIptvProtocolStream::Close() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     isActiveM = false;
-    handler->stop();
+
+    if (handler != nullptr) {
+        handler->stop();
+    }
 
     return true;
 }
