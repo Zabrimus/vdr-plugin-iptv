@@ -351,10 +351,6 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
                     return {"Invalid parameter value"};
                 }
             }
-
-            printf("Number: %d\n", number);
-            printf("Name: %s\n", name.c_str());
-            printf("Value: %s\n", value.c_str());
         } else {
             replyCodeP = 501;
             return { "Missing parameters" };
