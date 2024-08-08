@@ -18,6 +18,10 @@ private:
     unsigned int deviceCountM;
     int ParseFilters(const char *valueP, int *filtersP);
 
+    void findFreeFreqPid(unsigned long &freq, unsigned int &sid, unsigned int &tid, unsigned int &rid);
+    void addChannel(cString& channel, int &replyCode, cString& replyMessage);
+    int addM3UCfg(const std::string& cfgFile, const std::string& url);
+
 public:
     cPluginIptv();
     ~cPluginIptv() override;

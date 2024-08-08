@@ -7,6 +7,7 @@
 
 #include "iptv.h"
 #include <getopt.h>
+#include <vector>
 #include "common.h"
 #include "config.h"
 #include "setup.h"
@@ -234,7 +235,13 @@ const char **cPluginIptv::SVDRPHelpPages() {
         "LIPT [ <type> ]\n"
         "    List all iptv channels of <type>.\n",
         "CHPA <number> <name> <value>\n"
-        "    Change the parameter with name <name> to <value> of channel with number <number>",
+        "    Change the parameter with name <name> to <value> of channel with number <number>\n",
+        "ADDM <cfg file>#<name>#<URL>\n"
+        "    adds a M3U URL to the config file and channels. PIDs and frequency will be automatically set\n",
+        "ADDS <name>#<URL>\n"
+        "    adds a STREAM URL to channels. PIDs and frequency will be automatically set\n",
+        "ADDR <name>#<URL>\n"
+        "    adds a RADIO URL to channels. PIDs and frequency will be automatically set\n",
         nullptr
     };
     return HelpPages;
@@ -312,7 +319,7 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
 
         replyCodeP = 250;
         return { result.c_str() };
-    }  else if (strcasecmp(commandP, "CHPA") == 0) {
+    } else if (strcasecmp(commandP, "CHPA") == 0) {
         int number = -1;
         std::string name;
         std::string value;
@@ -322,26 +329,26 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
             char *p = strcpy(buf, optionP);
             char *strtok_next = nullptr;
 
-            if ((p = strtok_r(p, " \t", &strtok_next)) != nullptr) {
+            if ((p = strtok_r(p, " \t", &strtok_next))!=nullptr) {
                 if (isnumber(p)) {
                     number = atoi(p);
                 } else {
                     replyCodeP = 501;
-                    return { "Invalid channel number" };
+                    return {"Invalid channel number"};
                 }
 
-                if ((p = strtok_r(nullptr, " \t", &strtok_next)) != nullptr) {
+                if ((p = strtok_r(nullptr, " \t", &strtok_next))!=nullptr) {
                     name = p;
                 } else {
                     replyCodeP = 501;
-                    return { "Invalid parameter name" };
+                    return {"Invalid parameter name"};
                 }
 
-                if ((p = strtok_r(nullptr, " \t", &strtok_next)) != nullptr) {
+                if ((p = strtok_r(nullptr, " \t", &strtok_next))!=nullptr) {
                     value = p;
                 } else {
                     replyCodeP = 501;
-                    return { "Invalid parameter value" };
+                    return {"Invalid parameter value"};
                 }
             }
 
@@ -413,9 +420,249 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
 
         replyCodeP = 250;
         return { "OK" };
+    } else if (strcasecmp(commandP, "ADDM") == 0) {
+        if (*optionP) {
+            char buf[strlen(optionP) + 1];
+            char *p = strcpy(buf, optionP);
+            char *strtok_next = nullptr;
+
+            std::string cfgFile;
+            std::string name;
+            std::string url;
+
+            if ((p = strtok_r(p, "#", &strtok_next)) != nullptr) {
+                cfgFile = p;
+
+                if ((p = strtok_r(nullptr, "#", &strtok_next)) != nullptr) {
+                    name = p;
+
+                    if ((p = strtok_r(nullptr, "#", &strtok_next)) != nullptr) {
+                        url = p;
+                    } else {
+                        replyCodeP = 501;
+                        return { "parameter <url> not found" };
+                    }
+                } else {
+                    replyCodeP = 501;
+                    return { "parameter <name> not found" };
+                }
+            } else {
+                replyCodeP = 501;
+                return { "parameter <cfg file> not found" };
+            }
+
+            int id = addM3UCfg(cfgFile, url);
+            if (id < 0) {
+                replyCodeP = 501;
+                return cString::sprintf("Unable to open cfg file %s\n", cfgFile.c_str());
+            }
+
+            // calculate Frequence and PIDs
+            unsigned long freq;
+            unsigned int sid;
+            unsigned int tid;
+            unsigned int rid;
+            findFreeFreqPid(freq, sid, tid, rid);
+
+            // create channels.conf entry
+            cString ch = cString::sprintf("%s:%lu:S=1|P=0|F=M3U|U=%s|A=%d:I:0:256:257:0:0:%u:1:%u:0", name.c_str(), freq, cfgFile.c_str(), id, sid, tid);
+            cString replyMessage;
+            addChannel(ch, replyCodeP, replyMessage);
+
+            return replyMessage;
+        }
+    } else if (strcasecmp(commandP, "ADDS") == 0) {
+        if (*optionP) {
+            char buf[strlen(optionP) + 1];
+            char *p = strcpy(buf, optionP);
+            char *strtok_next = nullptr;
+
+            std::string name;
+            std::string url;
+
+            if ((p = strtok_r(p, "#", &strtok_next)) != nullptr) {
+                name = p;
+
+                if ((p = strtok_r(nullptr, "#", &strtok_next)) != nullptr) {
+                    url = p;
+                    url = ReplaceAll(url, ":", "%3A");
+                    url = ReplaceAll(url, "|", "%7C");
+                } else {
+                    replyCodeP = 501;
+                    return { "parameter <url> not found" };
+                }
+            } else {
+                replyCodeP = 501;
+                return { "parameter <name> not found" };
+            }
+
+            // calculate Frequence and PIDs
+            unsigned long freq;
+            unsigned int sid;
+            unsigned int tid;
+            unsigned int rid;
+            findFreeFreqPid(freq, sid, tid, rid);
+
+            // create channels.conf entry
+            cString ch = cString::sprintf("%s:%lu:S=1|P=0|F=STREAM|U=%s|A=1:I:0:256:257:0:0:%u:1:%u:0", name.c_str(), freq, url.c_str(), sid, tid);
+            cString replyMessage;
+            addChannel(ch, replyCodeP, replyMessage);
+
+            return replyMessage;
+        }
+    } else if (strcasecmp(commandP, "ADDR") == 0) {
+        if (*optionP) {
+            char buf[strlen(optionP) + 1];
+            char *p = strcpy(buf, optionP);
+            char *strtok_next = nullptr;
+
+            std::string name;
+            std::string url;
+
+            if ((p = strtok_r(p, "#", &strtok_next)) != nullptr) {
+                name = p;
+
+                if ((p = strtok_r(nullptr, "#", &strtok_next)) != nullptr) {
+                    url = p;
+                    url = ReplaceAll(url, ":", "%3A");
+                    url = ReplaceAll(url, "|", "%7C");
+                } else {
+                    replyCodeP = 501;
+                    return { "parameter <url> not found" };
+                }
+            } else {
+                replyCodeP = 501;
+                return { "parameter <name> not found" };
+            }
+
+            // calculate Frequence and PIDs
+            unsigned long freq;
+            unsigned int sid;
+            unsigned int tid;
+            unsigned int rid;
+            findFreeFreqPid(freq, sid, tid, rid);
+
+            // create channels.conf entry
+            cString ch = cString::sprintf("%s:%lu:S=1|P=0|F=RADIO|U=%s|A=1:I:0:0:257:0:0:%u:1:%u:%u", name.c_str(), freq, url.c_str(), sid, tid, rid);
+            cString replyMessage;
+            addChannel(ch, replyCodeP, replyMessage);
+
+            return replyMessage;
+        }
     }
 
     return nullptr;
+}
+void cPluginIptv::findFreeFreqPid(unsigned long &freq, unsigned int &sid, unsigned int &tid, unsigned int &rid) {
+    std::vector<unsigned long> freqs;
+    std::set<unsigned int> sids;
+    std::set<unsigned int> tids;
+    std::set<unsigned int> rids;
+
+    // collect all data
+    {
+        LOCK_CHANNELS_READ;
+        std::string result;
+        for (const cChannel *Channel = Channels->First(); Channel; Channel = Channels->Next(Channel)) {
+            if (Channel->IsSourceType('I')) {
+                freqs.emplace_back(Channel->Frequency());
+                sids.insert(Channel->Sid());
+                tids.insert(Channel->Tid());
+                rids.insert(Channel->Rid());
+            }
+        }
+    }
+
+    // Calculate free pids
+    unsigned long i;
+
+    for (i = 1; i < 65535 && sids.find(i) != sids.end(); ++i);
+    sid = i;
+
+    for (i = 1; i < 65535 && tids.find(i) != tids.end(); ++i);
+    tid = i;
+
+    for (i = 1; i < 65535 && rids.find(i) != rids.end(); ++i);
+    rid = i;
+
+    // calculate free frequency
+    unsigned long f;
+    std::sort(freqs.begin(), freqs.end());
+
+    std::vector<unsigned long> diffs;
+    for (i = 1; i < freqs.size(); ++i) {
+        diffs.emplace_back(freqs.at(i) - freqs.at(i-1));
+    }
+
+    f = freqs.at(freqs.size()-1) + 10;
+    for (i = 0; i < diffs.size(); ++i) {
+        if (diffs.at(i) > 20)  {
+            f = freqs.at(i) + 10;
+            break;
+        }
+    }
+
+    freq = f;
+}
+
+void cPluginIptv::addChannel(cString &channelStr, int &replyCode, cString &replyMessage) {
+    cChannel channel;
+    if (channel.Parse(channelStr)) {
+        LOCK_CHANNELS_WRITE;
+        Channels->SetExplicitModify();
+        if (Channels->HasUniqueChannelID(&channel)) {
+            cChannel *nchannel = new cChannel;
+            *nchannel = channel;
+            Channels->Add(nchannel);
+            Channels->ReNumber();
+            Channels->SetModifiedByUser();
+            Channels->SetModified();
+
+            replyCode = 250;
+            replyMessage = cString::sprintf("%d %s", nchannel->Number(), *nchannel->ToText());
+        } else {
+            replyCode = 501;
+            replyMessage = cString::sprintf("Channel settings are not unique");
+        }
+    } else {
+        replyCode = 501;
+        replyMessage = cString::sprintf("Error in channel settings");
+    }
+}
+int cPluginIptv::addM3UCfg(const std::string& cfgFile, const std::string& url) {
+    int maxNr = -1;
+
+    cString configFile = cString::sprintf("%s/%s", IptvConfig.GetM3uCfgPath(), cfgFile.c_str());
+
+    std::ifstream file(configFile);
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            unsigned long idx = line.find(':');
+            if (idx > 0) {
+                int nr = std::atoi(line.substr(0, idx).c_str());
+
+                if (maxNr <= nr) {
+                    maxNr = nr + 1;
+                }
+            }
+        }
+
+        file.close();
+    } else {
+        maxNr = 1;
+    }
+
+    std::ofstream outfile;
+    outfile.open(configFile, std::ios_base::app);
+    if (outfile.is_open()) {
+        outfile << maxNr << ":" << url << "\n";
+        outfile.close();
+    } else {
+        maxNr = -1;
+    }
+
+    return maxNr;
 }
 
 VDRPLUGINCREATOR(cPluginIptv); // Don't touch this!
