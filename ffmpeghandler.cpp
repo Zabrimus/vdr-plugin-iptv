@@ -154,7 +154,7 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdVideo(const m3u_stream &
 std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream &stream) {
     // create parameter list
     std::vector<std::string> callStr{
-        "ffmpeg", "-hide_banner", "-re", "-y"
+        "ffmpeg", "-hide_banner", "-nostats", "-loglevel", "verbose", "-re", "-y"
     };
 
     // add main input
@@ -171,6 +171,9 @@ std::vector<std::string> FFmpegHandler::prepareStreamCmdAudio(const m3u_stream &
     // transmux
     callStr.emplace_back("-codec");
     callStr.emplace_back("copy");
+
+    // callStr.emplace_back("-acodec");
+    // callStr.emplace_back("libmp3lame");
 
     // main input
     if (!stream.audio.empty()) {

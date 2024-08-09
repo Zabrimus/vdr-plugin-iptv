@@ -66,20 +66,13 @@ std::vector<std::string> VlcHandler::prepareStreamCmdVideo(const m3u_stream &str
 }
 
 std::vector<std::string> VlcHandler::prepareStreamCmdAudio(const m3u_stream &stream) {
-    // create parameter list
+
     std::vector<std::string> callStr{
-        "vlc", "-I", "dummy", "-v",
-        "--network-caching=4000", "--live-caching", "2000",
-        "--http-reconnect", "--http-user-agent=Mozilla/5.0",
-        "--adaptive-logic", "highest"
+        "vlc", "-I", "dummy", "--verbose=2", "--no-stats", stream.url, "--sout"
     };
 
-    callStr.emplace_back(stream.url);
-    callStr.emplace_back("--sout");
-
     int apid = stream.apids.empty() ? 257 : stream.apids[0];
-
-    std::string v = string_format("#standard{access=file,mux=ts{use-key-frames,pid-audio=%d,pid-spu=4096,tsid=%d},dst=-}", apid, stream.tpid);
+    std::string v = string_format("#transcode{acodec=mpga,ab=320}:standard{access=file,mux=ts{pid-audio=%d,pid-spu=4096,tsid=%d},dst=-}", apid, stream.tpid);
     callStr.emplace_back(v);
 
     std::ostringstream paramOut;

@@ -313,4 +313,4 @@ VDR Plugin 'iptv' Revision History
 - new plugin parameter: -m/--m3u-config-path to set the path for m3u config files
 
 2024-08-xx: Version 2.6.4
-- add new SVDRP commands LXML, LIPT and CHPA
+- add new SVDRP commands LXML, LIPT, CHPA, ADDM, ADDS, ADDR

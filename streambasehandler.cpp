@@ -1,6 +1,7 @@
 #include <string>
 #include <chrono>
 #include <iterator>
+#include <vdr/plugin.h>
 #include "config.h"
 #include "streambasehandler.h"
 #include "log.h"
@@ -82,10 +83,52 @@ bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
                                                 },
 
                                                 [this](const char *bytes, size_t n) {
-                                                  // TODO: ffmpeg prints many information on stderr
-                                                  //       How to handle this? ignore? filter?
-
                                                   std::string msg = std::string(bytes, n);
+
+                                                  /*
+                                                  size_t idx;
+
+                                                  // fmpeg version
+                                                  idx = msg.find("StreamTitle");
+                                                  if (idx != std::string::npos) {
+                                                      auto idx2 = msg.find(':', idx);
+                                                      std::string title = msg.substr(idx2+1);
+                                                      trim(title);
+
+                                                      if (!title.empty()) {
+                                                         TODO: Wie kommen die Daten in das Radio Plugin?
+                                                          auto idx3 = title.find('-');
+                                                          if (idx3 != std::string::npos) {
+                                                              artist = title.substr(0, idx3);
+                                                              title = title.substr(idx3 + 1);
+                                                          } else {
+                                                              text = title;
+                                                          }
+
+                                                          printf("Stream Title: %s\n", title.c_str());
+                                                      }
+                                                  }
+
+                                                  // vlc version
+                                                  idx = msg.find("New Icy-Title");
+                                                  if (idx != std::string::npos) {
+                                                      auto idx2 = msg.find('=', idx);
+                                                      std::string title = msg.substr(idx2+1);
+                                                      trim(title);
+
+                                                      if (!title.empty()) {
+                                                        TODO: Wie kommen die Daten in das Radio Plugin?
+                                                          auto idx3 = title.find('-');
+                                                          if (idx3 != std::string::npos) {
+                                                              artist = title.substr(0, idx3);
+                                                              title = title.substr(idx3 + 1);
+                                                          } else {
+                                                              text = title;
+                                                          }
+                                                          printf("Stream Title: %s\n", title.c_str());
+                                                      }
+                                                  }
+                                                  */
                                                   debug10("Error: %s\n", msg.c_str());
                                                 },
 
