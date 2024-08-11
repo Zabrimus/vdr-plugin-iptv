@@ -125,6 +125,13 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
 
     channelId = parameter.channelNumber;
 
+    if (handler != nullptr) {
+        handler->stop();
+    }
+
+    delete handler;
+    handler = nullptr;
+
     if (parameter.handlerType == 'F') {
         handler = new FFmpegHandler();
     } else if (parameter.handlerType == 'V') {
