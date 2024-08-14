@@ -22,7 +22,7 @@ public:
     int popPackets(unsigned char *bufferAddrP, unsigned int bufferLenP);
 
 private:
-    std::queue<std::string> tsPackets;
+    std::deque<std::string> tsPackets;
     std::mutex queueMutex;
 
 protected:

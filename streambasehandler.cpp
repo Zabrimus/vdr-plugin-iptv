@@ -44,7 +44,7 @@ bool StreamBaseHandler::streamVideo(const m3u_stream &stream) {
                                                   debug9("Queue size %ld\n", tsPackets.size());
 
                                                   std::lock_guard<std::mutex> guard(queueMutex);
-                                                  tsPackets.emplace(bytes, n);
+                                                  tsPackets.push_back(std::string(bytes, n));
                                                 },
 
                                                 [this](const char *bytes, size_t n) {
@@ -79,7 +79,7 @@ bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
                                                   debug9("Add new packets. Current queue size %ld\n", tsPackets.size());
 
                                                   std::lock_guard<std::mutex> guard(queueMutex);
-                                                  tsPackets.emplace(bytes, n);
+                                                  tsPackets.push_back(std::string(bytes, n));
                                                 },
 
                                                 [this](const char *bytes, size_t n) {
@@ -147,7 +147,7 @@ void StreamBaseHandler::stop() {
     }
 
     std::lock_guard<std::mutex> guard(queueMutex);
-    std::queue<std::string> empty;
+    std::deque<std::string> empty;
     std::swap(tsPackets, empty);
 }
 
@@ -163,17 +163,33 @@ int StreamBaseHandler::popPackets(unsigned char *bufferAddrP, unsigned int buffe
             error("WARNING: BufferLen %u < Size %ld\n", bufferLenP, front.size());
 
             // remove packet from queue to prevent queue overload
-            tsPackets.pop();
+            tsPackets.pop_front();
 
             return 0;
         }
 
         debug9("Read from queue: len %ld, size %ld bytes\n", tsPackets.size(), front.size());
 
-        memcpy(bufferAddrP, front.data(), front.size());
+        int full = front.size() / 188;
+        int rest = front.size() % 188;
+        if (rest != 0) {
+            // return only full packets
+            memcpy(bufferAddrP, front.data(), full * 188);
+            tsPackets.pop_front();
+            std::string newfront = front.substr(full*188);
 
-        tsPackets.pop();
-        return front.size();
+            if (!tsPackets.empty()) {
+                newfront.append(tsPackets.front());
+                tsPackets.pop_front();
+            }
+            tsPackets.push_front(newfront);
+
+            return full * 188;
+        } else {
+            memcpy(bufferAddrP, front.data(), front.size());
+            tsPackets.pop_front();
+            return front.size();
+        }
     }
 
     return 0;
