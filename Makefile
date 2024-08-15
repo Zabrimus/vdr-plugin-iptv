@@ -12,6 +12,9 @@
 
 PLUGIN = iptv
 
+# Build flags
+TS_ONLY_FULL_PACKETS=0
+
 ### The version number of this plugin (taken from the main source file):
 
 VERSION = $(shell grep 'const char VERSION\[\] *=' $(PLUGIN).cpp | awk '{ print $$5 }' | sed -e 's/[";]//g')
@@ -60,7 +63,7 @@ LIBS = $(shell curl-config --libs) -lssl -lcrypto
 
 INCLUDES +=
 
-DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"'
+DEFINES += -DPLUGIN_NAME_I18N='"$(PLUGIN)"' -DTS_ONLY_FULL_PACKETS=$(TS_ONLY_FULL_PACKETS)
 
 ifdef IPTV_EXTSHELL
 DEFINES += -DEXTSHELL='"$(IPTV_EXTSHELL)"'
