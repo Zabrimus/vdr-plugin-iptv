@@ -27,6 +27,8 @@ void performAudioInfoUpdate(m3u_stream stream) {
 }
 */
 
+TinyProcessLib::Process *StreamBaseHandler::streamHandler;
+
 StreamBaseHandler::StreamBaseHandler() {
     streamHandler = nullptr;
 }
@@ -36,6 +38,9 @@ StreamBaseHandler::~StreamBaseHandler() {
 }
 
 bool StreamBaseHandler::streamVideo(const m3u_stream &stream) {
+    // sanity check
+    stop();
+
     // create parameter list
     std::vector<std::string> callStr = prepareStreamCmdVideo(stream);
 
@@ -71,6 +76,9 @@ bool StreamBaseHandler::isRunning(int &exit_status) {
 }
 
 bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
+    // sanity check
+    stop();
+
     // create parameter list
     std::vector<std::string> callStr = prepareStreamCmdAudio(stream);
 
