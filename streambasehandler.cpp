@@ -6,6 +6,10 @@
 #include "streambasehandler.h"
 #include "log.h"
 
+#ifndef TS_ONLY_FULL_PACKETS
+#define TS_ONLY_FULL_PACKETS 0
+#endif
+
 /* disabled until a better solution is found
 std::thread audioUpdate;
 
@@ -178,6 +182,7 @@ int StreamBaseHandler::popPackets(unsigned char *bufferAddrP, unsigned int buffe
 
         debug9("Read from queue: len %ld, size %ld bytes\n", tsPackets.size(), front.size());
 
+#if TS_ONLY_FULL_PACKETS == 1
         int full = front.size() / 188;
         int rest = front.size() % 188;
         if (rest != 0) {
@@ -198,6 +203,11 @@ int StreamBaseHandler::popPackets(unsigned char *bufferAddrP, unsigned int buffe
             tsPackets.pop_front();
             return front.size();
         }
+#else
+        memcpy(bufferAddrP, front.data(), front.size());
+        tsPackets.pop_front();
+        return front.size();
+#endif
     }
 
     return 0;

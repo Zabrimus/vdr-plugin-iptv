@@ -312,5 +312,6 @@ VDR Plugin 'iptv' Revision History
 - add new channel parameter H=V or H=F (use FFmpeg or vlc)
 - new plugin parameter: -m/--m3u-config-path to set the path for m3u config files
 
-2024-08-xx: Version 2.6.4
+2024-08-15: Version 2.6.4
 - add new SVDRP commands LXML, LIPT, CHPA, ADDM, ADDS, ADDR
+- some fixes
