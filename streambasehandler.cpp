@@ -75,10 +75,6 @@ bool StreamBaseHandler::streamVideo(const m3u_stream &stream) {
     return true;
 }
 
-bool StreamBaseHandler::isRunning(int &exit_status) {
-    return streamHandler->try_get_exit_status(exit_status);
-}
-
 bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
     // sanity check
     stop();
@@ -152,10 +148,17 @@ bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
 
 void StreamBaseHandler::stop() {
     if (streamHandler!=nullptr) {
+        int pid = streamHandler->get_id();
+
         streamHandler->kill(true);
         streamHandler->get_exit_status();
         delete streamHandler;
         streamHandler = nullptr;
+
+
+        if (0 == kill(pid, 0)) {
+            printf("PID still exists....: %d\n", pid);
+        }
     }
 
     std::lock_guard<std::mutex> guard(queueMutex);
@@ -165,6 +168,11 @@ void StreamBaseHandler::stop() {
 
 int StreamBaseHandler::popPackets(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     std::lock_guard<std::mutex> guard(queueMutex);
+
+    if (streamHandler == nullptr) {
+        return 0;
+    }
+
     if (!tsPackets.empty()) {
         std::string front = tsPackets.front();
 

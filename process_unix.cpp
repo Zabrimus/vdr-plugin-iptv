@@ -484,12 +484,12 @@ void Process::kill(bool force) noexcept {
   std::lock_guard<std::mutex> lock(close_mutex);
   if(data.id > 0 && !closed) {
     if(force) {
-      ::kill(-data.id, SIGTERM);
-      ::kill(data.id, SIGTERM); // Based on comment in https://gitlab.com/eidheim/tiny-process-library/-/merge_requests/29#note_1146144166
+      ::kill(-data.id, SIGKILL);
+      ::kill(data.id, SIGKILL); // Based on comment in https://gitlab.com/eidheim/tiny-process-library/-/merge_requests/29#note_1146144166
     }
     else {
-      ::kill(-data.id, SIGINT);
-      ::kill(data.id, SIGINT);
+      ::kill(-data.id, SIGTERM);
+      ::kill(data.id, SIGTERM);
     }
   }
 }
@@ -499,12 +499,12 @@ void Process::kill(id_type id, bool force) noexcept {
     return;
 
   if(force) {
-    ::kill(-id, SIGTERM);
-    ::kill(id, SIGTERM);
+    ::kill(-id, SIGKILL);
+    ::kill(id, SIGKILL);
   }
   else {
-    ::kill(-id, SIGINT);
-    ::kill(id, SIGINT);
+    ::kill(-id, SIGTERM);
+    ::kill(id, SIGTERM);
   }
 }
 
