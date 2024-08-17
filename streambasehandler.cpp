@@ -33,8 +33,6 @@ void performAudioInfoUpdate(m3u_stream stream) {
 
 std::atomic<bool> streamThreadRunning(false);
 
-TinyProcessLib::Process *StreamBaseHandler::streamHandler;
-
 StreamBaseHandler::StreamBaseHandler() {
     streamHandler = nullptr;
     streamThreadRunning.store(false);

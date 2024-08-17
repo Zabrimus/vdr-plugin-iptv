@@ -8,7 +8,7 @@
 
 class StreamBaseHandler {
 private:
-    static TinyProcessLib::Process *streamHandler;
+    TinyProcessLib::Process *streamHandler;
 
 public:
     StreamBaseHandler();
