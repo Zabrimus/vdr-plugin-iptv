@@ -31,19 +31,27 @@ void performAudioInfoUpdate(m3u_stream stream) {
 }
 */
 
+std::atomic<bool> streamThreadRunning(false);
+
 TinyProcessLib::Process *StreamBaseHandler::streamHandler;
 
 StreamBaseHandler::StreamBaseHandler() {
     streamHandler = nullptr;
+    streamThreadRunning.store(false);
 }
 
 StreamBaseHandler::~StreamBaseHandler() {
+    if (streamThread.joinable()) {
+        streamThread.join();
+        streamThreadRunning.store(false);
+    }
+
     stop();
 }
 
-bool StreamBaseHandler::streamVideo(const m3u_stream &stream) {
-    // sanity check
-    stop();
+// void StreamBaseHandler::streamVideoInternal(std::vector<std::string> &callStr) {
+void StreamBaseHandler::streamVideoInternal(const m3u_stream &stream) {
+    streamThreadRunning.store(true);
 
     // create parameter list
     std::vector<std::string> callStr = prepareStreamCmdVideo(stream);
@@ -56,28 +64,26 @@ bool StreamBaseHandler::streamVideo(const m3u_stream &stream) {
                                                   tsPackets.push_back(std::string(bytes, n));
                                                 },
 
-                                                [this](const char *bytes, size_t n) {
-                                                  // TODO: ffmpeg prints many information on stderr
-                                                  //       How to handle this? ignore? filter?
-
+                                                [this, stream](const char *bytes, size_t n) {
                                                   std::string msg = std::string(bytes, n);
+                                                  checkErrorOut(msg);
+
                                                   debug10("Error: %s\n", msg.c_str());
                                                 },
 
                                                 true
     );
 
-    /*
-    audioUpdate = std::thread(performAudioInfoUpdate, stream);
-    audioUpdate.detach();
-    */
+    streamHandler->get_exit_status();
+    streamThreadRunning.store(false);
 
-    return true;
+    stop();
+
+    // printf("Video Process stopped...\n");
 }
 
-bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
-    // sanity check
-    stop();
+void StreamBaseHandler::streamAudioInternal(const m3u_stream &stream) {
+    streamThreadRunning.store(true);
 
     // create parameter list
     std::vector<std::string> callStr = prepareStreamCmdAudio(stream);
@@ -90,8 +96,9 @@ bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
                                                   tsPackets.push_back(std::string(bytes, n));
                                                 },
 
-                                                [this](const char *bytes, size_t n) {
+                                                [this, stream](const char *bytes, size_t n) {
                                                   std::string msg = std::string(bytes, n);
+                                                  checkErrorOut(msg);
 
                                                   /*
                                                   size_t idx;
@@ -143,22 +150,66 @@ bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
                                                 true
     );
 
+    streamHandler->get_exit_status();
+    streamThreadRunning.store(false);
+
+    stop();
+
+    // printf("Audio Process stopped...\n");
+}
+
+void StreamBaseHandler::checkErrorOut(const std::string &msg) {
+    // vlc
+    if (msg.find("status: \"404\"") != std::string::npos || msg.find("status: \"400\"") != std::string::npos) {
+        cString errmsg = cString::sprintf(tr("Unable to load stream"));
+        debug1("%s", *errmsg);
+
+        Skins.Message(mtError, errmsg);
+        stop();
+    }
+
+    // ffmpeg
+    if (msg.find("HTTP error 404") != std::string::npos || msg.find("HTTP error 400") != std::string::npos) {
+        cString errmsg = cString::sprintf(tr("Unable to load stream"));
+        debug1("%s", *errmsg);
+
+        Skins.Message(mtError, errmsg);
+    }
+}
+
+bool StreamBaseHandler::streamVideo(const m3u_stream &stream) {
+    // sanity check
+    stop();
+
+    streamThread = std::thread(&StreamBaseHandler::streamVideoInternal, this, stream);
+    return true;
+}
+
+bool StreamBaseHandler::streamAudio(const m3u_stream &stream) {
+    // sanity check
+    stop();
+
+    streamThread = std::thread(&StreamBaseHandler::streamAudioInternal, this, stream);
     return true;
 }
 
 void StreamBaseHandler::stop() {
-    if (streamHandler!=nullptr) {
-        int pid = streamHandler->get_id();
+    if (streamHandler != nullptr) {
+        if (streamThreadRunning) {
+            streamHandler->kill(true);
 
-        streamHandler->kill(true);
-        streamHandler->get_exit_status();
+            if (streamThread.joinable()) {
+                streamThread.join();
+                streamThreadRunning.store(false);
+            }
+
+            if (streamHandler!=nullptr) {
+                streamHandler->get_exit_status();
+            }
+        }
+
         delete streamHandler;
         streamHandler = nullptr;
-
-
-        if (0 == kill(pid, 0)) {
-            printf("PID still exists....: %d\n", pid);
-        }
     }
 
     std::lock_guard<std::mutex> guard(queueMutex);

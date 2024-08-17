@@ -85,6 +85,7 @@ cIptvProtocolRadio::SetSource(SourceParameter parameter) {
 
     if (url.empty()) {
         error("URL %s not found", parameter.locationP);
+        return false;
     }
 
     channelId = parameter.channelNumber;

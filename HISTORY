@@ -315,3 +315,7 @@ VDR Plugin 'iptv' Revision History
 2024-08-15: Version 2.6.4
 - add new SVDRP commands LXML, LIPT, CHPA, ADDM, ADDS, ADDR
 - some fixes
+
+2024-xx-xx: Version 2.6.5
+- improved error handling
+- show errors as VDR message

@@ -338,6 +338,9 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
         if (pidScanEnabledM && pPidScannerM) {
             pPidScannerM->SetChannel(channelM.GetChannelID());
         }
+    } else {
+        // set source failed
+        return false;
     }
 
     return true;

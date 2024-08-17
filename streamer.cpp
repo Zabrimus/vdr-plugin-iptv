@@ -111,12 +111,17 @@ bool cIptvStreamer::SetSource(cIptvProtocolIf *protocolP, SourceParameter parame
 
             protocolM = protocolP;
             if (protocolM) {
-                protocolM->SetSource(parameter);
+                if (!protocolM->SetSource(parameter)) {
+                    return false;
+                }
+
                 protocolM->Open();
             }
 
         } else if (protocolM) {
-            protocolM->SetSource(parameter);
+            if (!protocolM->SetSource(parameter)) {
+                return false;
+            }
         }
     }
 

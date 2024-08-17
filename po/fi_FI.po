@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-iptv 2.4.0\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2024-07-27 09:36+0200\n"
+"POT-Creation-Date: 2024-08-17 13:56+0200\n"
 "PO-Revision-Date: 2018-04-15 04:15+0300\n"
 "Last-Translator: Rolf Ahrenberg\n"
 "Language-Team: Finnish <vdr@linuxtv.org>\n"
@@ -33,6 +33,9 @@ msgstr "TDT (0x70)"
 
 msgid "Experience the IPTV"
 msgstr "Koe IPTV:n ihmeellinen maailma"
+
+msgid "Unable to load stream"
+msgstr ""
 
 msgid "IPTV Information"
 msgstr "IPTV-tiedot"

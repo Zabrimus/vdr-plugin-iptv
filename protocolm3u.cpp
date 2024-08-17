@@ -34,7 +34,11 @@ bool cIptvProtocolM3U::Open() {
 
         auto streams = m3u8Handler.parseM3u(url, useYtdlp);
         if (streams.width==0 || streams.height==0) {
-            debug1("Unable to read URL '%s'\n", url.c_str());
+            cString errmsg = cString::sprintf("Unable to load stream with URL %s", url.c_str());
+            debug1("%s", *errmsg);
+
+            errmsg = cString::sprintf(tr("Unable to load stream"));
+            Skins.Message(mtError, errmsg);
 
             isActiveM = false;
             return false;
@@ -121,6 +125,7 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
 
     if (url.empty()) {
         error("URL with index %d in file %s not found", parameter.parameterP, *configFileM);
+        return false;
     }
 
     channelId = parameter.channelNumber;

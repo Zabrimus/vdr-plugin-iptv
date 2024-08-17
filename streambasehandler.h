@@ -24,6 +24,12 @@ private:
     std::deque<std::string> tsPackets;
     std::mutex queueMutex;
 
+    std::thread streamThread;
+    void streamVideoInternal(const m3u_stream &stream);
+    void streamAudioInternal(const m3u_stream &stream);
+
+    void checkErrorOut(const std::string &msg);
+
 protected:
     virtual std::vector<std::string> prepareStreamCmdVideo(const m3u_stream &stream) = 0;
     virtual std::vector<std::string> prepareStreamCmdAudio(const m3u_stream &stream) = 0;
