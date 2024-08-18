@@ -9,7 +9,7 @@
 
 class VlcHandler : public StreamBaseHandler {
 public:
-    VlcHandler();
+    VlcHandler(int channelId);
     ~VlcHandler() override;
 
 protected:

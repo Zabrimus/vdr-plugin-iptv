@@ -11,6 +11,7 @@
 #include <vdr/tools.h>
 #include <vdr/config.h>
 #include <vdr/i18n.h>
+#include <set>
 
 #define ELEMENTS(x)                     (sizeof(x) / sizeof(x[0]))
 #define IPTV_BUFFER_SIZE                KILOBYTE(2048)
@@ -77,6 +78,12 @@ inline void trim(std::string &s) {
 }
 
 void printBacktrace();
+
+
+#define CHANNELMARK404 "- 404"
+extern std::set<int> all404Channels;
+void mark404Channel(int channelId);
+void rename404Channels();
 
 struct section_filter_table_type {
   const char *description;

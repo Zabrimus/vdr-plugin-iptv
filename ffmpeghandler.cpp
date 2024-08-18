@@ -37,7 +37,7 @@
 #include "log.h"
 #include "config.h"
 
-FFmpegHandler::FFmpegHandler() : StreamBaseHandler() {
+FFmpegHandler::FFmpegHandler(int channelId) : StreamBaseHandler(channelId) {
 }
 
 FFmpegHandler::~FFmpegHandler() = default;

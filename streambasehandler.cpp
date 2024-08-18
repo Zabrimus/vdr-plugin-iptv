@@ -33,7 +33,7 @@ void performAudioInfoUpdate(m3u_stream stream) {
 
 std::atomic<bool> streamThreadRunning(false);
 
-StreamBaseHandler::StreamBaseHandler() {
+StreamBaseHandler::StreamBaseHandler(int channelId) : channelId(channelId) {
     streamHandler = nullptr;
     streamThreadRunning.store(false);
 }
@@ -157,6 +157,8 @@ void StreamBaseHandler::streamAudioInternal(const m3u_stream &stream) {
 }
 
 void StreamBaseHandler::checkErrorOut(const std::string &msg) {
+    bool is404 = false;
+
     // vlc
     if (msg.find("status: \"404\"") != std::string::npos || msg.find("status: \"400\"") != std::string::npos) {
         cString errmsg = cString::sprintf(tr("Unable to load stream"));
@@ -164,6 +166,8 @@ void StreamBaseHandler::checkErrorOut(const std::string &msg) {
 
         Skins.Message(mtError, errmsg);
         stop();
+
+        is404 = true;
     }
 
     // ffmpeg
@@ -172,6 +176,12 @@ void StreamBaseHandler::checkErrorOut(const std::string &msg) {
         debug1("%s", *errmsg);
 
         Skins.Message(mtError, errmsg);
+
+        is404 = true;
+    }
+
+    if (is404) {
+        mark404Channel(channelId);
     }
 }
 

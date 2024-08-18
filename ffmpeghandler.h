@@ -8,9 +8,12 @@
 #include "streambasehandler.h"
 
 class FFmpegHandler : public StreamBaseHandler {
+private:
+    int channelId;
+
 public:
-    FFmpegHandler();
-    ~FFmpegHandler();
+    explicit FFmpegHandler(int channelId);
+    ~FFmpegHandler() override;
 
 protected:
     std::vector<std::string> prepareStreamCmdVideo(const m3u_stream &stream) override;

@@ -9,9 +9,10 @@
 class StreamBaseHandler {
 private:
     TinyProcessLib::Process *streamHandler;
+    int channelId;
 
 public:
-    StreamBaseHandler();
+    explicit StreamBaseHandler(int channelId);
     virtual ~StreamBaseHandler();
 
     bool streamVideo(const m3u_stream &stream);

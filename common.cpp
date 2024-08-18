@@ -8,9 +8,13 @@
 #include <cctype>
 #include <memory>
 #include <string>
-#include <stdexcept>
 #include <vdr/tools.h>
+#include <vdr/channels.h>
+#include <mutex>
 #include "common.h"
+
+std::mutex all404ChannelMutex;
+std::set<int> all404Channels;
 
 uint16_t ts_pid(const uint8_t *bufP) {
     return (uint16_t) (((bufP[1] & 0x1f) << 8) + bufP[2]);
@@ -111,3 +115,30 @@ void printBacktrace() {
 
     esyslog("[iptv] ==> Caller: %s", *cBackTrace::GetCaller());
 }
+
+void mark404Channel(int channelId) {
+    std::lock_guard<std::mutex> guard(all404ChannelMutex);
+    all404Channels.emplace(channelId);
+}
+
+void rename404Channels() {
+    if (all404Channels.empty()) {
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(all404ChannelMutex);
+    LOCK_CHANNELS_WRITE;
+
+    for (auto c : all404Channels) {
+        cChannel *channel = Channels->GetByNumber(c);
+
+        if (channel) {
+            if (!endswith(channel->Name(), CHANNELMARK404)) {
+                channel->SetName(cString::sprintf("%s %s", channel->Name(), CHANNELMARK404),
+                                 channel->ShortName(),
+                                 cString::sprintf("%s %s", CHANNELMARK404, channel->Provider()));
+            }
+        }
+    }
+}
+

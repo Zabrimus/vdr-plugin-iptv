@@ -97,9 +97,9 @@ bool cIptvProtocolStream::SetSource(SourceParameter parameter) {
     handler = nullptr;
 
     if (parameter.handlerType == 'F') {
-        handler = new FFmpegHandler();
+        handler = new FFmpegHandler(channelId);
     } else if (parameter.handlerType == 'V') {
-        handler = new VlcHandler();
+        handler = new VlcHandler(channelId);
     }
 
     return true;

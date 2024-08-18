@@ -34,6 +34,8 @@ bool cIptvProtocolM3U::Open() {
 
         auto streams = m3u8Handler.parseM3u(url, useYtdlp);
         if (streams.width==0 || streams.height==0) {
+            mark404Channel(channelId);
+
             cString errmsg = cString::sprintf("Unable to load stream with URL %s", url.c_str());
             debug1("%s", *errmsg);
 
@@ -41,6 +43,7 @@ bool cIptvProtocolM3U::Open() {
             Skins.Message(mtError, errmsg);
 
             isActiveM = false;
+
             return false;
         }
 
@@ -138,9 +141,9 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
     handler = nullptr;
 
     if (parameter.handlerType == 'F') {
-        handler = new FFmpegHandler();
+        handler = new FFmpegHandler(channelId);
     } else if (parameter.handlerType == 'V') {
-        handler = new VlcHandler();
+        handler = new VlcHandler(channelId);
     }
 
     return true;

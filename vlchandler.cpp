@@ -32,7 +32,7 @@ template<typename ... Args> std::string string_format(const std::string& format,
     return std::string( buf.get(), buf.get() + size - 1 );
 }
 
-VlcHandler::VlcHandler() : StreamBaseHandler() {
+VlcHandler::VlcHandler(int channelId) : StreamBaseHandler(channelId) {
 }
 
 VlcHandler::~VlcHandler() = default;
