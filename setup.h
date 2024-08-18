@@ -18,6 +18,8 @@ private:
     int numDisabledFiltersM;
     int disabledFilterIndexesM[SECTION_FILTER_TABLE_SIZE];
     const char *disabledFilterNamesM[SECTION_FILTER_TABLE_SIZE];
+    int stillPicture;
+    const char *stillPicType[3];
     cVector<const char *> helpM;
 
     eOSState ShowInfo();

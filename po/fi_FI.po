@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-iptv 2.4.0\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2024-08-17 13:56+0200\n"
+"POT-Creation-Date: 2024-08-18 15:44+0200\n"
 "PO-Revision-Date: 2018-04-15 04:15+0300\n"
 "Last-Translator: Rolf Ahrenberg\n"
 "Language-Team: Finnish <vdr@linuxtv.org>\n"
@@ -55,6 +55,15 @@ msgstr "Bitit/tavut"
 msgid "IPTV information not available!"
 msgstr "IPTV-tietoja ei saatavilla!"
 
+msgid "Use PlayPes-Function"
+msgstr ""
+
+msgid "Use StillPicture-Function"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
 msgid "Protocol base port"
 msgstr "Protokollan perusportti"
 
@@ -98,6 +107,12 @@ msgstr "Suodatin"
 
 msgid "Define an ill-behaving filter to be blacklisted."
 msgstr "Määrittele käytöstä poistettava suodatin, joka lisätään mustalle listalle."
+
+msgid "StillPicture"
+msgstr ""
+
+msgid "Define the type of the picture to show, if a radio plugin is not found."
+msgstr ""
 
 msgid "Help"
 msgstr "Opaste"

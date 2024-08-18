@@ -295,28 +295,36 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
     }
 
     switch (itp.Protocol()) {
-    case cIptvTransponderParameters::eProtocolUDP:protocol = pUdpProtocolM;
+    case cIptvTransponderParameters::eProtocolUDP:
+        protocol = pUdpProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolCURL:protocol = pCurlProtocolM;
+    case cIptvTransponderParameters::eProtocolCURL:
+        protocol = pCurlProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolHTTP:protocol = pHttpProtocolM;
+    case cIptvTransponderParameters::eProtocolHTTP:
+        protocol = pHttpProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolFILE:protocol = pFileProtocolM;
+    case cIptvTransponderParameters::eProtocolFILE:
+        protocol = pFileProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolEXT:protocol = pExtProtocolM;
+    case cIptvTransponderParameters::eProtocolEXT:
+        protocol = pExtProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolM3U:protocol = pM3UProtocolM;
+    case cIptvTransponderParameters::eProtocolM3U:
+        protocol = pM3UProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolRadio:protocol = pRadioProtocolM;
+    case cIptvTransponderParameters::eProtocolRadio:
+        protocol = pRadioProtocolM;
         break;
 
-    case cIptvTransponderParameters::eProtocolStream:protocol = pStreamProtocolM;
+    case cIptvTransponderParameters::eProtocolStream:
+        protocol = pStreamProtocolM;
         break;
 
     default:error("Unrecognized IPTV protocol: %s", channelP->Parameters());

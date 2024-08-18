@@ -15,6 +15,7 @@
 #include "deviceif.h"
 #include "protocolif.h"
 #include "statistics.h"
+#include "radioimage.h"
 
 class cIptvStreamer : public cThread, public cIptvStreamerStatistics {
 private:
@@ -25,6 +26,9 @@ private:
     cIptvProtocolIf *protocolM;
 
     std::mutex streamerMutex;
+    int channelNumber;
+
+    cRadioImage *radioImage;
 
 protected:
     void Action() override;

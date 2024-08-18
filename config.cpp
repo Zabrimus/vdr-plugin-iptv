@@ -16,6 +16,7 @@ cIptvConfig::cIptvConfig()
       useBytesM(1),
       sectionFilteringM(1),
       threadQueueSize(32),
+      stillPicture(0),
       ytdlpPath("/usr/local/bin/yt-dlp") {
 
     for (unsigned int i = 0; i < ARRAY_SIZE(disabledFiltersM); ++i) {
@@ -61,11 +62,11 @@ void cIptvConfig::SetResourceDirectory(const char *directoryP) {
 
 void cIptvConfig::SetYtdlpPath(const char *path) {
     debug1("%s (%s)", __PRETTY_FUNCTION__, path);
-    ERROR_IF(!realpath(path, ytdlpPath), "Cannot canonicalize resource directory");
+    ERROR_IF(!realpath(path, ytdlpPath), "Cannot canonicalize ytdlp path");
 
 }
 
 void cIptvConfig::SetM3uCfgPath(const char *directoryP) {
     debug1("%s (%s)", __PRETTY_FUNCTION__, directoryP);
-    ERROR_IF(!realpath(directoryP, m3uCfgPath), "Cannot canonicalize resource directory");
+    ERROR_IF(!realpath(directoryP, m3uCfgPath), "Cannot canonicalize m3ucfg directory");
 }

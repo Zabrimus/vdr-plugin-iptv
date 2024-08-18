@@ -5,6 +5,7 @@
  *
  */
 
+#include <vdr/plugin.h>
 #include "common.h"
 #include "log.h"
 #include "streamer.h"
@@ -14,7 +15,8 @@ cIptvStreamer::cIptvStreamer(cIptvDeviceIf &deviceP, unsigned int packetLenP)
       sleepM(),
       deviceM(&deviceP),
       packetBufferLenM(packetLenP),
-      protocolM(nullptr) {
+      protocolM(nullptr),
+      radioImage(nullptr) {
 
     debug1("%s (, %d)", __PRETTY_FUNCTION__, packetBufferLenM);
 
@@ -73,6 +75,36 @@ bool cIptvStreamer::Open() {
     if (protocolM && !protocolM->Open())
         return false;
 
+    // check if this is a radio channel (vpid == 0)
+    bool isRadio = false;
+    {
+        LOCK_CHANNELS_READ;
+        auto c = Channels->GetByNumber(channelNumber);
+        if (c && c->Vpid() == 0) {
+            isRadio = true;
+        }
+    }
+
+    // check if the radio plugin exists
+    bool hasRadioPlugin = false;
+    auto p = cPluginManager::GetPlugin("radio");
+    if (p) {
+        hasRadioPlugin = true;
+    }
+
+    // start RadioImage if this is a radio channel and radio plugin does not exists
+    if (isRadio && !hasRadioPlugin) {
+        if (radioImage != nullptr) {
+            radioImage->Exit();
+        }
+
+        radioImage = new cRadioImage();
+
+        cString img = cString::sprintf("%s/%s", IptvConfig.GetResourceDirectory(), "radio.mpg");
+        radioImage->SetBackgroundImage(*img);
+        radioImage->Start();
+    }
+
     // Start thread
     Start();
 
@@ -103,6 +135,8 @@ bool cIptvStreamer::SetSource(cIptvProtocolIf *protocolP, SourceParameter parame
     debug1("%s (%s, %d, %d, ChannelNumber: %d)", __PRETTY_FUNCTION__, parameter.locationP, parameter.parameterP, parameter.indexP, parameter.channelNumber);
 
     if (!isempty(parameter.locationP)) {
+        channelNumber = parameter.channelNumber;
+
         // Update protocol and set location and parameter; Close the existing one if changed
         if (protocolM!=protocolP) {
             if (protocolM) {

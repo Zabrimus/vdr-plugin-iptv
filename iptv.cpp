@@ -187,19 +187,24 @@ int cPluginIptv::ParseFilters(const char *valueP, int *filtersP) {
 bool cPluginIptv::SetupParse(const char *nameP, const char *valueP) {
     debug1("%s (%s, %s)", __PRETTY_FUNCTION__, nameP, valueP);
     // Parse your own setup parameters and store their values.
-    if (!strcasecmp(nameP, "ExtProtocolBasePort"))
+    if (!strcasecmp(nameP, "ExtProtocolBasePort")) {
         IptvConfig.SetProtocolBasePort(atoi(valueP));
-    else if (!strcasecmp(nameP, "SectionFiltering"))
+    } else if (!strcasecmp(nameP, "SectionFiltering")) {
         IptvConfig.SetSectionFiltering(atoi(valueP));
-    else if (!strcasecmp(nameP, "DisabledFilters")) {
+    } else if (!strcasecmp(nameP, "DisabledFilters")) {
         int DisabledFilters[SECTION_FILTER_TABLE_SIZE];
-        for (unsigned int i = 0; i < ARRAY_SIZE(DisabledFilters); ++i)
+        for (unsigned int i = 0; i < ARRAY_SIZE(DisabledFilters); ++i) {
             DisabledFilters[i] = -1;
+        }
         unsigned int DisabledFiltersCount = ParseFilters(valueP, DisabledFilters);
-        for (unsigned int i = 0; i < DisabledFiltersCount; ++i)
+        for (unsigned int i = 0; i < DisabledFiltersCount; ++i) {
             IptvConfig.SetDisabledFilters(i, DisabledFilters[i]);
-    } else
+        }
+    } else if (!strcasecmp(nameP, "StillPicture")) {
+        IptvConfig.SetStillPicture(atoi(valueP));
+    } else {
         return false;
+    }
     return true;
 }
 

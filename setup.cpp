@@ -125,6 +125,7 @@ cIptvPluginSetup::cIptvPluginSetup() {
     protocolBasePortM = IptvConfig.GetProtocolBasePort();
     sectionFilteringM = IptvConfig.GetSectionFiltering();
     numDisabledFiltersM = IptvConfig.GetDisabledFiltersCount();
+    stillPicture = IptvConfig.GetStillPicture();
 
     if (numDisabledFiltersM > SECTION_FILTER_TABLE_SIZE) {
         numDisabledFiltersM = SECTION_FILTER_TABLE_SIZE;
@@ -134,6 +135,10 @@ cIptvPluginSetup::cIptvPluginSetup() {
         disabledFilterIndexesM[i] = IptvConfig.GetDisabledFilters(i);
         disabledFilterNamesM[i] = tr(section_filter_table[i].description);
     }
+
+    stillPicType[0] = tr("Use PlayPes-Function");
+    stillPicType[1] = tr("Use StillPicture-Function");
+    stillPicType[2] = tr("Off");
 
     SetMenuCategory(mcSetupPlugins);
     Setup();
@@ -166,6 +171,9 @@ void cIptvPluginSetup::Setup() {
             helpM.Append(tr("Define an ill-behaving filter to be blacklisted."));
         }
     }
+
+    Add(new cMenuEditStraItem(tr("StillPicture"), &stillPicture, 3, stillPicType));
+    helpM.Append(tr("Define the type of the picture to show, if a radio plugin is not found."));
 
     SetCurrent(Get(current));
     Display();
@@ -244,10 +252,12 @@ void cIptvPluginSetup::Store() {
     SetupStore("ExtProtocolBasePort", protocolBasePortM);
     SetupStore("SectionFiltering", sectionFilteringM);
     StoreFilters("DisabledFilters", disabledFilterIndexesM);
+    SetupStore("StillPicture", stillPicture);
 
     // Update global config
     IptvConfig.SetProtocolBasePort(protocolBasePortM);
     IptvConfig.SetSectionFiltering(sectionFilteringM);
+    IptvConfig.SetStillPicture(stillPicture);
 
     for (int i = 0; i < SECTION_FILTER_TABLE_SIZE; ++i) {
         IptvConfig.SetDisabledFilters(i, disabledFilterIndexesM[i]);
