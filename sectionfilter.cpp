@@ -234,7 +234,7 @@ cIptvSectionFilterHandler::cIptvSectionFilterHandler(int deviceIndexP, unsigned 
                                         *cString::sprintf("IPTV SECTION HANDLER %d", deviceIndexP))),
       mutexM(),
       deviceIndexM(deviceIndexP) {
-    debug1("%s (%d, %d) [device %d]", __PRETTY_FUNCTION__, deviceIndexP, bufferLenP, deviceIndexM);
+    debug9("%s (%d, %d) [device %d]", __PRETTY_FUNCTION__, deviceIndexP, bufferLenP, deviceIndexM);
 
     // Initialize filter pointers
     memset(filtersM, 0, sizeof(filtersM));
@@ -250,7 +250,7 @@ cIptvSectionFilterHandler::cIptvSectionFilterHandler(int deviceIndexP, unsigned 
 }
 
 cIptvSectionFilterHandler::~cIptvSectionFilterHandler() {
-    debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
+    debug9("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
     // Stop thread
     if (Running())
         Cancel(3);
@@ -263,7 +263,7 @@ cIptvSectionFilterHandler::~cIptvSectionFilterHandler() {
 }
 
 void cIptvSectionFilterHandler::Action() {
-    debug1("%s Entering [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
+    debug9("%s Entering [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
     bool processed = false;
     // Do the thread loop
     while (Running()) {
@@ -294,7 +294,7 @@ void cIptvSectionFilterHandler::Action() {
                         }
                     }
                     ringBufferM->Del(len);
-                    debug1("%s Skipped %d bytes to sync on TS packet [device %d]]",
+                    debug9("%s Skipped %d bytes to sync on TS packet [device %d]]",
                            __PRETTY_FUNCTION__,
                            len,
                            deviceIndexM);
@@ -313,7 +313,7 @@ void cIptvSectionFilterHandler::Action() {
         }
         cCondWait::SleepMs(10); // to avoid busy loop and reduce cpu load
     }
-    debug1("%s Exiting [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
+    debug9("%s Exiting [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
 }
 
 cString cIptvSectionFilterHandler::GetInformation() {
@@ -399,7 +399,7 @@ void cIptvSectionFilterHandler::Close(int handleP) {
     // Search the filter for deletion
     for (unsigned int i = 0; i < eMaxSecFilterCount; ++i) {
         if (filtersM[i] && (handleP==filtersM[i]->GetFd())) {
-            debug1("%s (%d) pid=%d handle=%d index=%d [device %d]",
+            debug9("%s (%d) pid=%d handle=%d index=%d [device %d]",
                    __PRETTY_FUNCTION__,
                    handleP,
                    filtersM[i]->GetPid(),
@@ -418,7 +418,7 @@ int cIptvSectionFilterHandler::GetPid(int handleP) {
     // Search the filter for data
     for (unsigned int i = 0; i < eMaxSecFilterCount; ++i) {
         if (filtersM[i] && (handleP==filtersM[i]->GetFd())) {
-            debug1("%s (%d) pid=%d handle=%d index=%d [device %d]",
+            debug9("%s (%d) pid=%d handle=%d index=%d [device %d]",
                    __PRETTY_FUNCTION__,
                    handleP,
                    filtersM[i]->GetPid(),

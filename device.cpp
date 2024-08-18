@@ -211,13 +211,13 @@ cString cIptvDevice::DeviceName() const {
 }
 
 int cIptvDevice::SignalStrength() const {
-    debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
+    debug9("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
 
     return (100);
 }
 
 int cIptvDevice::SignalQuality() const {
-    debug1("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
+    debug9("%s [device %d]", __PRETTY_FUNCTION__, deviceIndexM);
 
     return (100);
 }

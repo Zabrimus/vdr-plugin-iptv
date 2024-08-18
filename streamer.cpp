@@ -129,7 +129,7 @@ bool cIptvStreamer::SetSource(cIptvProtocolIf *protocolP, SourceParameter parame
 }
 
 bool cIptvStreamer::SetPid(int pidP, int typeP, bool onP) {
-    debug1("%s (%d, %d, %d)", __PRETTY_FUNCTION__, pidP, typeP, onP);
+    debug9("%s (%d, %d, %d)", __PRETTY_FUNCTION__, pidP, typeP, onP);
 
     if (protocolM) {
         return protocolM->SetPid(pidP, typeP, onP);
