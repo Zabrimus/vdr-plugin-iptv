@@ -136,6 +136,11 @@ void cIptvProtocolExt::TerminateScript() {
 }
 
 bool cIptvProtocolExt::Open() {
+    if (isActiveM) {
+        // the script is still running
+        return true;
+    }
+
     debug1("%s", __PRETTY_FUNCTION__);
 
     // Reject empty script files
