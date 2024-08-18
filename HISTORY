@@ -319,3 +319,4 @@ VDR Plugin 'iptv' Revision History
 2024-xx-xx: Version 2.6.5
 - improved error handling
 - show errors as VDR message
+- copied RadioImage from Radio plugin (will be only activated if radio plugin is not found)
