@@ -264,6 +264,9 @@ const char **cPluginIptv::SVDRPHelpPages() {
         "    adds a STREAM URL to channels. PIDs and frequency will be automatically set\n",
         "ADDR <name>#<URL>\n"
         "    adds a RADIO URL to channels. PIDs and frequency will be automatically set\n",
+        "CHKU\n"
+        "    checks all configured URL and checks if a connect is possible and a valid result is returned.\n"
+        "    If this is not the case the channel will be marked with ' - 404'\n",
         nullptr
     };
     return HelpPages;
@@ -567,6 +570,11 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
 
             return replyMessage;
         }
+    } else if (strcasecmp(commandP, "CHKS") == 0) {
+        chk.start();
+
+        replyCodeP = 250;
+        return { "URL check started" };
     }
 
     return nullptr;

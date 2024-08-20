@@ -12,6 +12,7 @@
 #include "setup.h"
 #include "device.h"
 #include "iptvservice.h"
+#include "checkurl.h"
 
 class cPluginIptv : public cPlugin {
 private:
@@ -21,6 +22,8 @@ private:
     void findFreeFreqPid(unsigned long &freq, unsigned int &sid, unsigned int &tid, unsigned int &rid);
     void addChannel(cString& channel, int &replyCode, cString& replyMessage);
     int addM3UCfg(const std::string& cfgFile, const std::string& url);
+
+    CheckURL chk;
 
 public:
     cPluginIptv();

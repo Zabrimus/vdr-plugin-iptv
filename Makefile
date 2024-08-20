@@ -83,7 +83,7 @@ OBJS = $(PLUGIN).o common.o config.o device.o pidscanner.o \
 	protocoludp.o sectionfilter.o setup.o sidscanner.o socket.o \
 	protocolm3u.o protocolradio.o protocolstream.o \
 	m3u8handler.o process.o process_unix.o ffmpeghandler.o streambasehandler.o \
-	vlchandler.o source.o statistics.o streamer.o radioimage.o
+	vlchandler.o source.o statistics.o streamer.o radioimage.o checkurl.o
 
 ### The main target:
 

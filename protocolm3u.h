@@ -25,4 +25,6 @@ public:
     bool Open() override;
     bool Close() override;
     cString GetInformation() override;
+
+    static std::string findUrl(int parameterP, const char* locationP);
 };
