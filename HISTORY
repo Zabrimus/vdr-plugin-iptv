@@ -320,4 +320,5 @@ VDR Plugin 'iptv' Revision History
 - improved error handling
 - show errors as VDR message
 - copied RadioImage from Radio plugin (will be only activated if radio plugin is not found)
-- mark channels which cannot be reached with '- 404'
+- (currently disabled, because of an unknown deadlock)
+  mark channels which cannot be reached with '- 404'

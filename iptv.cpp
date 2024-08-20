@@ -133,8 +133,8 @@ bool cPluginIptv::Start() {
         info("%s", *info);
     }
 
-    thread404Running = true;
-    thread404 = std::thread(run404);
+    // thread404Running = true;
+    // thread404 = std::thread(run404);
 
     return true;
 }
