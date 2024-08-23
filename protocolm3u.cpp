@@ -3,11 +3,10 @@
 #include "protocolm3u.h"
 #include "common.h"
 #include "config.h"
-#include "ffmpeghandler.h"
-#include "vlchandler.h"
+#include "streambasehandler.h"
 #include "log.h"
 
-cIptvProtocolM3U::cIptvProtocolM3U() : isActiveM(false), handler(nullptr) {
+cIptvProtocolM3U::cIptvProtocolM3U() : isActiveM(false), handler("M3U") {
     debug1("%s", __PRETTY_FUNCTION__);
 }
 
@@ -16,14 +15,12 @@ cIptvProtocolM3U::~cIptvProtocolM3U() {
 
     // Drop open handles
     cIptvProtocolM3U::Close();
-
-    delete handler;
-    handler = nullptr;
+    handler.stop();
 }
 
 int cIptvProtocolM3U::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
-    return handler->popPackets(bufferAddrP, bufferLenP);
+    return handler.popPackets(bufferAddrP, bufferLenP);
 }
 
 bool cIptvProtocolM3U::Open() {
@@ -69,8 +66,11 @@ bool cIptvProtocolM3U::Open() {
             }
         }
 
+        handler.setChannelId(channelId);
+        handler.setHandlerType(handlerType);
+
         m3u8Handler.printStream(streams);
-        handler->streamVideo(streams);
+        handler.streamVideo(streams);
     }
 
     return true;
@@ -80,9 +80,7 @@ bool cIptvProtocolM3U::Close() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     isActiveM = false;
-    if (handler != nullptr) {
-        handler->stop();
-    }
+    handler.stop();
 
     return true;
 }
@@ -132,7 +130,9 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
     }
 
     channelId = parameter.channelNumber;
+    handlerType = parameter.handlerType;
 
+    /*
     if (handler != nullptr) {
         handler->stop();
     }
@@ -145,7 +145,7 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
     } else if (parameter.handlerType == 'V') {
         handler = new VlcHandler(channelId);
     }
-
+    */
     return true;
 }
 

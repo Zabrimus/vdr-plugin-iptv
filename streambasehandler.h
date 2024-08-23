@@ -10,10 +10,15 @@ class StreamBaseHandler {
 private:
     TinyProcessLib::Process *streamHandler;
     int channelId;
+    char handlerType;
+    std::string type;
 
 public:
-    explicit StreamBaseHandler(int channelId);
+    explicit StreamBaseHandler(std::string type);
     virtual ~StreamBaseHandler();
+
+    void setChannelId(int channelId);
+    void setHandlerType(char handlerType);
 
     bool streamVideo(const m3u_stream &stream);
     bool streamAudio(const m3u_stream &stream);
@@ -32,6 +37,9 @@ private:
     void checkErrorOut(const std::string &msg);
 
 protected:
-    virtual std::vector<std::string> prepareStreamCmdVideo(const m3u_stream &stream) = 0;
-    virtual std::vector<std::string> prepareStreamCmdAudio(const m3u_stream &stream) = 0;
+    std::vector<std::string> prepareStreamCmdVideoFfmpeg(const m3u_stream &stream);
+    std::vector<std::string> prepareStreamCmdAudioFfmpeg(const m3u_stream &stream);
+
+    std::vector<std::string> prepareStreamCmdVideoVlc(const m3u_stream &stream);
+    std::vector<std::string> prepareStreamCmdAudioVlc(const m3u_stream &stream);
 };

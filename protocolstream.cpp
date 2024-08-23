@@ -1,11 +1,10 @@
 #include "protocolstream.h"
 #include "common.h"
 #include "config.h"
-#include "ffmpeghandler.h"
-#include "vlchandler.h"
+#include "streambasehandler.h"
 #include "log.h"
 
-cIptvProtocolStream::cIptvProtocolStream() : channelId(0), isActiveM(false), handler(nullptr) {
+cIptvProtocolStream::cIptvProtocolStream() : channelId(0), isActiveM(false), handler("STREAM") {
     debug1("%s", __PRETTY_FUNCTION__);
 }
 
@@ -14,15 +13,13 @@ cIptvProtocolStream::~cIptvProtocolStream() {
 
     // Drop open handles
     cIptvProtocolStream::Close();
-
-    delete handler;
-    handler = nullptr;
+    handler.stop();
 }
 
 int cIptvProtocolStream::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
     // debug16("%s (, %u)", __PRETTY_FUNCTION__, bufferLenP);
 
-    return handler->popPackets(bufferAddrP, bufferLenP);
+    return handler.popPackets(bufferAddrP, bufferLenP);
 }
 
 bool cIptvProtocolStream::Open() {
@@ -57,7 +54,7 @@ bool cIptvProtocolStream::Open() {
             }
         }
 
-        handler->streamVideo(streams);
+        handler.streamVideo(streams);
     }
     return true;
 }
@@ -66,10 +63,7 @@ bool cIptvProtocolStream::Close() {
     debug1("%s", __PRETTY_FUNCTION__);
 
     isActiveM = false;
-
-    if (handler != nullptr) {
-        handler->stop();
-    }
+    handler.stop();
 
     return true;
 }
@@ -88,19 +82,12 @@ bool cIptvProtocolStream::SetSource(SourceParameter parameter) {
     }
 
     channelId = parameter.channelNumber;
+    handlerType = parameter.handlerType;
 
-    if (handler != nullptr) {
-        handler->stop();
-    }
+    handler.stop();
 
-    delete handler;
-    handler = nullptr;
-
-    if (parameter.handlerType == 'F') {
-        handler = new FFmpegHandler(channelId);
-    } else if (parameter.handlerType == 'V') {
-        handler = new VlcHandler(channelId);
-    }
+    handler.setChannelId(channelId);
+    handler.setHandlerType(handlerType);
 
     return true;
 }

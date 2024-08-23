@@ -14,7 +14,8 @@ private:
     bool isActiveM;
     int useYtdlp;
     M3u8Handler m3u8Handler;
-    StreamBaseHandler* handler;
+    StreamBaseHandler handler;
+    char handlerType;
 
 public:
     cIptvProtocolM3U();
