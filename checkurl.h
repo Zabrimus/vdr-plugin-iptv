@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <map>
+#include <set>
 
 class CheckURL {
 private:
@@ -13,11 +14,22 @@ private:
 private:
     void executeChecks();
 
+    int countChannels;
+    int checkedChannels;
+    cString currentChannelId;
+    cString currentChannelUrl;
+
 public:
     CheckURL();
     ~CheckURL();
 
     void start();
-    void abort();
+    cString status();
+    void stop();
+
+    int getCountChannels() const { return countChannels; };
+    int getCheckedChannels() const { return checkedChannels; };
+    cString getCurrentChannelId() { return currentChannelId; };
+    cString getCurrentChannelUrl() { return currentChannelUrl; };
 };
 

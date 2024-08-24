@@ -117,14 +117,18 @@ void printBacktrace() {
 }
 
 void mark404Channel(int channelId) {
-    /*
     std::lock_guard<std::mutex> guard(all404ChannelMutex);
     all404Channels.emplace(channelId);
-    */
+}
+
+void mark404Channel(const char* channelId) {
+    std::lock_guard<std::mutex> guard(all404ChannelMutex);
+    LOCK_CHANNELS_READ;
+    const cChannel *channel = Channels->GetByChannelID(tChannelID::FromString(channelId));
+    all404Channels.emplace(channel->Number());
 }
 
 void rename404Channels() {
-    /*
     if (all404Channels.empty()) {
         return;
     }
@@ -145,6 +149,5 @@ void rename404Channels() {
             }
         }
     }
-    */
 }
 

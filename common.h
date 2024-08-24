@@ -83,6 +83,7 @@ void printBacktrace();
 #define CHANNELMARK404 "- 404"
 extern std::set<int> all404Channels;
 void mark404Channel(int channelId);
+void mark404Channel(const char* channelId);
 void rename404Channels();
 
 struct section_filter_table_type {

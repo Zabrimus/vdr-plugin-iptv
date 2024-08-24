@@ -17,7 +17,7 @@ CheckURL::CheckURL() {
 }
 
 CheckURL::~CheckURL() {
-    abort();
+    stop();
 }
 
 void CheckURL::start() {
@@ -25,15 +25,33 @@ void CheckURL::start() {
         return;
     }
 
+    countChannels = 0;
+    checkedChannels = 0;
+    currentChannelId = "";
+    currentChannelUrl = "";
+
     isRunning = true;
     checkThread = std::thread(&CheckURL::executeChecks, this);
 }
 
-void CheckURL::abort() {
+void CheckURL::stop() {
+    if (!isRunning) {
+        return;
+    }
+
     isRunning = false;
-    checkThread.join();
+    if (checkThread.joinable()) {
+        checkThread.join();
+    }
 }
 
+cString CheckURL::status() {
+    if (!isRunning) {
+        return { "Check is not running or finished" };
+    }
+
+    return cString::sprintf("%d / %d finished, Currently testing %s, %s", getCheckedChannels(), getCountChannels(), *getCurrentChannelId(), *getCurrentChannelUrl());
+}
 
 static size_t check_header_callback(char *buffer, size_t size, size_t nitems, void *userdata)
 {
@@ -91,6 +109,8 @@ void CheckURL::executeChecks() {
         }
     }
 
+    countChannels = channels.size();
+
     // iterate over all channels and checks the URL
     CURLcode ret;
     CURL *hnd = curl_easy_init();
@@ -108,6 +128,11 @@ void CheckURL::executeChecks() {
         if (!isRunning) {
             break;
         }
+
+        checkedChannels++;
+        currentChannelId = a.first.c_str();
+        currentChannelUrl = a.second.c_str();
+
         fullsizeRead = 0;
         curl_easy_setopt(hnd, CURLOPT_URL, a.second.c_str());
 
@@ -120,17 +145,8 @@ void CheckURL::executeChecks() {
         curl_easy_getinfo(hnd, CURLINFO_RESPONSE_CODE, &response_code);
 
         if (!((ret == CURLE_OK || fullsizeRead >= READLIMIT_BYTES) && (response_code < 400))) {
-            printf("Error: %ld: %s -> %s\n", response_code, a.first.c_str(), a.second.c_str());
-            brokenChannels.emplace(a.first.c_str());
-
-            /*
-            {
-                LOCK_CHANNELS_READ;
-                tChannelID testChannelID = tChannelID::FromString(a.first.c_str());
-                const cChannel *testChannel = Channels->GetByChannelID(testChannelID);
-                cDevice::PrimaryDevice()->SwitchChannel(testChannel, true);
-            }
-            */
+            dsyslog("[iptv] Check url failed: %ld: %s -> %s, bytes read %ld\n", response_code, a.first.c_str(), a.second.c_str(), fullsizeRead);
+            mark404Channel(a.first.c_str());
         }
     }
 

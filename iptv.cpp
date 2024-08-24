@@ -33,7 +33,7 @@ bool thread404Running;
 
 void run404() {
     while(thread404Running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         rename404Channels();
     }
 }
@@ -48,6 +48,10 @@ cPluginIptv::cPluginIptv() : deviceCountM(1) {
 cPluginIptv::~cPluginIptv() {
     debug16("%s", __PRETTY_FUNCTION__);
     // Clean up after yourself!
+    if (thread404.joinable()) {
+        thread404Running = false;
+        thread404.join();
+    }
 }
 
 const char *cPluginIptv::CommandLineHelp() {
@@ -133,8 +137,8 @@ bool cPluginIptv::Start() {
         info("%s", *info);
     }
 
-    // thread404Running = true;
-    // thread404 = std::thread(run404);
+    thread404Running = true;
+    thread404 = std::thread(run404);
 
     return true;
 }
@@ -264,7 +268,7 @@ const char **cPluginIptv::SVDRPHelpPages() {
         "    adds a STREAM URL to channels. PIDs and frequency will be automatically set\n",
         "ADDR <name>#<URL>\n"
         "    adds a RADIO URL to channels. PIDs and frequency will be automatically set\n",
-        "CHKU\n"
+        "CHKU START, STATUS, STOP\n"
         "    checks all configured URL and checks if a connect is possible and a valid result is returned.\n"
         "    If this is not the case the channel will be marked with ' - 404'\n",
         nullptr
@@ -570,11 +574,33 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
 
             return replyMessage;
         }
-    } else if (strcasecmp(commandP, "CHKS") == 0) {
-        chk.start();
+    } else if (strcasecmp(commandP, "CHKU") == 0) {
+        if (*optionP) {
+            char buf[strlen(optionP) + 1];
+            char *p = strcpy(buf, optionP);
 
-        replyCodeP = 250;
-        return { "URL check started" };
+            cString cmd = cString(p);
+            cmd = ChangeCase(cmd, true);
+
+            if (strcmp(cmd, "START") == 0)  {
+                chk.start();
+                replyCodeP = 250;
+                return { "URL check started" };
+            } else if (strcmp(cmd, "STATUS") == 0) {
+                replyCodeP = 250;
+                return  { chk.status() };
+            } else if (strcmp(cmd, "STOP") == 0) {
+                chk.stop();
+                replyCodeP = 250;
+                return { "URL check stopped" };
+            } else {
+                replyCodeP = 501;
+                return { "CHKU command is unknown" };
+            }
+        } else {
+            replyCodeP = 501;
+            return { "CHKU missing command START, STATUS or STOP" };
+        }
     }
 
     return nullptr;
