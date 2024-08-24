@@ -12,7 +12,8 @@ private:
     int channelId;
     std::string url;
     bool isActiveM;
-    StreamBaseHandler *handler;
+    StreamBaseHandler handler;
+    char handlerType;
 
 public:
     cIptvProtocolRadio();
