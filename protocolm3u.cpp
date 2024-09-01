@@ -3,7 +3,6 @@
 #include "protocolm3u.h"
 #include "common.h"
 #include "config.h"
-#include "streambasehandler.h"
 #include "log.h"
 
 cIptvProtocolM3U::cIptvProtocolM3U() : isActiveM(false), handler("M3U") {
@@ -100,20 +99,6 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
     channelId = parameter.channelNumber;
     handlerType = parameter.handlerType;
 
-    /*
-    if (handler != nullptr) {
-        handler->stop();
-    }
-
-    delete handler;
-    handler = nullptr;
-
-    if (parameter.handlerType == 'F') {
-        handler = new FFmpegHandler(channelId);
-    } else if (parameter.handlerType == 'V') {
-        handler = new VlcHandler(channelId);
-    }
-    */
     return true;
 }
 
