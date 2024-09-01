@@ -32,6 +32,7 @@ public:
         eProtocolFILE,
         eProtocolEXT,
         eProtocolM3U,
+        eProtocolM3US,
         eProtocolRadio,
         eProtocolStream,
         eProtocolCount

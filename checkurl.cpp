@@ -89,6 +89,10 @@ void CheckURL::executeChecks() {
                     u = cIptvProtocolM3U::findUrl(itp.Parameter(), itp.Address());
                     break;
 
+                case cIptvTransponderParameters::eProtocolM3US:
+                    u = itp.Address();
+                    break;
+
                 case cIptvTransponderParameters::eProtocolRadio:
                 case cIptvTransponderParameters::eProtocolStream:
                     u = itp.Address();
@@ -102,7 +106,6 @@ void CheckURL::executeChecks() {
                 if (!u.empty()) {
                     u = ReplaceAll(u, "%3A", ":");
                     u = ReplaceAll(u, "%7C", "|");
-
                 }
                 channels[*Channel->GetChannelID().ToString()] = u;
             }

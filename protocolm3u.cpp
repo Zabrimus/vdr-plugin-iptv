@@ -90,7 +90,12 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
 
     this->useYtdlp = parameter.useYtDlp;
 
-    url = findUrl(parameter.parameterP, parameter.locationP);
+    if (parameter.protocol == cIptvTransponderParameters::eProtocolM3U) {
+        url = findUrl(parameter.parameterP, parameter.locationP);
+    } else if (parameter.protocol == cIptvTransponderParameters::eProtocolM3US) {
+        url = ReplaceAll(parameter.locationP, "%3A", ":");
+        url = ReplaceAll(url, "%7C", "|");
+    }
 
     if (url.empty()) {
         return false;

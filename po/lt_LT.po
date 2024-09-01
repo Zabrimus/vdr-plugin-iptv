@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-iptv 2.4.0\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2024-08-18 15:44+0200\n"
+"POT-Creation-Date: 2024-09-01 12:35+0200\n"
 "PO-Revision-Date: 2018-04-15 04:15+0300\n"
 "Last-Translator: Valdemaras Pipiras\n"
 "Language-Team: Lithuanian <vdr@linuxtv.org>\n"
@@ -134,6 +134,9 @@ msgstr "EXT"
 
 msgid "M3U"
 msgstr "M3U"
+
+msgid "M3US"
+msgstr "M3US"
 
 msgid "RADIO"
 msgstr "RADIO"

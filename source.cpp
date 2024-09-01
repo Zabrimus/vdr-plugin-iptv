@@ -63,6 +63,8 @@ int cIptvTransponderParameters::StrToProtocol(const char *prot) {
         protocolM = eProtocolFILE;
     } else if (strstr(prot, "EXT")) {
         protocolM = eProtocolEXT;
+    } else if (strstr(prot, "M3US")) {
+        protocolM = eProtocolM3US;
     } else if (strstr(prot, "M3U")) {
         protocolM = eProtocolM3U;
     } else if (strstr(prot, "RADIO")) {
@@ -96,6 +98,10 @@ std::string cIptvTransponderParameters::ProtocolToStr(int prot) {
 
     case eProtocolM3U:
         protocolstr = "M3U";
+        break;
+
+    case eProtocolM3US:
+        protocolstr = "M3US";
         break;
 
     case eProtocolRadio:
@@ -222,6 +228,7 @@ cIptvSourceParam::cIptvSourceParam(char sourceP, const char *descriptionP)
     protocolsM[cIptvTransponderParameters::eProtocolFILE] = tr("FILE");
     protocolsM[cIptvTransponderParameters::eProtocolEXT] = tr("EXT");
     protocolsM[cIptvTransponderParameters::eProtocolM3U] = tr("M3U");
+    protocolsM[cIptvTransponderParameters::eProtocolM3US] = tr("M3US");
     protocolsM[cIptvTransponderParameters::eProtocolRadio] = tr("RADIO");
     protocolsM[cIptvTransponderParameters::eProtocolStream] = tr("STREAM");
 }

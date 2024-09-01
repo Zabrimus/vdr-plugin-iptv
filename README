@@ -108,6 +108,7 @@ Configuration:
            |  |   |   |     |                    Y=2 tries to find the video URL internally
            |  |   |   |     |                    H=F uses ffmpeg
            |  |   |   |     |                    H=V uses vlc
+           |  |   |   |     |            M3US:
            |  |   |   |     |            STREAM: H=F uses ffmpeg
            |  |   |   |     |                    H=V uses vlc
            |  |   |   |     |            RADIO:  H=F uses ffmpeg
@@ -119,6 +120,7 @@ Configuration:
            |  |   |   |      FILE: file location
            |  |   |   |      EXT:  script location
            |  |   |   |      M3U:  m3u playlist
+           |  |   |   |      M3US: m3u URL
            |  |   |   |      RADIO:  An URL for a radio stream
            |  |   |   |      STREAM:  An URL for a video stream
            |  |   |   Stream protocol ("UDP", "CURL", "HTTP", "FILE", "EXT", "M3U", "RADIO", "STREAM")

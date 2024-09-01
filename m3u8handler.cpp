@@ -44,7 +44,8 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     // if useYtdlp == 2 then get the page and try to find the real m3u8 URL
     if (useYtdlp==1) {
         std::vector<std::string> callStr{
-            IptvConfig.GetYtdlpPath(), "--get-url", webUri
+            IptvConfig.GetYtdlpPath(), "--get-url",
+            "-f", "(bv*[vcodec~='^((he|a)vc|h26[45])']+ba[ext=m4a]/b[ext=mp4])", webUri
         };
 
         std::string newUri;

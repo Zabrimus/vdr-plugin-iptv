@@ -8,6 +8,7 @@
 #pragma once
 
 typedef struct {
+    int protocol;
     const char *locationP;
     int parameterP;
     unsigned int indexP;

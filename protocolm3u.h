@@ -6,6 +6,7 @@
 #include "protocolif.h"
 #include "m3u8handler.h"
 #include "streambasehandler.h"
+#include "source.h"
 
 class cIptvProtocolM3U : public cIptvProtocolIf {
 private:

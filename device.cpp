@@ -316,6 +316,7 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
         break;
 
     case cIptvTransponderParameters::eProtocolM3U:
+    case cIptvTransponderParameters::eProtocolM3US:
         protocol = pM3UProtocolM;
         break;
 
@@ -336,7 +337,7 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
     pidScanEnabledM = itp.PidScan()!=0;
 
     if (pIptvStreamerM &&
-        pIptvStreamerM->SetSource(protocol, { itp.Address(), itp.Parameter(), deviceIndexM, channelP->Number(), itp.UseYtdlp(), itp.HandlerType() })) {
+        pIptvStreamerM->SetSource(protocol, { itp.Protocol(), itp.Address(), itp.Parameter(), deviceIndexM, channelP->Number(), itp.UseYtdlp(), itp.HandlerType() })) {
         channelM = *channelP;
 
         if (sidScanEnabledM && pSidScannerM && IptvConfig.GetSectionFiltering()) {
