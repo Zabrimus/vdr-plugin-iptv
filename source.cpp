@@ -41,7 +41,6 @@ std::string cIptvTransponderParameters::ToString(char typeP) const {
         tostr.append("|Y=").append(std::to_string(useYtdlp));
     }
 
-    // tostr.append("|H=").append(std::to_string(handlerType));
     tostr.append("|H=").append(std::string(1 , handlerType));
 
     if (!xmltvId.empty()) {
@@ -49,8 +48,6 @@ std::string cIptvTransponderParameters::ToString(char typeP) const {
     }
 
     return { tostr };
-
-    // return cString::sprintf("S=%d|P=%d|F=%s|U=%s|A=%d", sidScanM, pidScanM, protocolstr.c_str(), addressM, parameterM);
 }
 
 int cIptvTransponderParameters::StrToProtocol(const char *prot) {

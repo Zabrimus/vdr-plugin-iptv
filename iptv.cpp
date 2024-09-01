@@ -412,9 +412,12 @@ cString cPluginIptv::SVDRPCommand(const char *commandP, const char *optionP, int
                 }
                 params.SetProtocol(prot);
             } else if (name == "U") {
-                params.SetAddress(value.c_str());
+                std::string u = value.c_str();
+                u = ReplaceAll(u, ":", "%3A");
+                u = ReplaceAll(u, "|", "%7C");
+                params.SetAddress(u.c_str());
             } else if (name == "A") {
-                params.SetAddress(value.c_str());
+                params.SetParameter(atoi(value.c_str()));
             } else if (name == "Y") {
                 if ((value ==  "1") || (value == "2")) {
                     params.SetYtdlp(atoi(value.c_str()));
