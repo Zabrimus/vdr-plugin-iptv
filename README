@@ -123,7 +123,8 @@ Configuration:
            |  |   |   |      M3US: m3u URL
            |  |   |   |      RADIO:  An URL for a radio stream
            |  |   |   |      STREAM:  An URL for a video stream
-           |  |   |   Stream protocol ("UDP", "CURL", "HTTP", "FILE", "EXT", "M3U", "RADIO", "STREAM")
+           |  |   |   |      YT:   URL (e.g. youtube or any other which is support by yt-dlp)
+           |  |   |   Stream protocol ("UDP", "CURL", "HTTP", "FILE", "EXT", "M3U", "M3US", "RADIO", "STREAM", "YT")
            |  |   Pid scanner ("0" disable, "1" enable)
            |  Section id (Sid/Nid/Tid) scanner ("0" disable, "1" enable)
            Unique enumeration
