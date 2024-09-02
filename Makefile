@@ -81,7 +81,7 @@ all-redirect: all
 OBJS = $(PLUGIN).o common.o config.o device.o pidscanner.o \
 	protocolcurl.o protocolext.o protocolfile.o protocolhttp.o \
 	protocoludp.o sectionfilter.o setup.o sidscanner.o socket.o \
-	protocolm3u.o protocolradio.o protocolstream.o \
+	protocolm3u.o protocolradio.o protocolstream.o protocolyt.o \
 	m3u8handler.o process.o process_unix.o streambasehandler.o \
 	source.o statistics.o streamer.o radioimage.o checkurl.o
 

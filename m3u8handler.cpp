@@ -37,6 +37,69 @@ std::vector<std::string> M3u8Handler::split(const std::string &s, char delim) {
     return result;
 }
 
+m3u_stream M3u8Handler::parseYT(const std::string &webUri) {
+    std::string useUriVideo;
+    std::string useUriAudio;
+
+    std::vector<std::string> callStr{
+        IptvConfig.GetYtdlpPath(), "--get-url",
+        "-f", "(bv*[vcodec~='^((he|a)vc|h26[45])']+ba[ext=m4a]/b[ext=mp4])", webUri
+    };
+
+    std::string newUri;
+    auto handler = new TinyProcessLib::Process(callStr, "",
+                                               [&newUri](const char *bytes, size_t n) {
+                                                 std::string result = std::string(bytes, n);
+                                                 debug1("yt-dlp found URL %s\n", result.c_str());
+                                                 newUri = std::string(bytes, n);
+                                               },
+
+                                               [](const char *bytes, size_t n) {
+                                                 std::string msg = std::string(bytes, n);
+                                                 debug1("yt-dlp Error: %s\n", msg.c_str());
+                                               },
+
+                                               true
+    );
+
+    int exitStatus = handler->get_exit_status();
+    if (exitStatus!=0) {
+        debug1("yt-dlp throws an error, abort\n");
+        m3u_stream result;
+        result.width = result.height = 0;
+        return result;
+    }
+
+    // check if the uri contains video/audio URL or if it's a simple URL
+    auto m = newUri.find('\n');
+    if (m == std::string::npos) {
+        // only video
+        useUriVideo = newUri;
+        useUriAudio = "";
+    } else {
+        // audio / video
+        useUriVideo = newUri.substr(0, m);
+        useUriAudio = newUri.substr(m+1);
+    }
+
+    // set dummy values
+    m3u_stream result;
+    result.width = 1920;
+    result.height = 1080;
+    result.url = useUriVideo;
+
+    if (!useUriAudio.empty()) {
+        struct media audio;
+        audio.uri = useUriAudio;
+        audio.name = "audio";
+        audio.language = "C";
+
+        result.audio.emplace_back(audio);
+    }
+
+    return result;
+}
+
 m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     std::string useUri;
 

@@ -18,6 +18,7 @@
 #include "protocolm3u.h"
 #include "protocolradio.h"
 #include "protocolstream.h"
+#include "protocolyt.h"
 #include "streamer.h"
 #include "sectionfilter.h"
 #include "pidscanner.h"
@@ -52,6 +53,7 @@ private:
     cIptvProtocolRadio *pRadioProtocolM;
     cIptvProtocolStream *pStreamProtocolM;
     cIptvStreamer *pIptvStreamerM;
+    cIptvProtocolYT *pYTProtocolM;
     cIptvSectionFilterHandler *pIptvSectionM;
     cPidScanner *pPidScannerM;
     cSidScanner *pSidScannerM;

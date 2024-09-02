@@ -36,6 +36,7 @@ class M3u8Handler {
 public:
     explicit M3u8Handler();
     static m3u_stream parseM3u(const std::string &uri, int useYtdlp);
+    static m3u_stream parseYT(const std::string &webUri);
 
     static void printStream(const m3u_stream& stream);
 

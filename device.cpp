@@ -42,6 +42,7 @@ cIptvDevice::cIptvDevice(unsigned int indexP)
     pM3UProtocolM = new cIptvProtocolM3U();
     pRadioProtocolM = new cIptvProtocolRadio();
     pStreamProtocolM = new cIptvProtocolStream();
+    pYTProtocolM = new cIptvProtocolYT();
     pPidScannerM = new cPidScanner();
     // Start section handler for iptv device
     pIptvSectionM = new cIptvSectionFilterHandler(deviceIndexM, bufsize + 1);
@@ -81,6 +82,7 @@ cIptvDevice::~cIptvDevice() {
     DELETE_POINTER(pM3UProtocolM);
     DELETE_POINTER(pRadioProtocolM);
     DELETE_POINTER(pStreamProtocolM);
+    DELETE_POINTER(pYTProtocolM);
     DELETE_POINTER(tsBufferM);
 
     // Close dvr fifo
@@ -326,6 +328,10 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
 
     case cIptvTransponderParameters::eProtocolStream:
         protocol = pStreamProtocolM;
+        break;
+
+    case cIptvTransponderParameters::eProtocolYT:
+        protocol = pYTProtocolM;
         break;
 
     default:error("Unrecognized IPTV protocol: %s", channelP->Parameters());

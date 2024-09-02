@@ -93,6 +93,10 @@ void CheckURL::executeChecks() {
                     u = itp.Address();
                     break;
 
+                case cIptvTransponderParameters::eProtocolYT:
+                    u = itp.Address();
+                    break;
+
                 case cIptvTransponderParameters::eProtocolRadio:
                 case cIptvTransponderParameters::eProtocolStream:
                     u = itp.Address();

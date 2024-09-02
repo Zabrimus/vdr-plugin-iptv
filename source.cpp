@@ -71,6 +71,8 @@ int cIptvTransponderParameters::StrToProtocol(const char *prot) {
         protocolM = eProtocolRadio;
     } else if (strstr(prot, "STREAM")) {
         protocolM = eProtocolStream;
+    } else if (strstr(prot, "YT")) {
+        protocolM = eProtocolYT;
     }
 
     return protocolM;
@@ -110,6 +112,10 @@ std::string cIptvTransponderParameters::ProtocolToStr(int prot) {
 
     case eProtocolStream:
         protocolstr = "STREAM";
+        break;
+
+    case eProtocolYT:
+        protocolstr = "YT";
         break;
 
     default:
@@ -231,6 +237,7 @@ cIptvSourceParam::cIptvSourceParam(char sourceP, const char *descriptionP)
     protocolsM[cIptvTransponderParameters::eProtocolM3US] = tr("M3US");
     protocolsM[cIptvTransponderParameters::eProtocolRadio] = tr("RADIO");
     protocolsM[cIptvTransponderParameters::eProtocolStream] = tr("STREAM");
+    protocolsM[cIptvTransponderParameters::eProtocolYT] = tr("YT");
 }
 
 void cIptvSourceParam::SetData(cChannel *channelP) {
