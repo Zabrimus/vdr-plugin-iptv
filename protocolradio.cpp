@@ -85,8 +85,6 @@ cIptvProtocolRadio::SetSource(SourceParameter parameter) {
     channelId = parameter.channelNumber;
     handlerType = parameter.handlerType;
 
-    handler.stop();
-
     handler.setChannelId(channelId);
     handler.setHandlerType(handlerType);
 
