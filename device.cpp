@@ -262,7 +262,7 @@ bool cIptvDevice::ProvidesChannel(const cChannel *channelP, int priorityP, bool 
 }
 
 bool cIptvDevice::ProvidesEIT() const {
-    return false;
+    return true;
 }
 
 int cIptvDevice::NumProvidedSystems() const {
