@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vdr-iptv 2.4.0\n"
 "Report-Msgid-Bugs-To: <see README>\n"
-"POT-Creation-Date: 2024-09-01 16:31+0200\n"
+"POT-Creation-Date: 2024-11-27 19:44+0100\n"
 "PO-Revision-Date: 2018-04-15 04:15+0300\n"
 "Last-Translator: Frank Neumann <fnu@yavdr.org>\n"
 "Language-Team: German <vdr@linuxtv.org>\n"
@@ -115,6 +115,12 @@ msgstr ""
 
 msgid "Define the type of the picture to show, if a radio plugin is not found."
 msgstr ""
+
+msgid "Enable EPG scan"
+msgstr "EPG Scan erlauben"
+
+msgid "Defines if EPG scan for the IpTV devices shall be enabled"
+msgstr "Definiert, ob das IpTV Plugin einen EPG Scan ermöglichen soll."
 
 msgid "Help"
 msgstr "Hilfe"

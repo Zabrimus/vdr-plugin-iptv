@@ -17,6 +17,7 @@ cIptvConfig::cIptvConfig()
       sectionFilteringM(1),
       threadQueueSize(32),
       stillPicture(0),
+      enableEpgScan(0),
       ytdlpPath("/usr/local/bin/yt-dlp") {
 
     for (unsigned int i = 0; i < ARRAY_SIZE(disabledFiltersM); ++i) {

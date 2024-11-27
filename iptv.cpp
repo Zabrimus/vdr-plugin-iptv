@@ -23,7 +23,7 @@
 #define GITVERSION ""
 #endif
 
-const char VERSION[] = "2.4.0" GITVERSION;
+const char VERSION[] = "2.6.5" GITVERSION;
 static const char DESCRIPTION[] = trNOOP("Experience the IPTV");
 
 const char *cPluginIptv::Description() { return tr(DESCRIPTION); }
@@ -222,6 +222,8 @@ bool cPluginIptv::SetupParse(const char *nameP, const char *valueP) {
         }
     } else if (!strcasecmp(nameP, "StillPicture")) {
         IptvConfig.SetStillPicture(atoi(valueP));
+    } else if (!strcasecmp(nameP, "EnableEpgScan")) {
+        IptvConfig.SetEnableEpgScan(atoi(valueP));
     } else {
         return false;
     }

@@ -16,6 +16,7 @@ private:
     int protocolBasePortM;
     int sectionFilteringM;
     int numDisabledFiltersM;
+    int enableEpgScanM;
     int disabledFilterIndexesM[SECTION_FILTER_TABLE_SIZE];
     const char *disabledFilterNamesM[SECTION_FILTER_TABLE_SIZE];
     int stillPicture;

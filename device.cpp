@@ -262,7 +262,7 @@ bool cIptvDevice::ProvidesChannel(const cChannel *channelP, int priorityP, bool 
 }
 
 bool cIptvDevice::ProvidesEIT() const {
-    return true;
+    return IptvConfig.GetEnableEpgScan() == 1;
 }
 
 int cIptvDevice::NumProvidedSystems() const {

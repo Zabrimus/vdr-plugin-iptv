@@ -124,6 +124,7 @@ cIptvPluginSetup::cIptvPluginSetup() {
 
     protocolBasePortM = IptvConfig.GetProtocolBasePort();
     sectionFilteringM = IptvConfig.GetSectionFiltering();
+    enableEpgScanM = IptvConfig.GetEnableEpgScan();
     numDisabledFiltersM = IptvConfig.GetDisabledFiltersCount();
     stillPicture = IptvConfig.GetStillPicture();
 
@@ -174,6 +175,9 @@ void cIptvPluginSetup::Setup() {
 
     Add(new cMenuEditStraItem(tr("StillPicture"), &stillPicture, 3, stillPicType));
     helpM.Append(tr("Define the type of the picture to show, if a radio plugin is not found."));
+
+    Add(new cMenuEditBoolItem(tr("Enable EPG scan"), &enableEpgScanM));
+    helpM.Append(tr("Defines if EPG scan for the IpTV devices shall be enabled"));
 
     SetCurrent(Get(current));
     Display();
@@ -253,11 +257,13 @@ void cIptvPluginSetup::Store() {
     SetupStore("SectionFiltering", sectionFilteringM);
     StoreFilters("DisabledFilters", disabledFilterIndexesM);
     SetupStore("StillPicture", stillPicture);
+    SetupStore("EnableEpgScan", enableEpgScanM);
 
     // Update global config
     IptvConfig.SetProtocolBasePort(protocolBasePortM);
     IptvConfig.SetSectionFiltering(sectionFilteringM);
     IptvConfig.SetStillPicture(stillPicture);
+    IptvConfig.SetEnableEpgScan(enableEpgScanM);
 
     for (int i = 0; i < SECTION_FILTER_TABLE_SIZE; ++i) {
         IptvConfig.SetDisabledFilters(i, disabledFilterIndexesM[i]);

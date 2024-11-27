@@ -17,6 +17,7 @@ private:
     unsigned int useBytesM;
     unsigned int sectionFilteringM;
     unsigned int threadQueueSize;
+    int enableEpgScan;
     int stillPicture;
     int disabledFiltersM[SECTION_FILTER_TABLE_SIZE];
     char configDirectoryM[PATH_MAX];
@@ -61,6 +62,7 @@ public:
     const char *GetM3uCfgPath() { return m3uCfgPath; };
     int GetDisabledFilters(unsigned int indexP) const;
     int GetStillPicture() const { return stillPicture; };
+    int GetEnableEpgScan() const { return enableEpgScan; };
 
     void SetTraceMode(unsigned int modeP) { traceModeM = (modeP & eTraceModeMask); };
     void SetThreadQueueSize(unsigned int tqs) { threadQueueSize = tqs; };
@@ -73,6 +75,7 @@ public:
     void SetYtdlpPath(const char* path);
     void SetM3uCfgPath(const char* directoryP);
     void SetStillPicture(int s) { stillPicture = s; };
+    void SetEnableEpgScan(int s) { enableEpgScan = s; };
 };
 
 extern cIptvConfig IptvConfig;
