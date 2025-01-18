@@ -1,11 +1,17 @@
 #include <string>
 #include <chrono>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
 #include <sys/stat.h>
 #include <vdr/plugin.h>
 #include <iterator>
 #include "config.h"
 #include "streambasehandler.h"
 #include "log.h"
+
 
 /**
  * Example of the ffmpeg call. Just for information and better understanding.
@@ -133,41 +139,148 @@ void StreamBaseHandler::setHandlerType(char handlerType) {
     this->handlerType = handlerType;
 }
 
+std::string StreamBaseHandler::convertStreamToJson(bool hasVideo, const m3u_stream &stream) {
+    // create json object and call script to get command line
+    std::string json;
 
-// void StreamBaseHandler::streamVideoInternal(std::vector<std::string> &callStr) {
+    json.append("{");
+    json.append("\"threads\": ").append(std::to_string(IptvConfig.GetThreadQueueSize())).append(",");
+
+    if (hasVideo) {
+        json.append("\"width\": ").append(std::to_string(stream.width)).append(",");
+        json.append("\"height\": ").append(std::to_string(stream.height)).append(",");
+    }
+
+    json.append("\"url\": \"").append(stream.url).append("\",");
+
+    if (!stream.audio.empty()) {
+        json.append("\"audiourl\": [");
+
+        for (long unsigned int i = 0; i < stream.audio.size(); ++i) {
+            json.append("\"").append(stream.audio[i].uri).append("\"");
+            if (i < stream.audio.size() - 1) {
+                json.append(",");
+            }
+        }
+
+        json.append("],");
+    }
+
+    json.append("\"channelName\": \"").append(stream.channelName).append("\",");
+
+    if (hasVideo) {
+        json.append("\"vpid\": ").append(std::to_string(stream.vpid)).append(",");
+        json.append("\"apid\": [");
+
+        int aidx = 1;
+        int maxPid = 0;
+        for (auto i : stream.apids) {
+            if (i > maxPid) {
+                maxPid = i;
+            }
+        }
+
+        // add well known pid
+        for (unsigned long i = 0; i < min(stream.apids.size(), stream.audio.size()); ++i) {
+            json.append(std::to_string(stream.apids[i])).append(",");
+            aidx++;
+        }
+
+        // add missing pid
+        int naidx = 1;
+        for (auto i = stream.apids.size(); i < stream.audio.size(); ++i) {
+            json.append(std::to_string(maxPid + naidx)).append(",");
+            aidx++;
+            naidx++;
+        }
+
+        if (aidx == 1) {
+            // no audio channels found, add default
+            json.append(std::to_string(stream.vpid + 1));
+        }
+
+        // json = json.substr(0, json.length()-1);
+        json.append("],");
+    } else {
+        int apid = stream.apids.empty() ? 257 : stream.apids[0];
+        json.append("\"apid\": [");
+        json.append(std::to_string(apid));
+        json.append("],");
+    }
+
+    json.append("\"spid\": ").append(std::to_string(stream.spid)).append(",");
+    json.append("\"tpid\": ").append(std::to_string(stream.tpid)).append(",");
+    json.append("\"nid\": ").append(std::to_string(stream.nid));
+
+    json.append("}");
+
+    return json;
+}
+
 void StreamBaseHandler::streamVideoInternal(const m3u_stream &stream) {
     streamThreadRunning.store(true);
 
     // create parameter list
-    std::vector<std::string> callStr;
+    std::vector<std::string> callStrVec;
+    std::string callStr;
+
+    bool cmdIsVector = true;
 
     if (handlerType == 'V') {
-        callStr = prepareStreamCmdVideoVlc(stream);
+        callStrVec = prepareStreamCmdVideoVlc(stream);
     } else if (handlerType == 'F') {
-        callStr = prepareStreamCmdVideoFfmpeg(stream);
+        callStrVec = prepareStreamCmdVideoFfmpeg(stream);
+    } else if (handlerType == 'E') {
+        cmdIsVector = false;
+
+        // create json object and call script to get command line
+        std::string json = convertStreamToJson(true, stream);
+        callStr = prepareExpertCmdLine(1, json);
+
+        debug1("CmdLine: %s", callStr.c_str());
     } else {
         streamThreadRunning.store(false);
         // TODO: Error message
         return;
     }
 
-    streamHandler = new TinyProcessLib::Process(callStr, "",
-                                                [this](const char *bytes, size_t n) {
-                                                  debug9("Queue size %ld\n", tsPackets.size());
+    if (cmdIsVector) {
+        streamHandler = new TinyProcessLib::Process(callStrVec, "",
+                                                    [this](const char *bytes, size_t n) {
+                                                        debug9("Queue size %ld\n", tsPackets.size());
 
-                                                  std::lock_guard<std::mutex> guard(queueMutex);
-                                                  tsPackets.push_back(std::string(bytes, n));
-                                                },
+                                                        std::lock_guard<std::mutex> guard(queueMutex);
+                                                        tsPackets.push_back(std::string(bytes, n));
+                                                    },
 
-                                                [this, stream](const char *bytes, size_t n) {
-                                                  std::string msg = std::string(bytes, n);
-                                                  checkErrorOut(msg);
+                                                    [this, stream](const char *bytes, size_t n) {
+                                                        std::string msg = std::string(bytes, n);
+                                                        checkErrorOut(msg);
 
-                                                  debug10("Error: %s\n", msg.c_str());
-                                                },
+                                                        debug10("Error: %s\n", msg.c_str());
+                                                    },
 
-                                                true
-    );
+                                                    true
+        );
+    } else {
+        streamHandler = new TinyProcessLib::Process(callStr, "",
+                                                    [this](const char *bytes, size_t n) {
+                                                        debug9("Queue size %ld\n", tsPackets.size());
+
+                                                        std::lock_guard<std::mutex> guard(queueMutex);
+                                                        tsPackets.push_back(std::string(bytes, n));
+                                                    },
+
+                                                    [this, stream](const char *bytes, size_t n) {
+                                                        std::string msg = std::string(bytes, n);
+                                                        checkErrorOut(msg);
+
+                                                        debug10("Error: %s\n", msg.c_str());
+                                                    },
+
+                                                    true
+        );
+    }
 
     streamHandler->get_exit_status();
     delete streamHandler;
@@ -179,80 +292,157 @@ void StreamBaseHandler::streamVideoInternal(const m3u_stream &stream) {
 void StreamBaseHandler::streamAudioInternal(const m3u_stream &stream) {
     streamThreadRunning.store(true);
 
+    bool cmdIsVector = true;
+
     // create parameter list
-    std::vector<std::string> callStr;
+    std::vector<std::string> callStrVec;
+    std::string callStr;
 
     if (handlerType == 'V') {
-        callStr = prepareStreamCmdAudioVlc(stream);
+        callStrVec = prepareStreamCmdAudioVlc(stream);
     } else if (handlerType == 'F') {
-        callStr = prepareStreamCmdAudioFfmpeg(stream);
+        callStrVec = prepareStreamCmdAudioFfmpeg(stream);
+    } else if (handlerType == 'E') {
+        cmdIsVector = false;
+
+        // create json object and call script to get command line
+        std::string json = convertStreamToJson(false, stream);
+        callStr = prepareExpertCmdLine(0, json);
+
+        debug1("CmdLine: %s", callStr.c_str());
     } else {
         streamThreadRunning.store(false);
         // TODO: Error message
         return;
     }
 
-    streamHandler = new TinyProcessLib::Process(callStr, "",
-                                                [this](const char *bytes, size_t n) {
-                                                  debug9("Add new packets. Current queue size %ld\n", tsPackets.size());
+    if (cmdIsVector) {
+        streamHandler = new TinyProcessLib::Process(callStrVec, "",
+                                                    [this](const char *bytes, size_t n) {
+                                                        debug9("Add new packets. Current queue size %ld\n",
+                                                               tsPackets.size());
 
-                                                  std::lock_guard<std::mutex> guard(queueMutex);
-                                                  tsPackets.push_back(std::string(bytes, n));
-                                                },
+                                                        std::lock_guard<std::mutex> guard(queueMutex);
+                                                        tsPackets.push_back(std::string(bytes, n));
+                                                    },
 
-                                                [this, stream](const char *bytes, size_t n) {
-                                                  std::string msg = std::string(bytes, n);
-                                                  checkErrorOut(msg);
+                                                    [this, stream](const char *bytes, size_t n) {
+                                                        std::string msg = std::string(bytes, n);
+                                                        checkErrorOut(msg);
 
-                                                  /*
-                                                  size_t idx;
+                                                        /*
+                                                        size_t idx;
 
-                                                  // fmpeg version
-                                                  idx = msg.find("StreamTitle");
-                                                  if (idx != std::string::npos) {
-                                                      auto idx2 = msg.find(':', idx);
-                                                      std::string title = msg.substr(idx2+1);
-                                                      trim(title);
+                                                        // fmpeg version
+                                                        idx = msg.find("StreamTitle");
+                                                        if (idx != std::string::npos) {
+                                                            auto idx2 = msg.find(':', idx);
+                                                            std::string title = msg.substr(idx2+1);
+                                                            trim(title);
 
-                                                      if (!title.empty()) {
-                                                         TODO: Wie kommen die Daten in das Radio Plugin?
-                                                          auto idx3 = title.find('-');
-                                                          if (idx3 != std::string::npos) {
-                                                              artist = title.substr(0, idx3);
-                                                              title = title.substr(idx3 + 1);
-                                                          } else {
-                                                              text = title;
-                                                          }
+                                                            if (!title.empty()) {
+                                                               TODO: Wie kommen die Daten in das Radio Plugin?
+                                                                auto idx3 = title.find('-');
+                                                                if (idx3 != std::string::npos) {
+                                                                    artist = title.substr(0, idx3);
+                                                                    title = title.substr(idx3 + 1);
+                                                                } else {
+                                                                    text = title;
+                                                                }
 
-                                                          printf("Stream Title: %s\n", title.c_str());
-                                                      }
-                                                  }
+                                                                printf("Stream Title: %s\n", title.c_str());
+                                                            }
+                                                        }
 
-                                                  // vlc version
-                                                  idx = msg.find("New Icy-Title");
-                                                  if (idx != std::string::npos) {
-                                                      auto idx2 = msg.find('=', idx);
-                                                      std::string title = msg.substr(idx2+1);
-                                                      trim(title);
+                                                        // vlc version
+                                                        idx = msg.find("New Icy-Title");
+                                                        if (idx != std::string::npos) {
+                                                            auto idx2 = msg.find('=', idx);
+                                                            std::string title = msg.substr(idx2+1);
+                                                            trim(title);
 
-                                                      if (!title.empty()) {
-                                                        TODO: Wie kommen die Daten in das Radio Plugin?
-                                                          auto idx3 = title.find('-');
-                                                          if (idx3 != std::string::npos) {
-                                                              artist = title.substr(0, idx3);
-                                                              title = title.substr(idx3 + 1);
-                                                          } else {
-                                                              text = title;
-                                                          }
-                                                          printf("Stream Title: %s\n", title.c_str());
-                                                      }
-                                                  }
-                                                  */
-                                                  debug10("Error: %s\n", msg.c_str());
-                                                },
+                                                            if (!title.empty()) {
+                                                              TODO: Wie kommen die Daten in das Radio Plugin?
+                                                                auto idx3 = title.find('-');
+                                                                if (idx3 != std::string::npos) {
+                                                                    artist = title.substr(0, idx3);
+                                                                    title = title.substr(idx3 + 1);
+                                                                } else {
+                                                                    text = title;
+                                                                }
+                                                                printf("Stream Title: %s\n", title.c_str());
+                                                            }
+                                                        }
+                                                        */
+                                                        debug10("Error: %s\n", msg.c_str());
+                                                    },
 
-                                                true
-    );
+                                                    true
+        );
+    } else {
+        streamHandler = new TinyProcessLib::Process(callStr, "",
+                                                    [this](const char *bytes, size_t n) {
+                                                        debug9("Add new packets. Current queue size %ld\n",
+                                                               tsPackets.size());
+
+                                                        std::lock_guard<std::mutex> guard(queueMutex);
+                                                        tsPackets.push_back(std::string(bytes, n));
+                                                    },
+
+                                                    [this, stream](const char *bytes, size_t n) {
+                                                        std::string msg = std::string(bytes, n);
+                                                        checkErrorOut(msg);
+
+                                                        /*
+                                                        size_t idx;
+
+                                                        // fmpeg version
+                                                        idx = msg.find("StreamTitle");
+                                                        if (idx != std::string::npos) {
+                                                            auto idx2 = msg.find(':', idx);
+                                                            std::string title = msg.substr(idx2+1);
+                                                            trim(title);
+
+                                                            if (!title.empty()) {
+                                                               TODO: Wie kommen die Daten in das Radio Plugin?
+                                                                auto idx3 = title.find('-');
+                                                                if (idx3 != std::string::npos) {
+                                                                    artist = title.substr(0, idx3);
+                                                                    title = title.substr(idx3 + 1);
+                                                                } else {
+                                                                    text = title;
+                                                                }
+
+                                                                printf("Stream Title: %s\n", title.c_str());
+                                                            }
+                                                        }
+
+                                                        // vlc version
+                                                        idx = msg.find("New Icy-Title");
+                                                        if (idx != std::string::npos) {
+                                                            auto idx2 = msg.find('=', idx);
+                                                            std::string title = msg.substr(idx2+1);
+                                                            trim(title);
+
+                                                            if (!title.empty()) {
+                                                              TODO: Wie kommen die Daten in das Radio Plugin?
+                                                                auto idx3 = title.find('-');
+                                                                if (idx3 != std::string::npos) {
+                                                                    artist = title.substr(0, idx3);
+                                                                    title = title.substr(idx3 + 1);
+                                                                } else {
+                                                                    text = title;
+                                                                }
+                                                                printf("Stream Title: %s\n", title.c_str());
+                                                            }
+                                                        }
+                                                        */
+                                                        debug10("Error: %s\n", msg.c_str());
+                                                    },
+
+                                                    true
+        );
+    }
 
     streamHandler->get_exit_status();
     delete streamHandler;
@@ -645,4 +835,36 @@ std::vector<std::string> StreamBaseHandler::prepareStreamCmdAudioVlc(const m3u_s
     debug2("vlc call: %s\n", paramOut.str().c_str());
 
     return callStr;
+}
+
+std::string StreamBaseHandler::prepareExpertCmdLine(int isVideo, const std::string &json) {
+    std::vector<std::string> callStr{
+            std::string(IptvConfig.GetConfigDirectory()) + "/iptv-cmdline-expert.py",
+            std::to_string(isVideo), json
+    };
+
+    debug1("Call expert script: %s %s \"%s\"", callStr.at(0).c_str(), callStr.at(1).c_str(), callStr.at(2).c_str());
+
+    std::string cmdLine;
+    auto handler = new TinyProcessLib::Process(callStr, "",
+                                               [&cmdLine](const char *bytes, size_t n) {
+                                                   std::string result = std::string(bytes, n);
+                                                   cmdLine = std::string(bytes, n);
+                                               },
+
+                                               [](const char *bytes, size_t n) {
+                                                   std::string msg = std::string(bytes, n);
+                                                   debug1("iptv-cmdline-expert.py Error: %s\n", msg.c_str());
+                                               },
+
+                                               true
+    );
+
+    int exitStatus = handler->get_exit_status();
+    if (exitStatus!=0) {
+        debug1("iptv-cmdline-expert.py throws an error, abort\n");
+        return {};
+    }
+
+    return cmdLine;
 }

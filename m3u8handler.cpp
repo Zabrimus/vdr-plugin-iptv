@@ -281,6 +281,7 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     result.vpid = -1;
     result.spid = -1;
     result.tpid = -1;
+    result.nid  = -1;
     result.apids.clear();
 
     return result;

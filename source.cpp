@@ -186,7 +186,7 @@ bool cIptvTransponderParameters::Parse(const char *strP) {
                     break;
 
                 case 'H':
-                    if (data[0] == 'F' || data[0] == 'V') {
+                    if (data[0] == 'F' || data[0] == 'V' || data[0] == 'E') {
                         handlerType = data[0];
                     }
                     break;

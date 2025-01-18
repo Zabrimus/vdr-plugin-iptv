@@ -111,8 +111,10 @@ Configuration:
            |  |   |   |     |            M3US:
            |  |   |   |     |            STREAM: H=F uses ffmpeg
            |  |   |   |     |                    H=V uses vlc
+           |  |   |   |     |                    H=E calls the script iptv-cmdline-expert.py to get the commandline
            |  |   |   |     |            RADIO:  H=F uses ffmpeg
            |  |   |   |     |                    H=V uses vlc
+           |  |   |   |     |                    H=E calls the script iptv-cmdline-expert.py to get the commandline
            |  |   |   |     Stream address
            |  |   |   |      UDP:  multicast [source@]group address
            |  |   |   |      CURL: HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded

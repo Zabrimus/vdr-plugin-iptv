@@ -40,6 +40,7 @@ bool cIptvProtocolRadio::Open() {
                 streams.vpid = 0;
                 streams.spid = Channel->Sid();
                 streams.tpid = Channel->Tid();
+                streams.nid  = Channel->Nid();
 
                 int aidx = 0;
                 while (true) {

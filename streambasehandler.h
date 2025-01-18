@@ -36,10 +36,14 @@ private:
 
     void checkErrorOut(const std::string &msg);
 
+    std::string convertStreamToJson(bool hasVideo, const m3u_stream &stream);
+
 protected:
     std::vector<std::string> prepareStreamCmdVideoFfmpeg(const m3u_stream &stream);
     std::vector<std::string> prepareStreamCmdAudioFfmpeg(const m3u_stream &stream);
 
     std::vector<std::string> prepareStreamCmdVideoVlc(const m3u_stream &stream);
     std::vector<std::string> prepareStreamCmdAudioVlc(const m3u_stream &stream);
+
+    std::string prepareExpertCmdLine(int isVideo, const std::string &json);
 };
