@@ -90,6 +90,7 @@ Configuration:
   RD1:IPTV:80:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=8:I:0:270:271,272,273,274,275:0:0:8:1:9:8
   TV7;IPTV:70:S=1|P=0|F=M3U|U=list1.cfg|A=5:I:0:200:201,202,203,204,205:0:0:11:1:100:0
   TV6;IPTV:60:S=1|P=0|F=EXT|U=iptvstream.sh|A=0:I:0:0:680:0:0:6:0:0:0
+  TV7;IPTV:60:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=0:I:0:0:680:0:0:6:0:0:0
   TV5;IPTV:50:S=0|P=1|F=FILE|U=/video/stream.ts|A=5:I:0:514:670:2321:0:5:0:0:0
   TV4;IPTV:40:S=0|P=1|F=HTTP|U=127.0.0.1/TS/2|A=3000:I:0:513:660:2321:0:4:0:0:0
   TV3;IPTV:30:S=1|P=0|F=CURL|U=http%3A//foo%3Abar@127.0.0.1%3A3000/TS/2|A=0:I:0:512:650:2321:0:3:0:0:0
@@ -104,6 +105,7 @@ Configuration:
            |  |   |   |     |            HTTP:   HTTP port number
            |  |   |   |     |            FILE:   file delay (ms)
            |  |   |   |     |            EXT:    script parameter
+           |  |   |   |     |            EXTT:   script parameter
            |  |   |   |     |            M3U:    Y=1 uses yt-dlp to determine the video URL
            |  |   |   |     |                    Y=2 tries to find the video URL internally
            |  |   |   |     |                    H=F uses ffmpeg
@@ -120,13 +122,14 @@ Configuration:
            |  |   |   |      CURL: HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded
            |  |   |   |      HTTP: URL; missing the scheme name part and possible port declaration
            |  |   |   |      FILE: file location
-           |  |   |   |      EXT:  script location
+           |  |   |   |      EXT:  script location (uses UDP)
+           |  |   |   |      EXTT: script location (uses TCP)
            |  |   |   |      M3U:  m3u playlist
            |  |   |   |      M3US: m3u URL
            |  |   |   |      RADIO:  An URL for a radio stream
            |  |   |   |      STREAM:  An URL for a video stream
            |  |   |   |      YT:   URL (e.g. youtube or any other which is support by yt-dlp)
-           |  |   |   Stream protocol ("UDP", "CURL", "HTTP", "FILE", "EXT", "M3U", "M3US", "RADIO", "STREAM", "YT")
+           |  |   |   Stream protocol ("UDP", "CURL", "HTTP", "FILE", "EXT", "EXTT", "M3U", "M3US", "RADIO", "STREAM", "YT")
            |  |   Pid scanner ("0" disable, "1" enable)
            |  Section id (Sid/Nid/Tid) scanner ("0" disable, "1" enable)
            Unique enumeration
@@ -153,6 +156,12 @@ External streaming:
 - When an EXT or CURL/RTSP channel is opened the IPTV plugin opens an UDP
   listening port on the localhost. The external script is responsible for
   supplying IPTV plugin with MPEG2 TS data in UDP/RTP format to the listening
+  port. The data will be processed in VDR like a normal DVB broadcast. The
+  listening base port can be specified in the plugin configuration menu.
+
+- When an EXTT channel is opened the IPTV plugin opens an TCP
+  listening port on the localhost. The external script is responsible for
+  supplying IPTV plugin with MPEG2 TS data in TCP format to the listening
   port. The data will be processed in VDR like a normal DVB broadcast. The
   listening base port can be specified in the plugin configuration menu.
 

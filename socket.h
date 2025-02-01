@@ -67,3 +67,16 @@ public:
     bool Write(const char *bufferAddrP, unsigned int bufferLenP);
 };
 
+class cIptvTcpServerSocket : public cIptvSocket {
+private:
+    int clientSocketDescM;
+
+public:
+    cIptvTcpServerSocket();
+    ~cIptvTcpServerSocket() override;
+    virtual int Read(unsigned char *bufferAddrP, unsigned int bufferLenP);
+    bool OpenSocket(int portP, bool isUdpP = false);
+    void CloseSocket();
+    bool Accept();
+    bool ClientConnected();
+};

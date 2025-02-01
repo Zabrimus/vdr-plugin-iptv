@@ -31,6 +31,7 @@ public:
         eProtocolHTTP,
         eProtocolFILE,
         eProtocolEXT,
+        eProtocolEXTT,
         eProtocolM3U,
         eProtocolM3US,
         eProtocolRadio,

@@ -467,3 +467,127 @@ bool cIptvTcpSocket::Write(const char *bufferAddrP, unsigned int bufferLenP) {
 
     return true;
 }
+
+cIptvTcpServerSocket::cIptvTcpServerSocket() : clientSocketDescM(-1) {
+    debug1("%s", __PRETTY_FUNCTION__);
+}
+
+cIptvTcpServerSocket::~cIptvTcpServerSocket() {
+    debug1("%s", __PRETTY_FUNCTION__);
+}
+
+int cIptvTcpServerSocket::Read(unsigned char *bufferAddrP, unsigned int bufferLenP) {
+    // Error out if socket not initialized
+    if (clientSocketDescM <= 0) {
+        // error("%s Invalid socket", __PRETTY_FUNCTION__);
+
+        return -1;
+    }
+
+    int len = 0;
+    socklen_t addrlen = sizeof(sockAddrM);
+
+    // Read data from socket
+    if (isActiveM && clientSocketDescM && bufferAddrP && (bufferLenP > 0)) {
+        len = (int) recvfrom(clientSocketDescM, bufferAddrP, bufferLenP, MSG_DONTWAIT, (struct sockaddr *) &sockAddrM, &addrlen);
+    }
+
+    return len;
+}
+
+bool cIptvTcpServerSocket::OpenSocket(int portP, bool isUdpP) {
+    if (socketDescM > 0) {
+        return true;
+    }
+
+    int opt;
+
+    /* create a STREAM (TCP) socket in the INET6 (IPv6) protocol */
+    socketDescM = socket(PF_INET6, SOCK_STREAM, 0);
+    if (socketDescM < 0) {
+        error("%s: could not create socket: %m", __PRETTY_FUNCTION__);
+        return false;
+    }
+
+    /* let socket accept v6 and v4 (mapped address) connections */
+    opt = 0;
+    if (setsockopt(socketDescM, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof(opt)) < 0) {
+        error("%s: could not turn off IPV6_V6ONLY: %m", __PRETTY_FUNCTION__);
+        return false;
+    }
+
+    /* allow socket to always reuse the same port */
+    opt = 1;
+    if (setsockopt(socketDescM, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        error("%s: could not turn on SO_REUSEADDR: %m", __PRETTY_FUNCTION__);
+    }
+
+    /* bind socket to any address on port 'mPort' */
+    struct sockaddr_in6 server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin6_family = AF_INET6;
+    server_addr.sin6_addr = in6addr_any;
+    server_addr.sin6_port = htons(portP);
+
+    if (bind(socketDescM, (struct sockaddr*) &server_addr,  sizeof(server_addr)) < 0) {
+        error("%s: couldnt bind socket to port %d: %m", __PRETTY_FUNCTION__, portP);
+        CloseSocket();
+        return false;
+    }
+
+    /* switch socket to non-blocking */
+    opt = fcntl(socketDescM, F_GETFL, 0);
+    if (opt < 0) {
+        error("%s: couldnt get socket flags: %m", __PRETTY_FUNCTION__);
+        CloseSocket();
+        return false;
+    }
+    opt |= O_NONBLOCK;
+    if (fcntl(socketDescM, F_SETFL, opt) < 0) {
+        error("%s: couldnt set socket flags: %m", __PRETTY_FUNCTION__);
+        CloseSocket();
+        return false;
+    }
+
+    /* start listening on socket */
+    if (listen(socketDescM, 5) < 0) {
+        error("%s: couldnt start listening: %m", __PRETTY_FUNCTION__);
+        CloseSocket();
+        return false;
+    }
+    return true;
+}
+
+void cIptvTcpServerSocket::CloseSocket() {
+    cIptvSocket::CloseSocket();
+}
+
+bool cIptvTcpServerSocket::Accept() {
+    char addrbuf[INET6_ADDRSTRLEN];
+    struct sockaddr_in6 client_addr;
+    socklen_t len = sizeof(client_addr);
+
+    clientSocketDescM = accept(socketDescM, (struct sockaddr*) &client_addr, &len);
+
+    if (clientSocketDescM < 0) {
+        if (errno != EINTR && errno != EAGAIN) {
+            error("%s: accept failed: %m", __PRETTY_FUNCTION__);
+        }
+
+        return false;
+    }
+
+    /* as this is an IPv6 socket, it reports IPv4 addresses as
+     * 'IPv4-mapped IPv6 address' with prefix '::ffff:', ie.
+     *  '::ffff:127.0.0.1' for '127.0.0.1'
+     */
+    debug1("connect from %s port %d",
+            inet_ntop(AF_INET6, &client_addr.sin6_addr, addrbuf, INET6_ADDRSTRLEN),
+            clientSocketDescM);
+
+    return true;
+}
+
+bool cIptvTcpServerSocket::ClientConnected() {
+    return clientSocketDescM != -1;
+}
