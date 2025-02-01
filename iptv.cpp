@@ -23,7 +23,7 @@
 #define GITVERSION ""
 #endif
 
-const char VERSION[] = "2.6.6" GITVERSION;
+const char VERSION[] = "2.6.7" GITVERSION;
 static const char DESCRIPTION[] = trNOOP("Experience the IPTV");
 
 const char *cPluginIptv::Description() { return tr(DESCRIPTION); }
