@@ -17,6 +17,8 @@
 #include "log.h"
 #include "socket.h"
 
+#define BUFFER_SIZE (1024*1024)
+
 cIptvSocket::cIptvSocket()
     : socketPortM(0),
       socketDescM(-1),
@@ -74,6 +76,11 @@ bool cIptvSocket::OpenSocket(const int portP, const bool isUdpP) {
         sockAddrM.sin_family = AF_INET;
         sockAddrM.sin_port = htons((uint16_t) (portP & 0xFFFF));
         sockAddrM.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        auto optval = BUFFER_SIZE;
+        if ((setsockopt(socketDescM, SOL_SOCKET, SO_RCVBUF, &optval, sizeof(optval))) < 0) {
+            debug1("setsockopt(SO_RCVBUF): %s.\n", strerror(errno));
+        }
 
         if (isUdpP) {
             ERROR_IF_FUNC(bind(socketDescM, (struct sockaddr *) &sockAddrM, sizeof(sockAddrM)) < 0, "bind()", CloseSocket(), return false);
@@ -555,6 +562,13 @@ bool cIptvTcpServerSocket::OpenSocket(int portP, bool isUdpP) {
         CloseSocket();
         return false;
     }
+
+    /* increase read buffer if possible */
+    auto optval = BUFFER_SIZE;
+    if ((setsockopt(socketDescM, SOL_SOCKET, SO_RCVBUF, &optval, sizeof(optval))) < 0) {
+        debug1("setsockopt(SO_RCVBUF): %s.\n", strerror(errno));
+    }
+
     return true;
 }
 
