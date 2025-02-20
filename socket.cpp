@@ -576,6 +576,7 @@ void cIptvTcpServerSocket::CloseSocket() {
     cIptvSocket::CloseSocket();
     if (clientSocketDescM) {
         close(clientSocketDescM);
+        clientSocketDescM = 0;
     }
 }
 
