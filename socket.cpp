@@ -574,6 +574,9 @@ bool cIptvTcpServerSocket::OpenSocket(int portP, bool isUdpP) {
 
 void cIptvTcpServerSocket::CloseSocket() {
     cIptvSocket::CloseSocket();
+    if (clientSocketDescM) {
+        close(clientSocketDescM);
+    }
 }
 
 bool cIptvTcpServerSocket::Accept() {
