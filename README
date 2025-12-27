@@ -87,7 +87,7 @@ Plugin parameters:
 channels.conf:
 The channels.conf configuration is used to define the protocol and the necessary parameters for each different protocol.
 The common configuration and described below is
-<Name of channel>;IPTV:<Frequence>:S=1|P=0|F=<PROTOCOL>|U=<Protocol Parameter>|<Stream Parameter>:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+<Name of channel>;IPTV:<Frequence>:S=1|P=0|F=<PROTOCOL>|<Protocol Parameter>|<Stream Parameter>:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
     - <Name of channel>
       Select a useful name to identify the stream in the channel.conf
     - <Frequency>
@@ -99,6 +99,8 @@ The common configuration and described below is
     - <VPID>: Video pids. If P=1, then the VPIDs are read from the stream. Select initially e.g. 200
     - <APID>: Audio pids. If P=1, then the APIDs are read from the stream. Select initially e.g. 201
     - <TPID>: Teletext pid or 0 if not available
+
+All protocol parameters are appened using the character '|' as separator. E.g: U=URL|Y=1|H=F
 
 Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 - Protocol UDP
