@@ -17,6 +17,7 @@
 #include "protocolext.h"
 #include "protocolextt.h"
 #include "protocolm3u.h"
+#include "protocolm3us.h"
 #include "protocolradio.h"
 #include "protocolstream.h"
 #include "protocolyt.h"
@@ -52,6 +53,7 @@ private:
     cIptvProtocolExt *pExtProtocolM;
     cIptvProtocolExtT *pExtTProtocolM;
     cIptvProtocolM3U *pM3UProtocolM;
+    cIptvProtocolM3US *pM3USProtocolM;
     cIptvProtocolRadio *pRadioProtocolM;
     cIptvProtocolStream *pStreamProtocolM;
     cIptvStreamer *pIptvStreamerM;

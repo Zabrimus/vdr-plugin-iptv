@@ -35,7 +35,7 @@ PORT=${2}
 # then controlled by the extra parameter passed by IPTV plugin to the script
 case ${PARAMETER} in
     1)
-        URL="https://sdn-global-live-streaming-packager-cache.3qsdn.com/64733/64733_264_live.m3u8"
+        URL="https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
         ;;
     2)
         URL=""

@@ -3,6 +3,7 @@
 #include "checkurl.h"
 #include "source.h"
 #include "protocolm3u.h"
+#include "protocolm3us.h"
 
 #define READLIMIT_BYTES  (1024 * 50)
 #define READ_TIMEOUT_SEC 10L

@@ -97,6 +97,8 @@ cIptvProtocolM3U::SetSource(SourceParameter parameter) {
         url = ReplaceAll(url, "%7C", "|");
     }
 
+    debug1("%s (%d, %s)", __PRETTY_FUNCTION__, parameter.protocol, url.c_str());
+
     if (url.empty()) {
         return false;
     }

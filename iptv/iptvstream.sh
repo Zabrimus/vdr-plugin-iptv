@@ -41,7 +41,7 @@ ABITRATE=320
 # then controlled by the extra parameter passed by IPTV plugin to the script
 case ${PARAMETER} in
     1)
-        URL=""
+        URL="https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
         WIDTH=720
         HEIGHT=576
         FPS=25
@@ -77,6 +77,9 @@ let APID=${PARAMETER}+2
 let SPID=${PARAMETER}+3
 
 # Capture VLC pid for further management in IPTV plugin
+echo "Start vlc"
+echo "vlc \"${URL}\" --sout \"#transcode{${TRANSCODE_OPTS}}:standard{access=udp,mux=ts{pid-video=${VPID},pid-audio=${APID},pid-spu=${SPID}},dst=127.0.0.1:${PORT}}\" --intf dummy"
+
 vlc "${URL}" --sout "#transcode{${TRANSCODE_OPTS}}:standard{access=udp,mux=ts{pid-video=${VPID},pid-audio=${APID},pid-spu=${SPID}},dst=127.0.0.1:${PORT}}" --intf dummy &
 
 PID=${!}

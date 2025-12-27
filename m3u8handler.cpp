@@ -108,7 +108,7 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     if (useYtdlp==1) {
         std::vector<std::string> callStr{
             IptvConfig.GetYtdlpPath(), "--get-url",
-            "-f", "(bv*[vcodec~='^((he|a)vc|h26[45])']+ba[ext=m4a]/b[ext=mp4])", webUri
+            "-f", "(bv*[vcodec~='^((he|a)vc|h26[45])']/(bv*+ba/b)+ba[ext=m4a]/b[ext=mp4])", webUri
         };
 
         std::string newUri;
@@ -136,7 +136,8 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
         }
 
         useUri = newUri;
-    } else if (useYtdlp==2) {
+    } /* Disabled, because i don't know what this code shall do
+      else if (useYtdlp==2) {
         auto yturi = splitUri(webUri);
 
         httplib::Client ytcli(yturi.first);
@@ -159,7 +160,7 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
         auto m = ytres->body.find(".m3u");
         auto index = ytres->body.rfind("http", m);
         useUri = ytres->body.substr(index, m + 4 - index);
-    } else {
+    }*/ else {
         useUri = webUri;
     }
 

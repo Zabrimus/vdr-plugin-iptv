@@ -674,7 +674,11 @@ std::vector<std::string> StreamBaseHandler::prepareStreamCmdVideoFfmpeg(const m3
     callStr.emplace_back("mpegts");
 
     callStr.emplace_back("-mpegts_transport_stream_id");
-    callStr.emplace_back(std::to_string(stream.tpid));
+    if (stream.tpid <= 0) {
+        callStr.emplace_back("1");
+    } else {
+        callStr.emplace_back(std::to_string(stream.tpid));
+    }
 
     callStr.emplace_back("-mpegts_pmt_start_pid");
     callStr.emplace_back("4096");
@@ -683,7 +687,11 @@ std::vector<std::string> StreamBaseHandler::prepareStreamCmdVideoFfmpeg(const m3
     callStr.emplace_back(std::to_string(stream.spid));
 
     callStr.emplace_back("-mpegts_original_network_id");
-    callStr.emplace_back(std::to_string(stream.nid));
+    if (stream.nid <= 0) {
+        callStr.emplace_back("1");
+    } else {
+        callStr.emplace_back(std::to_string(stream.nid));
+    }
 
     callStr.emplace_back("-mpegts_flags");
     callStr.emplace_back("system_b");
@@ -755,7 +763,11 @@ std::vector<std::string> StreamBaseHandler::prepareStreamCmdAudioFfmpeg(const m3
     callStr.emplace_back("mpegts");
 
     callStr.emplace_back("-mpegts_transport_stream_id");
-    callStr.emplace_back(std::to_string(stream.tpid));
+    if (stream.tpid <= 0) {
+        callStr.emplace_back("1");
+    } else {
+        callStr.emplace_back(std::to_string(stream.tpid));
+    }
 
     callStr.emplace_back("-mpegts_pmt_start_pid");
     callStr.emplace_back("4096");
@@ -764,7 +776,11 @@ std::vector<std::string> StreamBaseHandler::prepareStreamCmdAudioFfmpeg(const m3
     callStr.emplace_back(std::to_string(stream.spid));
 
     callStr.emplace_back("-mpegts_original_network_id");
-    callStr.emplace_back("65281");
+    if (stream.nid <= 0) {
+        callStr.emplace_back("1");
+    } else {
+        callStr.emplace_back(std::to_string(stream.nid));
+    }
 
     callStr.emplace_back("-mpegts_flags");
     callStr.emplace_back("system_b");

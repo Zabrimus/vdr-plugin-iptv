@@ -6,9 +6,10 @@ Written by:                  Rolf Ahrenberg
                              Antti Seppälä
                              < a . s e p p a l a @ g m a i l . c o m >
 
-Project's homepage:          http://www.saunalahti.fi/~rahrenbe/vdr/iptv/
+Original Project's homepage:  http://www.saunalahti.fi/~rahrenbe/vdr/iptv/
+Current Project's homepage:   https://github.com/Zabrimus/vdr-plugin-iptv
 
-Latest version available at: http://www.saunalahti.fi/~rahrenbe/vdr/iptv/
+Latest version available at: https://github.com/Zabrimus/vdr-plugin-iptv
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 2 as
@@ -20,6 +21,7 @@ Requirements:
 - Libcurl - the multiprotocol file transfer library
   http://curl.haxx.se/libcurl/
 - yt-dlp  - optional. Used for protocol M3U.
+- either vlc or ffmpeg or both
 
 Description:
 
@@ -38,7 +40,7 @@ should be considered as a testing feature only.
 IPTV plugin also features a support for external streaming applications.
 With proper helper applications and configuration IPTV plugin is able to
 display not only MPEG1/2, H.264 and H.265 transport streams but also other
-formats like MP3 radio streams, mms video streams and so on.
+formats like MP3 radio streams, mms video streams and many more.
 
 Installation:
 
@@ -81,58 +83,222 @@ Plugin parameters:
    -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size
    -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp
 
-Configuration:
 
-- channels.conf
+channels.conf:
+The channels.conf configuration is used to define the protocol and the necessary parameters for each different protocol.
+The common configuration and described below is
+<Name of channel>;IPTV:<Frequence>:S=1|P=0|F=<PROTOCOL>|U=<Protocol Parameter>|<Stream Parameter>:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+    - <Name of channel>
+      Select a useful name to identify the stream in the channel.conf
+    - <Frequency>
+      It's recommended to use frequencies in decades (10, 20, 30, 40, ...) for all IPTV channel entries.
+      See also the last entry in the channels.conf. You could use the same value as the first frequency to prevent
+      that VDR deletes a channel, because of a found duplicate.
+    - S=1 or S=0: Section id (Sid/Nid/Tid) scanner ("0" disable, "1" enable)
+    - P=0 or P=1: Pid scanner ("0" disable, "1" enable)
+    - <VPID>: Video pids. If P=1, then the VPIDs are read from the stream. Select initially e.g. 200
+    - <APID>: Audio pids. If P=1, then the APIDs are read from the stream. Select initially e.g. 201
+    - <TPID>: Teletext pid or 0 if not available
 
-  TV8;IPTV:70:S=1|P=0|F=M3U|U=other.cfg|A=2|Y=1|H=F:I:0:200:201,202,203,204,205:0:0:11:1:100:0
-  ST1:IPTV:90:S=1|P=0|F=STREAM|U=http%3A//locahost/stream?id=10|A=1|H=V:I:0:514:670:2321:0:5:0:200:0
-  RD1:IPTV:80:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=8:I:0:270:271,272,273,274,275:0:0:8:1:9:8
-  TV7;IPTV:70:S=1|P=0|F=M3U|U=list1.cfg|A=5:I:0:200:201,202,203,204,205:0:0:11:1:100:0
-  TV6;IPTV:60:S=1|P=0|F=EXT|U=iptvstream.sh|A=0:I:0:0:680:0:0:6:0:0:0
-  TV7;IPTV:60:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=0:I:0:0:680:0:0:6:0:0:0
-  TV5;IPTV:50:S=0|P=1|F=FILE|U=/video/stream.ts|A=5:I:0:514:670:2321:0:5:0:0:0
-  TV4;IPTV:40:S=0|P=1|F=HTTP|U=127.0.0.1/TS/2|A=3000:I:0:513:660:2321:0:4:0:0:0
-  TV3;IPTV:30:S=1|P=0|F=CURL|U=http%3A//foo%3Abar@127.0.0.1%3A3000/TS/2|A=0:I:0:512:650:2321:0:3:0:0:0
-  TV2;IPTV:20:S=1|P=0|F=UDP|U=127.0.0.1@127.0.0.1|A=1234:I:0:512:650:2321:0:2:0:0:0
-  TV1;IPTV:10:S=1|P=0|F=UDP|U=127.0.0.1|A=1234:I:0:512:650:2321:0:1:0:0:0
-           ^  ^   ^   ^     ^           ^      ^
-           |  |   |   |     |           |      |
-           |  |   |   |     |           |      Source type ("I")
-           |  |   |   |     |           Stream parameter
-           |  |   |   |     |            UDP:    multicast port
-           |  |   |   |     |            CURL:   <<to be defined>>
-           |  |   |   |     |            HTTP:   HTTP port number
-           |  |   |   |     |            FILE:   file delay (ms)
-           |  |   |   |     |            EXT:    script parameter
-           |  |   |   |     |            EXTT:   script parameter
-           |  |   |   |     |            M3U:    Y=1 uses yt-dlp to determine the video URL
-           |  |   |   |     |                    Y=2 tries to find the video URL internally
-           |  |   |   |     |                    H=F uses ffmpeg
-           |  |   |   |     |                    H=V uses vlc
-           |  |   |   |     |            M3US:
-           |  |   |   |     |            STREAM: H=F uses ffmpeg
-           |  |   |   |     |                    H=V uses vlc
-           |  |   |   |     |                    H=E calls the script iptv-cmdline-expert.py to get the commandline
-           |  |   |   |     |            RADIO:  H=F uses ffmpeg
-           |  |   |   |     |                    H=V uses vlc
-           |  |   |   |     |                    H=E calls the script iptv-cmdline-expert.py to get the commandline
-           |  |   |   |     Stream address
-           |  |   |   |      UDP:  multicast [source@]group address
-           |  |   |   |      CURL: HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded
-           |  |   |   |      HTTP: URL; missing the scheme name part and possible port declaration
-           |  |   |   |      FILE: file location
-           |  |   |   |      EXT:  script location (uses UDP)
-           |  |   |   |      EXTT: script location (uses TCP)
-           |  |   |   |      M3U:  m3u playlist
-           |  |   |   |      M3US: m3u URL
-           |  |   |   |      RADIO:  An URL for a radio stream
-           |  |   |   |      STREAM:  An URL for a video stream
-           |  |   |   |      YT:   URL (e.g. youtube or any other which is support by yt-dlp)
-           |  |   |   Stream protocol ("UDP", "CURL", "HTTP", "FILE", "EXT", "EXTT", "M3U", "M3US", "RADIO", "STREAM", "YT")
-           |  |   Pid scanner ("0" disable, "1" enable)
-           |  Section id (Sid/Nid/Tid) scanner ("0" disable, "1" enable)
-           Unique enumeration
+Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
+- Protocol UDP
+  The protocol UDP receives a stream via multicast [source@]group address.
+
+  Stream parameter:
+  U=<multicast IP address>
+  A=<multicast port>
+
+  Example:
+  <Name of channel>;IPTV:Frequence>:S=1|P=0|F=UDP|U=<multicast IP address>|A=<multicast port>:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  Multicast Stream;IPTV:10:S=1|P=0|F=UDP|U=127.0.0.1|A=1234:I:0:200:201:0:0:1:0:0:10
+
+- Protocol CURL
+  Receives a stream via cURL (RTMP)
+
+  Stream parameter:
+  U=HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded
+  A=0 (needs to be checked!)
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=CURL|U=<HTTP/HTTPS address>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  Curl Demo;IPTV:20:S=1|P=0|F=CURL|U=http%3A//foo%3Abar@127.0.0.1%3A3000/TS/2|A=0:I:0:200:201:0:0:1:0:0:20
+
+- Protocol FILE
+  Reads a file
+
+  Stream parameter:
+  U=File name
+  A=0 (needs to be defined)
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=CURL|U=<file name>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  Local File;IPTV:30:S=0|P=1|F=FILE|U=/video/stream.ts|A=5:I:0:200:201:0:0:1:0:0:30
+
+- Protocol EXT
+  Calls a script which gets all parameters of the channels.conf. The script itself decides itself what to do and
+  sends the TS stream via UDP to the plugin.
+
+  Stream parameter:
+  U=Location of the script
+  A=<value> The parameter will be used by the script
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=EXT|U=<script name>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  Script UDP;IPTV:40:S=1|P=0|F=EXT|U=iptvstream.sh|A=0:I:0:200:201:0:0:1:0:0:40
+
+  Check also the script iptvstream.sh in directory iptv. The script uses the Parameter A to select the URL and some
+  transcoding parameters. The URL will be transcoded using vlc and the stream will be sent to the plugin via UDP.
+  The existing script can be used as a template or a whole new script can be written of course.
+
+- Protocol EXTT
+  Very similar to protocol EXT, but the TS stream must be sent via TCP.
+
+  Calls a script which gets all parameters of the channels.conf. The script itself decides itself what to do and
+  sends the TS stream via UDP to the plugin.
+
+  Stream parameter:
+  U=Location of the script
+  A=<value> The parameter will be used by the script
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=EXTT|U=<script name>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  Script UDP;IPTV:50:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=0:I:0:200:201:0:0:1:0:0:50
+
+  Check also the script iptvstream.sh in directory iptv. The script uses the Parameter A to select the URL and some
+  transcoding parameters. The URL will be transcoded using vlc and the stream will be sent to the plugin via UDP.
+  The existing script can be used as a template or a whole new script can be written of course.
+
+- Protocol M3U
+  The M3U protocol reads a configurable file (Parameter U=) line by line and uses the value in line (Parameter A=) as m3u URL to stream
+
+  Stream parameter:
+  U=<m3u configuration file>
+  A=<number of the desired entry>
+  Y=0 (default)
+  Y=1 (uses yt-dlp to determine the video URL, recommended)
+  H=F (uses FFmpeg to transcode the stream)
+  H=V (uses vlc to transcode the stream)
+
+  If you have a file list1.cfg in the plugin configuration directory of VDR with the following lines
+  1:https://mcdn.daserste.de/daserste/de/master.m3u8
+  2:https://zdf-hls-15.akamaized.net/hls/live/2016498/de/veryhigh/master.m3u8
+  3:https://zdf-hls-18.akamaized.net/hls/live/2016501/dach/veryhigh/master.m3u8
+  4:https://artesimulcast.akamaized.net/hls/live/2030993/artelive_de/master.m3u8
+  5:https://dbjwcot8t7nyd.cloudfront.net/out/v1/9d068a9428444b458324ad77b5a0a4b8/index.m3u8
+  6:https://mcdn.br.de/br/fs/ard_alpha/hls/de/master.m3u8
+  7:https://mcdn.one.ard.de/ardone/hls/master.m3u8
+
+  then you can add some entries to the channels.conf to stream either the first, second or sixth entry.
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=M3U|U=<m3u configuration file>|A=<number of the desired entry>:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  M3U List Entry 1 Internal;IPTV:60:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=0|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:60
+  M3U List Entry 2 Internal;IPTV:70:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:70
+  M3U List Entry 6 Internal;IPTV:80:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:80
+  M3U List Entry 1 yt_dlp;IPTV:90:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:90
+  M3U List Entry 2 yt_dlp;IPTV:100:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:100
+  M3U List Entry 6 yt_dlp;IPTV:110:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:110
+
+- Protocol M3US
+  It's a simpler version of M3U. Instead of a configuration file, the URL (colons (%3A) and pipes (%7C) shall be URL encoded)
+  will be configured directly.
+
+  Stream parameter:
+  U=<m3u URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
+  A=0 (needs to be defined)
+  Y=0 (default)
+  Y=1 (uses yt-dlp to determine the video URL, recommended)
+  H=F (uses FFmpeg to transcode the stream)
+  H=V (uses vlc to transcode the stream)
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=M3US|U=<m3u URL>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  M3U URL;IPTV:120:S=1|P=0|F=M3US|U=https%3A//mcdn.daserste.de/daserste/de/masters.m3u8|A=0:I:0:200:201:0:0:1:0:0:120
+  M3U URL yt-dlpL;IPTV:130:S=1|P=0|F=M3US|U=https%3A//daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8|A=0|H=F|Y=1:I:0:200=2:201=@4:0:0:1:0:0:130
+
+- Protocol STREAM
+  Streams a TS stream provided e.g. by a local FFmpeg server.
+
+  Stream parameter:
+  U=<URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
+  A=0 (needs to be defined)
+  H=F (uses FFmpeg to transcode the stream)
+  H=V (uses vlc to transcode the stream)
+  H=E (calls the script iptv-cmdline-expert.py to get the commandline)
+
+  Start e.g. an ffmpeg server with 'ffmpeg -i 00001.ts -f mpegts tcp://127.0.0.1:6666?listen' and use the url in
+  the channel.conf configuration.
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=STREAM|U=<URL>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  Stream name:IPTV:140:S=1|P=0|F=STREAM|U=http%3A//127.0.0.1%3A6666|A=0|H=V:I:0:200:201:0:0:1:0:0:140
+
+- Protocol RADIO
+  This protocol is useful for audio only streams. It is recommended to use vlc as transcoder (see below)
+
+  Stream parameter:
+  U=<URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
+  A=0 (needs to be defined)
+  H=F (uses FFmpeg to transcode the stream)
+  H=V (uses vlc to transcode the stream)
+  H=E (calls the script iptv-cmdline-expert.py to get the commandline)
+
+  Example:
+  <Name of channel>:IPTV:<Frequence>:S=1|P=0|F=RADIO|U=<URL>>|A=0:I:0:<VPID>:0:<TPID>:0:1:0:0:<Frequence>
+
+  Radio;IPTV:150:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=0|H=V:I:0:0:201:0:0:1:0:0:150
+
+- Protocol YT
+  Streams a youtube or an other supported video. Please check the tool yt-dlp (get the least recent version to prevent problems)
+  to get supported sites. The final URL of the stream will be determined using the tool yt-dlp.
+
+  Stream parameter:
+  U=<URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
+  A=0 (needs to be defined)
+
+  Example:
+  <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=YT|U=<URL>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
+
+  YT URL;IPTV:160:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:160
+
+- All samples in one channels.conf:
+    Script UDP;IPTV:10:S=1|P=0|F=EXT|U=iptvstream.sh|A=1:I:0:0:200=@3:0:0:1:0:0:10
+    Script TCP;IPTV:20:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:20
+    M3U List Entry 1 Internal;IPTV:30:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=0|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:30
+    M3U List Entry 2 Internal;IPTV:40:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:40
+    M3U List Entry 6 Internal;IPTV:50:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:50
+    M3U List Entry 1 yt_dlp;IPTV:60:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:60
+    M3U List Entry 2 yt_dlp;IPTV:70:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:70
+    M3U List Entry 6 yt_dlp;IPTV:80:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:80
+    M3U URL;IPTV:90:S=1|P=0|F=M3US|U=https%3A//daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8|A=0|H=F:I:0:200=2:201=@4:0:0:1:0:0:90
+    Stream name;IPTV:100:S=1|P=0|F=STREAM|U=tcp%3A//localhost%3A6666|A=0|H=F:I:0:200=2:257=deu@3:0:0:1:0:0:100
+    YT URL;IPTV:120:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:120
+    Radio;IPTV:130:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=0|H=V:I:0:0:201=@4:0:0:1:0:0:130
+
+    The VDR svdrp command LSTC :ids shows then
+    220 vdr SVDRP VideoDiskRecorder 2.7.7; Sat Dec 27 17:50:15 2025; UTF-8
+    250-1 I-0-10-1-10 Script UDP;IPTV:10:S=1|P=0|F=EXT|U=iptvstream.sh|A=1:I:0:100=27:200=deu@15,201=deu@15,202=deu@15:0:0:1:0:0:10
+    250-2 I-0-20-1-20 Script TCP;IPTV:20:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:20
+    250-3 I-0-30-1-30 M3U List Entry 1 Internal;IPTV:30:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=0|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:30
+    250-4 I-0-40-1-40 M3U List Entry 2 Internal;IPTV:40:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:40
+    250-5 I-0-50-1-50 M3U List Entry 6 Internal;IPTV:50:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:50
+    250-6 I-0-60-1-60 M3U List Entry 1 yt_dlp;IPTV:60:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:60
+    250-7 I-0-70-1-70 M3U List Entry 2 yt_dlp;IPTV:70:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:70
+    250-8 I-0-80-1-80 M3U List Entry 6 yt_dlp;IPTV:80:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:80
+    250-9 I-0-90-1-90 M3U URL;IPTV:90:S=1|P=0|F=M3US|U=https%3A//daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8|A=0|H=F:I:0:200=2:201=@4:0:0:1:0:0:90
+    250-10 I-0-100-1-100 Stream name;IPTV:100:S=1|P=0|F=STREAM|U=tcp%3A//localhost%3A6666|A=0|H=F:I:0:200=2:257=deu@3:0:0:1:0:0:100
+    250-11 I-0-120-1-120 YT URL;IPTV:120:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:120
+    250 12 I-0-130-1-130 Radio;IPTV:130:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=0|H=V:I:0:0:201=@4:0:0:1:0:0:130
+    221 vdr closing connections
+
 
 - UDP multicast rules for iptables firewall
 

@@ -41,6 +41,7 @@ cIptvDevice::cIptvDevice(unsigned int indexP)
     pExtProtocolM = new cIptvProtocolExt();
     pExtTProtocolM = new cIptvProtocolExtT();
     pM3UProtocolM = new cIptvProtocolM3U();
+    pM3USProtocolM = new cIptvProtocolM3US();
     pRadioProtocolM = new cIptvProtocolRadio();
     pStreamProtocolM = new cIptvProtocolStream();
     pYTProtocolM = new cIptvProtocolYT();
@@ -82,6 +83,7 @@ cIptvDevice::~cIptvDevice() {
     DELETE_POINTER(pCurlProtocolM);
     DELETE_POINTER(pUdpProtocolM);
     DELETE_POINTER(pM3UProtocolM);
+    DELETE_POINTER(pM3USProtocolM);
     DELETE_POINTER(pRadioProtocolM);
     DELETE_POINTER(pStreamProtocolM);
     DELETE_POINTER(pYTProtocolM);
@@ -323,9 +325,12 @@ bool cIptvDevice::SetChannelDevice(const cChannel *channelP, bool liveViewP) {
         protocol = pExtTProtocolM;
         break;
 
-        case cIptvTransponderParameters::eProtocolM3U:
-    case cIptvTransponderParameters::eProtocolM3US:
+    case cIptvTransponderParameters::eProtocolM3U:
         protocol = pM3UProtocolM;
+        break;
+
+    case cIptvTransponderParameters::eProtocolM3US:
+        protocol = pM3USProtocolM;
         break;
 
     case cIptvTransponderParameters::eProtocolRadio:
