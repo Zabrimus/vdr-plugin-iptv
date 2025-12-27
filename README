@@ -106,6 +106,8 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=<multicast IP address>
+
+  Protocol parameter:
   A=<multicast port>
 
   Example:
@@ -118,6 +120,8 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=HTTP/HTTPS URL; colons (%3A) and pipes (%7C) shall be URL encoded
+
+  Protocol parameter:
   A=0 (needs to be checked!)
 
   Example:
@@ -130,6 +134,8 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=File name
+
+  Protocol parameter:
   A=0 (needs to be defined)
 
   Example:
@@ -143,6 +149,8 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=Location of the script
+
+  Protocol parameter:
   A=<value> The parameter will be used by the script
 
   Example:
@@ -162,6 +170,8 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=Location of the script
+
+  Protocol parameter:
   A=<value> The parameter will be used by the script
 
   Example:
@@ -178,11 +188,13 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=<m3u configuration file>
-  A=<number of the desired entry>
   Y=0 (default)
   Y=1 (uses yt-dlp to determine the video URL, recommended)
   H=F (uses FFmpeg to transcode the stream)
   H=V (uses vlc to transcode the stream)
+
+  Protocol parameter:
+  A=<number of the desired entry>
 
   If you have a file list1.cfg in the plugin configuration directory of VDR with the following lines
   1:https://mcdn.daserste.de/daserste/de/master.m3u8
@@ -211,11 +223,13 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=<m3u URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
-  A=0 (needs to be defined)
   Y=0 (default)
   Y=1 (uses yt-dlp to determine the video URL, recommended)
   H=F (uses FFmpeg to transcode the stream)
   H=V (uses vlc to transcode the stream)
+
+  Protocol parameter:
+  A=0 (needs to be defined)
 
   Example:
   <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=M3US|U=<m3u URL>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
@@ -228,10 +242,12 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=<URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
-  A=0 (needs to be defined)
   H=F (uses FFmpeg to transcode the stream)
   H=V (uses vlc to transcode the stream)
   H=E (calls the script iptv-cmdline-expert.py to get the commandline)
+
+  Protocol parameter:
+  A=0 (needs to be defined)
 
   Start e.g. an ffmpeg server with 'ffmpeg -i 00001.ts -f mpegts tcp://127.0.0.1:6666?listen' and use the url in
   the channel.conf configuration.
@@ -246,10 +262,12 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=<URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
-  A=0 (needs to be defined)
   H=F (uses FFmpeg to transcode the stream)
   H=V (uses vlc to transcode the stream)
   H=E (calls the script iptv-cmdline-expert.py to get the commandline)
+
+  Protocol parameter
+  A=0 (needs to be defined)
 
   Example:
   <Name of channel>:IPTV:<Frequence>:S=1|P=0|F=RADIO|U=<URL>>|A=0:I:0:<VPID>:0:<TPID>:0:1:0:0:<Frequence>
@@ -262,6 +280,8 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
 
   Stream parameter:
   U=<URL> (colons (%3A) and pipes (%7C) shall be URL encoded)
+
+  Protocol parameter:
   A=0 (needs to be defined)
 
   Example:
