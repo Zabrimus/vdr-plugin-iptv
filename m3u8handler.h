@@ -18,7 +18,9 @@ struct media {
     std::string uri;
 };
 
-typedef struct {
+typedef struct m3u_stream {
+    m3u_stream() : width(0), height(0), audio(0), vpid(0), spid(0), tpid(0), nid(0) {};
+
     int width;
     int height;
     std::string url;

@@ -239,8 +239,9 @@ void cIptvPluginSetup::StoreFilters(const char *nameP, int *valuesP) {
             *q++ = ' ';
         }
 
+        memset(s, 0, sizeof(s));
         snprintf(s, sizeof(s), "%d", valuesP[i]);
-        strncpy(q, s, strlen(s));
+        memcpy(q, s, strlen(s));
         q += strlen(s);
     }
 

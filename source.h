@@ -52,7 +52,7 @@ public:
     void SetSidScan(int sidScanP) { sidScanM = sidScanP; };
     void SetPidScan(int pidScanP) { pidScanM = pidScanP; };
     void SetProtocol(int protocolP) { protocolM = protocolP; };
-    void SetAddress(const char *addressP) { strncpy(addressM, addressP, sizeof(addressM)); };
+    void SetAddress(const char *addressP) { memset(addressM, 0, sizeof(addressM)); strncpy(addressM, addressP, sizeof(addressM)-1); };
     void SetParameter(int parameterP) { parameterM = parameterP; };
     void SetYtdlp(int value) { useYtdlp = value; };
     void SetXmlTvId(std::string id) { xmltvId = id; };
