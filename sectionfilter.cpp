@@ -117,7 +117,7 @@ inline int cIptvSectionFilter::Feed() {
 }
 
 int cIptvSectionFilter::CopyDump(const uint8_t *bufP, uint8_t lenP) {
-    uint16_t limit, seclen, n;
+    uint16_t limit, seclen;
 
     if (tsFeedpM >= eDmxMaxSectionFeedSize)
         return 0;
@@ -138,7 +138,7 @@ int cIptvSectionFilter::CopyDump(const uint8_t *bufP, uint8_t lenP) {
     // Always set secbuf
     secBufM = secBufBaseM + secBufpM;
 
-    for (n = 0; secBufpM + 2 < limit; ++n) {
+    for (; secBufpM + 2 < limit;) {
         seclen = GetLength(secBufM);
         if ((seclen <= 0) || (seclen > eDmxMaxSectionSize) || ((seclen + secBufpM) > limit))
             return 0;
