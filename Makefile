@@ -149,6 +149,7 @@ install-conf:
 	@mkdir -p $(DESTDIR)$(CFGDIR)/plugins/$(PLUGIN)
 	@mkdir -p $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)
 	@cp -pn $(PLUGIN)/* $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/
+	@cp -pn samples/m3u-list-main.cfg $(DESTDIR)$(RESDIR)/plugins/$(PLUGIN)/
 
 install: install-lib install-i18n install-conf
 

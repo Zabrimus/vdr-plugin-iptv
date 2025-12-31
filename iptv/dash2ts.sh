@@ -31,38 +31,7 @@ PARAMETER=${1}
 # Iptv plugin listens this port
 PORT=${2}
 
-# There is a way to specify multiple URLs in the same script. The selection is
-# then controlled by the extra parameter passed by IPTV plugin to the script
-case ${PARAMETER} in
-    1)
-        URL="https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
-        ;;
-    2)
-        URL=""
-        ;;
-    3)
-        URL=""
-        ;;
-    *)
-        URL=""  # Default URL
-        ;;
-esac
+# URL to stream
+URL="https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
 
-if [ -z "${URL}" ]; then
-    logger "$0: error: URL not defined!"
-    exit 1
-fi
-
-# Create unique pids for the stream
-VPID=${PARAMETER}+1
-APID=${PARAMETER}+2
-SPID=${PARAMETER}+3
-
-ffmpeg -re -hide_banner -i "${URL}" -c:v copy -c:a aac -f mpegts tcp://127.0.0.1:${PORT} &
-
-PID=${!}
-
-trap 'kill -INT ${PID} 2> /dev/null' INT EXIT QUIT TERM
-
-# Waiting for the given PID to terminate
-wait ${PID}
+/usr/local/bin/dash2ts -k /usr/lib/x86_64-linux-gnu/kodi -p ${PORT} -u ${URL}

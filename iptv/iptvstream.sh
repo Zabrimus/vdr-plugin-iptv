@@ -25,7 +25,7 @@ if [ $# -ne 2 ]; then
     exit 1
 fi
 
-# Channels.conf parameter
+# Channels.conf parameter (A=xxx)
 PARAMETER=${1}
 
 # Iptv plugin listens this port

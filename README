@@ -20,7 +20,11 @@ Requirements:
 
 - Libcurl - the multiprotocol file transfer library
   http://curl.haxx.se/libcurl/
-- yt-dlp  - optional. Used for protocol M3U.
+- optional: yt-dlp. Used for protocol M3U.
+  https://github.com/yt-dlp/yt-dlp
+- optional: dash2ts and the Kodi Addon inputstream-adaptive
+  https://github.com/jojo61/dash2ts
+  https://github.com/xbmc/inputstream.adaptive
 - either vlc or ffmpeg or both
 
 Description:
@@ -179,11 +183,28 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
   Example:
   <Name of channel>;IPTV:<Frequence>:S=1|P=0|F=EXTT|U=<script name>|A=0:I:0:<VPID>:<APID>:<TPID>:0:1:0:0:<Frequence>
 
-  Script UDP;IPTV:50:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=0:I:0:200:201:0:0:1:0:0:50
+  Script TCP;IPTV:50:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=0:I:0:200:201:0:0:1:0:0:50
 
   Check also the script iptvstream.sh in directory iptv. The script uses the Parameter A to select the URL and some
   transcoding parameters. The URL will be transcoded using vlc and the stream will be sent to the plugin via UDP.
   The existing script can be used as a template or a whole new script can be written of course.
+
+  YTDLP-1-1;IPTV:140:S=1|P=0|F=EXTT|U=ytdlp-1.sh|A=1|H=V:I:0:256=27:257=@15:0:0:1:0:0:140
+  YTDLP-1-2;IPTV:150:S=1|P=0|F=EXTT|U=ytdlp-1.sh|A=2|H=V:I:0:256=27:257=@15:0:0:1:0:0:150
+
+  The script ytdlp-1.sh uses yt-dlp to download the stream and uses either ffmpeg (A=1) or netcat (A=2) to send the stream
+  via TCP.
+
+  YTDLP-2-1;IPTV:160:S=1|P=0|F=EXTT|U=ytdlp-2.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:160
+  YTDLP-2-2;IPTV:170:S=1|P=0|F=EXTT|U=ytdlp-2.sh|A=2:I:0:256=27:257=@15:0:0:1:0:0:170
+  YTDLP-2-3;IPTV:180:S=1|P=0|F=EXTT|U=ytdlp-2.sh|A=6:I:0:256=27:257=@15:0:0:1:0:0:180
+
+  The script ytdlp-2.sh uses yt-dlp to download the stream and selects the channel in file m3u-list-main.cfg (see also protocol M3U)
+  The stream will be downloaded with yt-dlp send uses netcat to send the stream via TCP.
+
+  dash2ts;IPTV:190:S=1|P=0|F=EXTT|U=dash2ts.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:190
+
+  The script dash2ts uses dash2ts and the Kodi inputstream-adaptive Addon to download and play the video.
 
 - Protocol M3U
   The M3U protocol reads a configurable file (Parameter U=) line by line and uses the value in line (Parameter A=) as m3u URL to stream
@@ -292,35 +313,28 @@ Every <PROTOCOL> has his own configuration parameter <Protocol parameter>.
   YT URL;IPTV:160:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:160
 
 - All samples in one channels.conf:
-    Script UDP;IPTV:10:S=1|P=0|F=EXT|U=iptvstream.sh|A=1:I:0:0:200=@3:0:0:1:0:0:10
-    Script TCP;IPTV:20:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:20
-    M3U List Entry 1 Internal;IPTV:30:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=0|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:30
-    M3U List Entry 2 Internal;IPTV:40:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:40
-    M3U List Entry 6 Internal;IPTV:50:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:50
-    M3U List Entry 1 yt_dlp;IPTV:60:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:60
-    M3U List Entry 2 yt_dlp;IPTV:70:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:70
-    M3U List Entry 6 yt_dlp;IPTV:80:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:80
-    M3U URL;IPTV:90:S=1|P=0|F=M3US|U=https%3A//daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8|A=0|H=F:I:0:200=2:201=@4:0:0:1:0:0:90
-    Stream name;IPTV:100:S=1|P=0|F=STREAM|U=tcp%3A//localhost%3A6666|A=0|H=F:I:0:200=2:257=deu@3:0:0:1:0:0:100
-    YT URL;IPTV:120:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:120
-    Radio;IPTV:130:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=0|H=V:I:0:0:201=@4:0:0:1:0:0:130
-
-    The VDR svdrp command LSTC :ids shows then
-    220 vdr SVDRP VideoDiskRecorder 2.7.7; Sat Dec 27 17:50:15 2025; UTF-8
-    250-1 I-0-10-1-10 Script UDP;IPTV:10:S=1|P=0|F=EXT|U=iptvstream.sh|A=1:I:0:100=27:200=deu@15,201=deu@15,202=deu@15:0:0:1:0:0:10
-    250-2 I-0-20-1-20 Script TCP;IPTV:20:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:20
-    250-3 I-0-30-1-30 M3U List Entry 1 Internal;IPTV:30:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=0|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:30
-    250-4 I-0-40-1-40 M3U List Entry 2 Internal;IPTV:40:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:40
-    250-5 I-0-50-1-50 M3U List Entry 6 Internal;IPTV:50:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:50
-    250-6 I-0-60-1-60 M3U List Entry 1 yt_dlp;IPTV:60:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:60
-    250-7 I-0-70-1-70 M3U List Entry 2 yt_dlp;IPTV:70:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:70
-    250-8 I-0-80-1-80 M3U List Entry 6 yt_dlp;IPTV:80:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:80
-    250-9 I-0-90-1-90 M3U URL;IPTV:90:S=1|P=0|F=M3US|U=https%3A//daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8|A=0|H=F:I:0:200=2:201=@4:0:0:1:0:0:90
-    250-10 I-0-100-1-100 Stream name;IPTV:100:S=1|P=0|F=STREAM|U=tcp%3A//localhost%3A6666|A=0|H=F:I:0:200=2:257=deu@3:0:0:1:0:0:100
-    250-11 I-0-120-1-120 YT URL;IPTV:120:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:120
-    250 12 I-0-130-1-130 Radio;IPTV:130:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=0|H=V:I:0:0:201=@4:0:0:1:0:0:130
-    221 vdr closing connections
-
+    Multicast Stream;IPTV:10:S=1|P=0|F=UDP|U=127.0.0.1|A=1234:I:0:200:201:0:0:1:0:0:10
+    Curl Demo;IPTV:20:S=1|P=0|F=CURL|U=http%3A//foo%3Abar@127.0.0.1%3A3000/TS/2|A=0:I:0:200:201:0:0:1:0:0:20
+    Local File;IPTV:30:S=0|P=1|F=FILE|U=/video/stream.ts|A=5:I:0:200:201:0:0:1:0:0:30
+    Script UDP;IPTV:40:S=1|P=0|F=EXT|U=iptvstream.sh|A=0:I:0:200:201:0:0:1:0:0:40
+    Script TCP;IPTV:50:S=1|P=0|F=EXTT|U=iptvstreamtcp.sh|A=0:I:0:200:201:0:0:1:0:0:50
+    YTDLP-1-1;IPTV:140:S=1|P=0|F=EXTT|U=ytdlp-1.sh|A=1|H=V:I:0:256=27:257=@15:0:0:1:0:0:140
+    YTDLP-1-2;IPTV:150:S=1|P=0|F=EXTT|U=ytdlp-1.sh|A=2|H=V:I:0:256=27:257=@15:0:0:1:0:0:150
+    YTDLP-2-1;IPTV:160:S=1|P=0|F=EXTT|U=ytdlp-2.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:160
+    YTDLP-2-2;IPTV:170:S=1|P=0|F=EXTT|U=ytdlp-2.sh|A=2:I:0:256=27:257=@15:0:0:1:0:0:170
+    YTDLP-2-3;IPTV:180:S=1|P=0|F=EXTT|U=ytdlp-2.sh|A=6:I:0:256=27:257=@15:0:0:1:0:0:180
+    dash2ts;IPTV:190:S=1|P=0|F=EXTT|U=dash2ts.sh|A=1:I:0:256=27:257=@15:0:0:1:0:0:190
+    M3U List Entry 1 Internal;IPTV:60:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=0|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:60
+    M3U List Entry 2 Internal;IPTV:70:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:70
+    M3U List Entry 6 Internal;IPTV:80:S=1|P=0|F=M3U|U=m3u-list-main.cfg|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:80
+    M3U List Entry 1 yt_dlp;IPTV:90:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=1:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:90
+    M3U List Entry 2 yt_dlp;IPTV:100:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=2:I:0:200=27:201=@15,202=@15,203=@15:0:0:1:0:0:100
+    M3U List Entry 6 yt_dlp;IPTV:110:S=1|P=0|F=M3U|U=m3u-list-main.cfg|H=F|Y=1|A=6:I:0:200=27:201=@15,202=@15:0:0:1:0:0:110
+    M3U URL;IPTV:120:S=1|P=0|F=M3US|U=https%3A//mcdn.daserste.de/daserste/de/masters.m3u8|A=0:I:0:200:201:0:0:1:0:0:120
+    M3U URL yt-dlpL;IPTV:130:S=1|P=0|F=M3US|U=https%3A//daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8|A=0|H=F|Y=1:I:0:200=2:201=@4:0:0:1:0:0:130
+    Stream name:IPTV:140:S=1|P=0|F=STREAM|U=http%3A//127.0.0.1%3A6666|A=0|H=V:I:0:200:201:0:0:1:0:0:140
+    Radio;IPTV:150:S=1|P=0|F=RADIO|U=http%3A//wdr-1live-live.icecast.wdr.de/wdr/1live/live/mp3/128/stream.mp3|A=0|H=V:I:0:0:201:0:0:1:0:0:150
+    YT URL;IPTV:160:S=1|P=0|F=YT|U=https%3A//www.youtube.com/watch?v=Li3Dvqlo5uE|A=0:I:0:200=2:201=@4:0:0:1:0:0:160
 
 - UDP multicast rules for iptables firewall
 
