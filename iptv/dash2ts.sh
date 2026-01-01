@@ -32,6 +32,6 @@ PARAMETER=${1}
 PORT=${2}
 
 # URL to stream
-URL="https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
+URL="http://dash.akamaized.net/dash264/TestCases/3b/fraunhofer/aac-lc_stereo_with_video/ElephantsDream/elephants_dream_480p_aaclc_stereo_sidx.mpd"
 
 /usr/local/bin/dash2ts -k /usr/lib/x86_64-linux-gnu/kodi -p ${PORT} -u ${URL}
