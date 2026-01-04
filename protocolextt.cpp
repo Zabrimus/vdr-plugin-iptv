@@ -157,8 +157,8 @@ bool cIptvProtocolExtT::Open() {
 
     // Wait for client
     int retries = 0;
-    int waitMs = 200;
-    while (!Accept() && retries < 1000 / waitMs * 10) {
+    int waitMs = 50;
+    while (!Accept() && retries < 10000 / waitMs * 10) {
         std::this_thread::sleep_for(std::chrono::milliseconds(waitMs));
         retries++;
     }
