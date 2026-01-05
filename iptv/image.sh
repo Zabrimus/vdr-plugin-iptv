@@ -36,7 +36,7 @@ if [ $# -ne 2 ]; then
     exit 1
 fi
 
-# Channels.conf parameter
+# Channels.conf parameter (A=xxx)
 case ${1} in
     1)
         URL="http://proxy/cgi-bin/bin/graph.cgi?hostname=proxy;plugin=energy;type=electricity"
