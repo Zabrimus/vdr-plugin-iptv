@@ -90,8 +90,7 @@ bool cIptvStreamer::Open() {
 
     // check if the radio plugin exists
     bool hasRadioPlugin = false;
-    auto p = cPluginManager::GetPlugin("radio");
-    if (p) {
+    if ( (cPluginManager::GetPlugin("radio") != nullptr) || (cPluginManager::GetPlugin("radio-ng") != nullptr) ) {
         hasRadioPlugin = true;
     }
 
