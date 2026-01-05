@@ -103,12 +103,12 @@ m3u_stream M3u8Handler::parseYT(const std::string &webUri) {
 m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
     std::string useUri;
 
+    // if useYtdlp == 0 read m3u and try to parse the file
     // if useYtdlp == 1 then use yt-dlp to get the real m3u8 URL
-    // if useYtdlp == 2 then get the page and try to find the real m3u8 URL
-    if (useYtdlp==1) {
+    if (useYtdlp == 1) { // yt-dlp Version
         std::vector<std::string> callStr{
-            IptvConfig.GetYtdlpPath(), "--get-url",
-            "-f", "(bv*[vcodec~='^((he|a)vc|h26[45])']/(bv*+ba/b)+ba[ext=m4a]/b[ext=mp4])", webUri
+            IptvConfig.GetYtdlpPath(), "--get-url", "--audio-multistream",
+            "-f", "bv[vcodec~='^((he|a)vc|h26[45])']+mergeall[acodec~='^mp4(a)|aac|(e)ac3']/mergeall[ext=mp4]/bestaudio", webUri
         };
 
         std::string newUri;
@@ -116,7 +116,7 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
                                                    [&newUri](const char *bytes, size_t n) {
                                                      std::string result = std::string(bytes, n);
                                                      debug1("yt-dlp found URL %s\n", result.c_str());
-                                                     newUri = std::string(bytes, n);
+                                                     newUri = newUri + result;
                                                    },
 
                                                    [](const char *bytes, size_t n) {
@@ -136,156 +136,164 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
         }
 
         useUri = newUri;
-    } /* Disabled, because i don't know what this code shall do
-      else if (useYtdlp==2) {
-        auto yturi = splitUri(webUri);
 
-        httplib::Client ytcli(yturi.first);
-        ytcli.set_follow_location(true);
-        auto ytres = ytcli.Get(yturi.second);
+        std::stringstream sp(useUri);
+        std::string to;
+        int idx = 0; // idx 0 -> Video, all others are audio
 
-        m3u_stream ytresult;
-        ytresult.width = ytresult.height = 0;
+        m3u_stream r;
+        r.width = 1920;
+        r.height = 1080;
+        r.url = useUri;
 
-        if (ytres==nullptr) {
-            error("Got no result for request %s\n", webUri.c_str());
-            return ytresult;
+        while(std::getline(sp, to, '\n')) {
+            if (idx == 0) {
+                r.url = to;
+            } else {
+                media m;
+                m.uri = to;
+                r.audio.emplace_back(m);
+            }
+
+            idx++;
         }
 
-        if (ytres->status!=200) {
-            debug1("Got HTTP result code %d\n", ytres->status);
-            return ytresult;
+        if (idx > 0) {
+            // we found at least one stream
+            r.width = 1920;
+            r.height = 1080;
         }
 
-        auto m = ytres->body.find(".m3u");
-        auto index = ytres->body.rfind("http", m);
-        useUri = ytres->body.substr(index, m + 4 - index);
-    }*/ else {
+        return r;
+    } else { // manual Version
         useUri = webUri;
-    }
+        auto uri = splitUri(webUri);
 
-    auto uri = splitUri(useUri);
+        httplib::Client cli(uri.first);
+        cli.set_follow_location(true);
+        auto res = cli.Get(uri.second);
 
-    httplib::Client cli(uri.first);
-    cli.set_follow_location(true);
-    auto res = cli.Get(uri.second);
+        m3u_stream result;
+        result.width = result.height = 0;
 
-    m3u_stream result;
-    result.width = result.height = 0;
-
-    if (res==nullptr) {
-        return result;
-    }
-
-    if (res->status!=200) {
-        return result;
-    }
-
-    std::string m3u = res->body;
-    std::istringstream stream(m3u);
-    std::string line;
-
-    int maxW = 0, maxH = 0;
-    std::string audioGroup;
-    std::string m3uMax;
-
-    std::string starterStream = "#EXT-X-STREAM-INF:";
-    std::string starterMedia = "#EXT-X-MEDIA:";
-    std::string starterIgnore = "#EXTINF:";
-
-    while (std::getline(stream, line)) {
-        if (startsWith(line, starterStream)) {
-            auto splitted = split(line.substr(starterStream.length()), ',');
-
-            for (const auto &t : splitted) {
-                if (startsWith(t, "RESOLUTION=")) {
-                    int w, h;
-                    sscanf(t.c_str() + 11, "%dx%d", &w, &h);
-
-                    debug2("Found Resolution: %dx%d\n", w, h);
-
-                    if (w > maxW) {
-                        maxW = w;
-                        maxH = h;
-                        std::getline(stream, m3uMax);
-
-                        if (!startsWith(m3uMax, "http://") && !startsWith(m3uMax, "https://")) {
-                            // this is a relative URL -> construct absolute URL
-                            auto last = useUri.find_last_of('/');
-                            m3uMax = useUri.substr(0, last + 1).append(m3uMax);
-                        }
-                    }
-                } else if (startsWith(t, "AUDIO=")) {
-                    audioGroup = t.substr(7, t.length() - 8);
-                }
-            }
-        } else if (startsWith(line, starterMedia)) {
-            auto splitted = split(line.substr(starterMedia.length()), ',');
-
-            bool addThis = true;
-            media m;
-
-            for (const auto &t : splitted) {
-                if (startsWith(t, "TYPE=")) {
-                    m.type = t.substr(5);
-                    if (m.type!="AUDIO") {
-                        // no audio -> skip
-                        addThis = false;
-                        break;
-                    }
-                } else if (startsWith(t, "LANGUAGE=")) {
-                    m.language = t.substr(10, t.length() - 11);
-                } else if (startsWith(t, "NAME=")) {
-                    m.name = t.substr(6, t.length() - 7);
-                } else if (startsWith(t, "GROUP-ID=")) {
-                    m.groupId = t.substr(10, t.length() - 11);
-                } else if (startsWith(t, "URI=")) {
-                    m.uri = t.substr(5, t.length() - 6);
-                }
-            }
-
-            if (addThis) {
-                if (!startsWith(m.uri, "http://") && !startsWith(m.uri, "https://")) {
-                    // this is a relative URL -> construct absolute URL
-                    auto last = useUri.find_last_of('/');
-                    m.uri = useUri.substr(0, last + 1).append(m.uri);
-                }
-
-                result.audio.push_back(m);
-            }
-        } else if (startsWith(line, starterIgnore)) {
-            // this is already a usable m3u8. Don't process anymore but return a useful result
-            result.width = 1920;
-            result.height = 1080;
-            result.url = useUri;
+        if (res==nullptr) {
             return result;
         }
-    }
 
-    // remove all unwanted audio streams with wrong group-id
-    if (!audioGroup.empty() && !result.audio.empty()) {
-        auto it = result.audio.begin();
-        while (it!=result.audio.end()) {
-            if (it->groupId!=audioGroup) {
-                it = result.audio.erase(it);
-            } else {
-                ++it;
+        if (res->status!=200) {
+            return result;
+        }
+
+        std::string m3u = res->body;
+        std::istringstream stream(m3u);
+        std::string line;
+
+        int maxW = 0, maxH = 0;
+        std::string audioGroup;
+        std::string m3uMax;
+
+        std::string starterStream = "#EXT-X-STREAM-INF:";
+        std::string starterMedia = "#EXT-X-MEDIA:";
+        std::string starterIgnore = "#EXTINF:";
+
+        while (std::getline(stream, line)) {
+            if (startsWith(line, starterStream)) {
+                auto splitted = split(line.substr(starterStream.length()), ',');
+
+                for (const auto &t : splitted) {
+                    if (startsWith(t, "RESOLUTION=")) {
+                        int w, h;
+                        sscanf(t.c_str() + 11, "%dx%d", &w, &h);
+
+                        debug2("Found Resolution: %dx%d\n", w, h);
+
+                        if (w > maxW) {
+                            maxW = w;
+                            maxH = h;
+                            std::getline(stream, m3uMax);
+
+                            debug3("m3uMax: %s -> %s, %s", m3uMax.c_str(), startsWith(m3uMax, "http://") ? "true" : "false", startsWith(m3uMax, "https://") ? "true" : "false");
+
+                            if (!startsWith(m3uMax, "http://") && !startsWith(m3uMax, "https://")) {
+                                // this is a relative URL -> construct absolute URL
+                                auto last = useUri.find_last_of('/');
+                                m3uMax = useUri.substr(0, last + 1).append(m3uMax);
+                            }
+
+                            debug3("m3uMax (neu): %s", m3uMax.c_str());
+                        }
+                    } else if (startsWith(t, "AUDIO=")) {
+                        audioGroup = t.substr(7, t.length() - 8);
+                    }
+                }
+            } else if (startsWith(line, starterMedia)) {
+                auto splitted = split(line.substr(starterMedia.length()), ',');
+
+                bool addThis = true;
+                media m;
+
+                for (const auto &t : splitted) {
+                    if (startsWith(t, "TYPE=")) {
+                        m.type = t.substr(5);
+                        if (m.type!="AUDIO") {
+                            // no audio -> skip
+                            addThis = false;
+                            break;
+                        }
+                    } else if (startsWith(t, "LANGUAGE=")) {
+                        m.language = t.substr(10, t.length() - 11);
+                    } else if (startsWith(t, "NAME=")) {
+                        m.name = t.substr(6, t.length() - 7);
+                    } else if (startsWith(t, "GROUP-ID=")) {
+                        m.groupId = t.substr(10, t.length() - 11);
+                    } else if (startsWith(t, "URI=")) {
+                        m.uri = t.substr(5, t.length() - 6);
+                    }
+                }
+
+                if (addThis) {
+                    if (!startsWith(m.uri, "http://") && !startsWith(m.uri, "https://")) {
+                        // this is a relative URL -> construct absolute URL
+                        auto last = useUri.find_last_of('/');
+                        m.uri = useUri.substr(0, last + 1).append(m.uri);
+                    }
+
+                    result.audio.push_back(m);
+                }
+            } else if (startsWith(line, starterIgnore)) {
+                // this is already a usable m3u8. Don't process anymore but return a useful result
+                result.width = 1920;
+                result.height = 1080;
+                result.url = useUri;
+                return result;
             }
         }
+
+        // remove all unwanted audio streams with wrong group-id
+        if (!audioGroup.empty() && !result.audio.empty()) {
+            auto it = result.audio.begin();
+            while (it!=result.audio.end()) {
+                if (it->groupId!=audioGroup) {
+                    it = result.audio.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
+
+        result.width = maxW;
+        result.height = maxH;
+        result.url = m3uMax;
+
+        result.channelName = "";
+        result.vpid = -1;
+        result.spid = -1;
+        result.tpid = -1;
+        result.nid  = -1;
+        result.apids.clear();
+
+        return result;
     }
-
-    result.width = maxW;
-    result.height = maxH;
-    result.url = m3uMax;
-
-    result.channelName = "";
-    result.vpid = -1;
-    result.spid = -1;
-    result.tpid = -1;
-    result.nid  = -1;
-    result.apids.clear();
-
-    return result;
 }
 
 void M3u8Handler::printStream(const m3u_stream& stream) {
