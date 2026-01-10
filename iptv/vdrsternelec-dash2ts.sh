@@ -34,4 +34,4 @@ PORT=${2}
 # URL to stream
 URL="http://dash.akamaized.net/dash264/TestCases/3b/fraunhofer/aac-lc_stereo_with_video/ElephantsDream/elephants_dream_480p_aaclc_stereo_sidx.mpd"
 
-/usr/local/bin/dash2ts -p ${PORT} -u ${URL}w
+/usr/local/bin/dash2ts -p ${PORT} -u ${URL}
