@@ -51,11 +51,16 @@ void cRadioImage::Stop() {
 }
 
 void cRadioImage::Action() {
+    int count = 0;
     while (Running()) {
-        cCondWait::SleepMs(333);
-        if (imagepath && !imageShown) {
-            imageShown = true;
-            Show(imagepath);
+        cCondWait::SleepMs(20);
+        count++;
+        if (count % 15 == 0) {
+            count = 0;
+            if (imagepath && !imageShown) {
+                imageShown = true;
+                Show(imagepath);
+            }
         }
     }
 }
