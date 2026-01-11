@@ -120,6 +120,10 @@ bool cIptvStreamer::Close() {
 
     debug1("%s", __PRETTY_FUNCTION__);
 
+    if (radioImage != nullptr) {
+        radioImage->Exit();
+    }
+
     // Stop thread
     sleepM.Signal();
 
