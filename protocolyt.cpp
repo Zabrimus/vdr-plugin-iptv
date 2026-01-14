@@ -30,8 +30,6 @@ bool cIptvProtocolYT::Open() {
 
         auto streams = m3u8Handler.parseYT(url);
         if (streams.width==0 || streams.height==0) {
-            mark404Channel(channelId);
-
             cString errmsg = cString::sprintf("Unable to load stream with URL %s", url.c_str());
             debug1("%s", *errmsg);
 

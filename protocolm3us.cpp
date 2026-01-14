@@ -30,8 +30,6 @@ bool cIptvProtocolM3US::Open() {
 
         auto streams = m3u8Handler.parseM3u(url, useYtdlp);
         if (streams.width==0 || streams.height==0) {
-            mark404Channel(channelId);
-
             cString errmsg = cString::sprintf("Unable to load stream with URL %s", url.c_str());
             debug1("%s", *errmsg);
 

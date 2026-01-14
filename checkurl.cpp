@@ -154,7 +154,6 @@ void CheckURL::executeChecks() {
 
         if (!((ret == CURLE_OK || fullsizeRead >= READLIMIT_BYTES) && (response_code < 400))) {
             dsyslog("[iptv] Check url failed: %ld: %s -> %s, bytes read %ld\n", response_code, a.first.c_str(), a.second.c_str(), fullsizeRead);
-            mark404Channel(a.first.c_str());
         }
     }
 

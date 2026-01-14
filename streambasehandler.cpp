@@ -452,8 +452,6 @@ void StreamBaseHandler::streamAudioInternal(const m3u_stream &stream) {
 }
 
 void StreamBaseHandler::checkErrorOut(const std::string &msg) {
-    bool is404 = false;
-
     // vlc
     if (msg.find("status: \"404\"") != std::string::npos || msg.find("status: \"400\"") != std::string::npos) {
         cString errmsg = cString::sprintf(tr("Unable to load stream"));
@@ -464,8 +462,6 @@ void StreamBaseHandler::checkErrorOut(const std::string &msg) {
         // TODO: Hier müsste alles gestoppt werden. Allerdings funktioniert diese Variante nicht,
         //  da ein deadlock erzeugt wird.
         // stop();
-
-        is404 = true;
     }
 
     // ffmpeg
@@ -478,12 +474,6 @@ void StreamBaseHandler::checkErrorOut(const std::string &msg) {
         // TODO: Hier müsste alles gestoppt werden. Allerdings funktioniert diese Variante nicht,
         //  da ein deadlock erzeugt wird.
         // stop();
-
-        is404 = true;
-    }
-
-    if (is404) {
-        mark404Channel(channelId);
     }
 }
 

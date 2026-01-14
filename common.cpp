@@ -115,39 +115,3 @@ void printBacktrace() {
 
     esyslog("[iptv] ==> Caller: %s", *cBackTrace::GetCaller());
 }
-
-void mark404Channel(int channelId) {
-    std::lock_guard<std::mutex> guard(all404ChannelMutex);
-    all404Channels.emplace(channelId);
-}
-
-void mark404Channel(const char* channelId) {
-    std::lock_guard<std::mutex> guard(all404ChannelMutex);
-    LOCK_CHANNELS_READ;
-    const cChannel *channel = Channels->GetByChannelID(tChannelID::FromString(channelId));
-    all404Channels.emplace(channel->Number());
-}
-
-void rename404Channels() {
-    if (all404Channels.empty()) {
-        return;
-    }
-
-    std::lock_guard<std::mutex> guard(all404ChannelMutex);
-
-    for (auto c : all404Channels) {
-        {
-            LOCK_CHANNELS_WRITE;
-            cChannel *channel = Channels->GetByNumber(c);
-
-            if (channel) {
-                if (!endswith(channel->Name(), CHANNELMARK404)) {
-                    channel->SetName(cString::sprintf("%s %s", channel->Name(), CHANNELMARK404),
-                                     channel->ShortName(),
-                                     cString::sprintf("%s %s", CHANNELMARK404, channel->Provider()));
-                }
-            }
-        }
-    }
-}
-

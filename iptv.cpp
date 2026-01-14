@@ -28,16 +28,6 @@ static const char DESCRIPTION[] = trNOOP("Experience the IPTV");
 
 const char *cPluginIptv::Description() { return tr(DESCRIPTION); }
 
-std::thread thread404;
-bool thread404Running;
-
-void run404() {
-    while(thread404Running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        rename404Channels();
-    }
-}
-
 cPluginIptv::cPluginIptv() : deviceCountM(1) {
     debug16("%s", __PRETTY_FUNCTION__);
     // Initialize any member variables here.
@@ -48,10 +38,6 @@ cPluginIptv::cPluginIptv() : deviceCountM(1) {
 cPluginIptv::~cPluginIptv() {
     debug16("%s", __PRETTY_FUNCTION__);
     // Clean up after yourself!
-    if (thread404.joinable()) {
-        thread404Running = false;
-        thread404.join();
-    }
 }
 
 const char *cPluginIptv::CommandLineHelp() {
@@ -137,9 +123,6 @@ bool cPluginIptv::Start() {
         info("%s", *info);
     }
 
-    thread404Running = true;
-    thread404 = std::thread(run404);
-
     return true;
 }
 
@@ -148,9 +131,6 @@ void cPluginIptv::Stop() {
     // Stop any background activities the plugin is performing.
     cIptvDevice::Shutdown();
     curl_global_cleanup();
-
-    thread404Running = false;
-    thread404.join();
 }
 
 void cPluginIptv::Housekeeping() {
