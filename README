@@ -86,6 +86,7 @@ Plugin parameters:
    -t <mode>, --trace=<mode>               set the tracing mode
    -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size
    -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp
+   -c <id>,   --http-client=<id>           1:use cpp_httlib (default), 2:use httpclient (curl)
 
 
 channels.conf:

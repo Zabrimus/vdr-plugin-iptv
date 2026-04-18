@@ -3,6 +3,10 @@
 #include "config.h"
 #include "process.hpp"
 
+void logHttpMessage(const std::string& message) {
+    debug1("%s\n", message.c_str());
+}
+
 std::pair<std::string, std::string> splitUri(const std::string& uri) {
     auto yturi = uri::parse_uri(uri);
     std::string host = yturi.scheme + "://" + yturi.authority.host
@@ -165,26 +169,47 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
         }
 
         return r;
-    } else { // manual Version
-        useUri = webUri;
-        auto uri = splitUri(webUri);
-
-        httplib::Client cli(uri.first);
-        cli.set_follow_location(true);
-        auto res = cli.Get(uri.second);
-
+    } else {
+        // manual Version
+        std::string m3u;
         m3u_stream result;
         result.width = result.height = 0;
+        useUri = webUri;
 
-        if (res==nullptr) {
-            return result;
+        if (IptvConfig.GetHttpClient() == 2) {
+            debug1("Use httpclient to get URL\n");
+
+            long lWebPageCode = 0;
+
+            CHTTPClient httpClient([](const std::string& message){ logHttpMessage(message); });
+
+            httpClient.InitSession();
+            httpClient.GetText(webUri, m3u, lWebPageCode);
+            httpClient.CleanupSession();
+
+            if (lWebPageCode != 200 || m3u.empty()) {
+                return result;
+            }
+        } else {
+            debug1("Use cpp_httplib to get URL\n");
+
+            auto uri = splitUri(webUri);
+
+            httplib::Client cli(uri.first);
+            cli.set_follow_location(true);
+            auto res = cli.Get(uri.second);
+
+            if (res==nullptr) {
+                return result;
+            }
+
+            if (res->status!=200) {
+                return result;
+            }
+
+            m3u = res->body;
         }
 
-        if (res->status!=200) {
-            return result;
-        }
-
-        std::string m3u = res->body;
         std::istringstream stream(m3u);
         std::string line;
 

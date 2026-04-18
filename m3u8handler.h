@@ -8,7 +8,9 @@
 
 #undef error
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httplib.h"
+#include "http/cpp-httplib/httplib.h"
+
+#include "HTTPClient.h"
 
 struct media {
     std::string type;

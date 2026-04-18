@@ -19,6 +19,7 @@ private:
     unsigned int threadQueueSize;
     int enableEpgScan;
     int stillPicture;
+    int httpClient;
     int disabledFiltersM[SECTION_FILTER_TABLE_SIZE];
     char configDirectoryM[PATH_MAX];
     char resourceDirectoryM[PATH_MAX];
@@ -49,7 +50,7 @@ public:
 
     cIptvConfig();
 
-    unsigned int GetTraceMode() const { return traceModeM; };
+    unsigned int GetTraceMode() const { return traceModeM; }
     unsigned int GetThreadQueueSize() const { return threadQueueSize; };
     bool IsTraceMode(eTraceMode modeP) const { return (traceModeM & modeP); };
     unsigned int GetProtocolBasePort() const { return protocolBasePortM; };
@@ -63,6 +64,7 @@ public:
     int GetDisabledFilters(unsigned int indexP) const;
     int GetStillPicture() const { return stillPicture; };
     int GetEnableEpgScan() const { return enableEpgScan; };
+    int GetHttpClient() const { return httpClient; };
 
     void SetTraceMode(unsigned int modeP) { traceModeM = (modeP & eTraceModeMask); };
     void SetThreadQueueSize(unsigned int tqs) { threadQueueSize = tqs; };
@@ -76,6 +78,7 @@ public:
     void SetM3uCfgPath(const char* directoryP);
     void SetStillPicture(int s) { stillPicture = s; };
     void SetEnableEpgScan(int s) { enableEpgScan = s; };
+    void SetHttpClient(int c) { httpClient = c; };
 };
 
 extern cIptvConfig IptvConfig;

@@ -85,6 +85,11 @@ OBJS = $(PLUGIN).o common.o config.o device.o pidscanner.o \
 	m3u8handler.o process.o process_unix.o streambasehandler.o \
 	source.o statistics.o streamer.o radioimage.o checkurl.o
 
+# http client
+OBJS += http/httpclient/CurlHandle.o http/httpclient/HTTPClient.o
+INCLUDES += -Ihttp/httpclient
+DEFINES += -DLINUX
+
 ### The main target:
 
 all: $(SOFILE) i18n

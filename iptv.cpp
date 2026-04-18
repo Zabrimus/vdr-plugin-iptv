@@ -47,7 +47,8 @@ const char *cPluginIptv::CommandLineHelp() {
            "  -t <mode>, --trace=<mode>               set the tracing mode\n"
            "  -s <num>,  --thread-queue-size=<number> set the FFmpeg thread-queue-size\n"
            "  -y <path>, --ytdlp=<path>               set the path to yt-dlp. Default /usr/local/bin/yt-dlp\n"
-           "  -m <path>, --m3u-config-path=<path>     sets the path to m3u cfg files\n";
+           "  -m <path>, --m3u-config-path=<path>     sets the path to m3u cfg files\n"
+           "  -c <id>,   --http-client=<id>           1:use cpp_httlib (default), 2:use httpclient (curl)\n";
 }
 
 bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
@@ -60,11 +61,12 @@ bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
         {"thread-queue-size", required_argument, nullptr, 's'},
         {"ytdlp", required_argument, nullptr, 'y'},
         {"m3u-config-path", required_argument, nullptr, 'm'},
+        {"http-client", required_argument, nullptr, 'c'},
         {nullptr, no_argument, nullptr, 0}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "d:t:s:y:m:", long_options, nullptr))!=-1) {
+    while ((c = getopt_long(argc, argv, "d:t:s:y:m:c:", long_options, nullptr))!=-1) {
         switch (c) {
         case 'd':
             deviceCountM = atoi(optarg);
@@ -84,6 +86,10 @@ bool cPluginIptv::ProcessArgs(int argc, char *argv[]) {
 
         case 'm':
             IptvConfig.SetM3uCfgPath(optarg);
+            break;
+
+        case 'c':
+            IptvConfig.SetHttpClient(strtol(optarg, nullptr, 0));
             break;
 
         default:
