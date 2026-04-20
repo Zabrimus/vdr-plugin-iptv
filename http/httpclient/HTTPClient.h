@@ -57,8 +57,8 @@ public:
       /* Fill in the filename or the submit field */
       void AddFormContent(const std::string& fieldName, const std::string& fieldValue);
 
-      struct curl_httppost* m_pFormPost;
-      struct curl_httppost* m_pLastFormptr;
+      curl_mime* m_pMime;
+      curl_mimepart* m_pMimePart;
    };
 
    // Progress Function Data Object - parameter void* of ProgressFnCallback references it
@@ -136,7 +136,7 @@ public:
    const bool DownloadFile(std::vector<unsigned char>& data, const std::string& strURL, long& lHTTPStatusCode);
 
    const bool UploadForm(const std::string& strURL,
-                         const PostFormInfo& data,
+                         PostFormInfo& data,
                          long& lHTTPStatusCode);
 
    inline void AddHeader(const std::string& strHeader)
