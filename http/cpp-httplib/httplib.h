@@ -17126,11 +17126,18 @@ inline std::string get_cert_subject_cn(cert_t cert) {
   auto subject_name = X509_get_subject_name(x509);
   if (!subject_name) return "";
 
-  char buf[256];
-  auto len =
-      X509_NAME_get_text_by_NID(subject_name, NID_commonName, buf, sizeof(buf));
-  if (len < 0) return "";
-  return std::string(buf, static_cast<size_t>(len));
+  int idx = X509_NAME_get_index_by_NID(subject_name, NID_commonName, -1);
+  if (idx < 0) return "";
+  auto entry = X509_NAME_get_entry(subject_name, idx);
+  if (!entry) return "";
+  auto asn1_str = X509_NAME_ENTRY_get_data(entry);
+  if (!asn1_str) return "";
+  unsigned char *utf8 = nullptr;
+  int len = ASN1_STRING_to_UTF8(&utf8, asn1_str);
+  if (len < 0 || !utf8) return "";
+  std::string result(reinterpret_cast<char *>(utf8), static_cast<size_t>(len));
+  OPENSSL_free(utf8);
+  return result;
 }
 
 inline std::string get_cert_issuer_name(cert_t cert) {
@@ -17730,13 +17737,23 @@ inline bool SSLClient::verify_host_with_common_name(X509 *server_cert) const {
   const auto subject_name = X509_get_subject_name(server_cert);
 
   if (subject_name != nullptr) {
-    char name[BUFSIZ];
-    auto name_len = X509_NAME_get_text_by_NID(subject_name, NID_commonName,
-                                              name, sizeof(name));
-
-    if (name_len != -1) {
-      return detail::match_hostname(
-          std::string(name, static_cast<size_t>(name_len)), host_);
+    int idx = X509_NAME_get_index_by_NID(subject_name, NID_commonName, -1);
+    if (idx >= 0) {
+      auto entry = X509_NAME_get_entry(subject_name, idx);
+      if (entry) {
+        auto asn1_str = X509_NAME_ENTRY_get_data(entry);
+        if (asn1_str) {
+          unsigned char *utf8 = nullptr;
+          int len = ASN1_STRING_to_UTF8(&utf8, asn1_str);
+          if (len >= 0 && utf8) {
+            auto result = detail::match_hostname(
+                std::string(reinterpret_cast<char *>(utf8),
+                            static_cast<size_t>(len)), host_);
+            OPENSSL_free(utf8);
+            return result;
+          }
+        }
+      }
     }
   }
 
