@@ -237,8 +237,8 @@ const CURLcode CHTTPClient::Perform()
 
    if (m_bProgressCallbackSet)
    {
-      curl_easy_setopt(m_pCurlSession, CURLOPT_PROGRESSFUNCTION, *GetProgressFnCallback());
-      curl_easy_setopt(m_pCurlSession, CURLOPT_PROGRESSDATA, &m_ProgressStruct);
+      curl_easy_setopt(m_pCurlSession, CURLOPT_XFERINFOFUNCTION, *GetProgressFnCallback());
+      curl_easy_setopt(m_pCurlSession, CURLOPT_XFERINFODATA, &m_ProgressStruct);
       curl_easy_setopt(m_pCurlSession, CURLOPT_NOPROGRESS, 0L);
    }
 
@@ -247,7 +247,7 @@ const CURLcode CHTTPClient::Perform()
        // SSL (TLS)
        curl_easy_setopt(m_pCurlSession, CURLOPT_USE_SSL, CURLUSESSL_ALL);
        curl_easy_setopt(m_pCurlSession, CURLOPT_SSL_VERIFYPEER, (m_eSettingsFlags & VERIFY_PEER) ? 1L : 0L);
-       curl_easy_setopt(m_pCurlSession, CURLOPT_SSL_VERIFYPEER, (m_eSettingsFlags & CURLOPT_SSL_VERIFYHOST) ? 2L : 0L);
+       curl_easy_setopt(m_pCurlSession, CURLOPT_SSL_VERIFYHOST, (m_eSettingsFlags & VERIFY_HOST) ? 2L : 0L);
    }
 
    if (m_bHTTPS && !s_strCertificationAuthorityFile.empty())
@@ -481,7 +481,7 @@ const bool CHTTPClient::DownloadFile(std::vector<unsigned char>& data, const std
  * @retval false  The header couldn't be posted.
  */
 const bool CHTTPClient::UploadForm(const std::string& strURL,
-                                   const PostFormInfo& data,
+                                   PostFormInfo& data,
                                    long& lHTTPStatusCode)
 {
    if (strURL.empty())
@@ -502,6 +502,8 @@ const bool CHTTPClient::UploadForm(const std::string& strURL,
    curl_easy_reset(m_pCurlSession);
 
    UpdateURL(strURL);
+   // Initialize mime handle
+   data.m_pMime = curl_mime_init(m_pCurlSession);
 
    /** Now specify we want to POST data */
    curl_easy_setopt(m_pCurlSession, CURLOPT_POST, 1L);
@@ -510,8 +512,7 @@ const bool CHTTPClient::UploadForm(const std::string& strURL,
    AddHeader("Expect:");
    
    /** set post form */
-   if (data.m_pFormPost != nullptr)
-      curl_easy_setopt(m_pCurlSession, CURLOPT_HTTPPOST, data.m_pFormPost);
+   curl_easy_setopt(m_pCurlSession, CURLOPT_MIMEPOST, data.m_pMime);
 
    /* to avoid printing response's body to stdout.
     * CURLOPT_WRITEDATA : by default, this is a FILE * to stdout. */
@@ -538,7 +539,7 @@ const bool CHTTPClient::UploadForm(const std::string& strURL,
  * @brief PostFormInfo constructor
  */
 CHTTPClient::PostFormInfo::PostFormInfo() :
-   m_pFormPost(nullptr), m_pLastFormptr(nullptr)
+   m_pMime(nullptr), m_pMimePart(nullptr)
 {
 }
 
@@ -548,11 +549,10 @@ CHTTPClient::PostFormInfo::PostFormInfo() :
 CHTTPClient::PostFormInfo::~PostFormInfo()
 {
    // cleanup the formpost chain
-   if (m_pFormPost)
+   if (m_pMime)
    {
-      curl_formfree(m_pFormPost);
-      m_pFormPost = nullptr;
-      m_pLastFormptr = nullptr;
+      curl_mime_free(m_pMime);
+      m_pMime = nullptr;
    }
 }
 
@@ -565,10 +565,9 @@ CHTTPClient::PostFormInfo::~PostFormInfo()
 void CHTTPClient::PostFormInfo::AddFormFile(const std::string& strFieldName,
                                             const std::string& strFieldValue)
 {
-   curl_formadd(&m_pFormPost, &m_pLastFormptr,
-      CURLFORM_COPYNAME, strFieldName.c_str(),
-      CURLFORM_FILE, strFieldValue.c_str(),
-      CURLFORM_END);
+   m_pMimePart = curl_mime_addpart(m_pMime);
+   curl_mime_name(m_pMimePart, strFieldName.c_str());
+   curl_mime_filedata(m_pMimePart, strFieldValue.c_str());
 }
 
 /**
@@ -581,10 +580,9 @@ void CHTTPClient::PostFormInfo::AddFormFile(const std::string& strFieldName,
 void CHTTPClient::PostFormInfo::AddFormContent(const std::string& strFieldName,
                                                const std::string& strFieldValue)
 {
-   curl_formadd(&m_pFormPost, &m_pLastFormptr,
-      CURLFORM_COPYNAME, strFieldName.c_str(),
-      CURLFORM_COPYCONTENTS, strFieldValue.c_str(),
-      CURLFORM_END);
+   m_pMimePart = curl_mime_addpart(m_pMime);
+   curl_mime_name(m_pMimePart, strFieldName.c_str());
+   curl_mime_data(m_pMimePart, strFieldValue.c_str(), CURL_ZERO_TERMINATED);
 }
 
 // REST REQUESTS
@@ -796,8 +794,7 @@ const bool CHTTPClient::Put(const std::string& strUrl, const CHTTPClient::Header
       Payload.pszData = strPutData.c_str();
       Payload.usLength = strPutData.size();
 
-      // specify a PUT request
-      curl_easy_setopt(m_pCurlSession, CURLOPT_PUT, 1L);
+      // specify an UPLOAD (PUT) request
       curl_easy_setopt(m_pCurlSession, CURLOPT_UPLOAD, 1L);
 
       // set read callback function
@@ -836,8 +833,7 @@ const bool CHTTPClient::Put(const std::string& strUrl, const CHTTPClient::Header
       Payload.pszData = Data.data();
       Payload.usLength = Data.size();
 
-      // specify a PUT request
-      curl_easy_setopt(m_pCurlSession, CURLOPT_PUT, 1L);
+      // specify an UPLOAD (PUT) request
       curl_easy_setopt(m_pCurlSession, CURLOPT_UPLOAD, 1L);
 
       // set read callback function
