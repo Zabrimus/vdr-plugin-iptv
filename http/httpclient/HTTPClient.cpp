@@ -20,14 +20,14 @@ std::string CHTTPClient::s_strCurlTraceLogDirectory;
  *
  */
 CHTTPClient::CHTTPClient(LogFnCallback Logger) :
-   m_oLog(Logger),
-   m_iCurlTimeout(0),
-   m_bHTTPS(false),
    m_bNoSignal(false),
-   m_bProgressCallbackSet(false),
+   m_bHTTPS(false),
    m_eSettingsFlags(ALL_FLAGS),
-   m_pCurlSession(nullptr),
    m_pHeaderlist(nullptr),
+   m_pCurlSession(nullptr),
+   m_iCurlTimeout(0),
+   m_bProgressCallbackSet(false),
+   m_oLog(Logger),
    m_curlHandle(CurlHandle::instance())
 {
 
