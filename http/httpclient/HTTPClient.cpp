@@ -900,8 +900,8 @@ inline void CHTTPClient::TrimSpaces(std::string& str)
 
 size_t CHTTPClient::ThrowAwayCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
-   reinterpret_cast<void*>(ptr);
-   reinterpret_cast<void*>(data);
+   (void)ptr;
+   (void)data;
 
    /* we are not interested in the headers itself,
    so we only return the size we would have saved ... */
