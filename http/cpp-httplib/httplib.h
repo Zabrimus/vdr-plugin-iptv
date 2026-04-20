@@ -16488,7 +16488,11 @@ inline std::string evp_pkey_to_pem(EVP_PKEY *key) {
 inline std::string x509_store_to_pem(X509_STORE *store) {
   if (!store) return {};
   std::string pem;
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) return {};
   auto count = sk_X509_OBJECT_num(objs);
   for (decltype(count) i = 0; i < count; i++) {
@@ -16498,6 +16502,9 @@ inline std::string x509_store_to_pem(X509_STORE *store) {
       if (cert) { pem += x509_to_pem(cert); }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
   return pem;
 }
 
@@ -16552,7 +16559,11 @@ inline STACK_OF(X509_NAME) *
   auto ca_list = sk_X509_NAME_new_null();
   if (!ca_list) { return nullptr; }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) {
     sk_X509_NAME_free(ca_list);
     return nullptr;
@@ -16572,6 +16583,9 @@ inline STACK_OF(X509_NAME) *
       }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
 
   if (sk_X509_NAME_num(ca_list) == 0) {
     sk_X509_NAME_free(ca_list);
@@ -17321,7 +17335,11 @@ inline size_t get_ca_certs(ctx_t ctx, std::vector<cert_t> &certs) {
   auto store = SSL_CTX_get_cert_store(ssl_ctx);
   if (!store) { return 0; }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) { return 0; }
 
   auto count = sk_X509_OBJECT_num(objs);
@@ -17337,6 +17355,9 @@ inline size_t get_ca_certs(ctx_t ctx, std::vector<cert_t> &certs) {
       }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
   return certs.size();
 }
 
@@ -17348,7 +17369,11 @@ inline std::vector<std::string> get_ca_names(ctx_t ctx) {
   auto store = SSL_CTX_get_cert_store(ssl_ctx);
   if (!store) { return names; }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) { return names; }
 
   auto count = sk_X509_OBJECT_num(objs);
@@ -17367,6 +17392,9 @@ inline std::vector<std::string> get_ca_names(ctx_t ctx) {
       }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
   return names;
 }
 
