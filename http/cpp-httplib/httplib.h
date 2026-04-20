@@ -16488,7 +16488,11 @@ inline std::string evp_pkey_to_pem(EVP_PKEY *key) {
 inline std::string x509_store_to_pem(X509_STORE *store) {
   if (!store) return {};
   std::string pem;
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) return {};
   auto count = sk_X509_OBJECT_num(objs);
   for (decltype(count) i = 0; i < count; i++) {
@@ -16498,6 +16502,9 @@ inline std::string x509_store_to_pem(X509_STORE *store) {
       if (cert) { pem += x509_to_pem(cert); }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
   return pem;
 }
 
@@ -16552,7 +16559,11 @@ inline STACK_OF(X509_NAME) *
   auto ca_list = sk_X509_NAME_new_null();
   if (!ca_list) { return nullptr; }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) {
     sk_X509_NAME_free(ca_list);
     return nullptr;
@@ -16572,6 +16583,9 @@ inline STACK_OF(X509_NAME) *
       }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
 
   if (sk_X509_NAME_num(ca_list) == 0) {
     sk_X509_NAME_free(ca_list);
@@ -17112,11 +17126,18 @@ inline std::string get_cert_subject_cn(cert_t cert) {
   auto subject_name = X509_get_subject_name(x509);
   if (!subject_name) return "";
 
-  char buf[256];
-  auto len =
-      X509_NAME_get_text_by_NID(subject_name, NID_commonName, buf, sizeof(buf));
-  if (len < 0) return "";
-  return std::string(buf, static_cast<size_t>(len));
+  int idx = X509_NAME_get_index_by_NID(subject_name, NID_commonName, -1);
+  if (idx < 0) return "";
+  auto entry = X509_NAME_get_entry(subject_name, idx);
+  if (!entry) return "";
+  auto asn1_str = X509_NAME_ENTRY_get_data(entry);
+  if (!asn1_str) return "";
+  unsigned char *utf8 = nullptr;
+  int len = ASN1_STRING_to_UTF8(&utf8, asn1_str);
+  if (len < 0 || !utf8) return "";
+  std::string result(reinterpret_cast<char *>(utf8), static_cast<size_t>(len));
+  OPENSSL_free(utf8);
+  return result;
 }
 
 inline std::string get_cert_issuer_name(cert_t cert) {
@@ -17321,7 +17342,11 @@ inline size_t get_ca_certs(ctx_t ctx, std::vector<cert_t> &certs) {
   auto store = SSL_CTX_get_cert_store(ssl_ctx);
   if (!store) { return 0; }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) { return 0; }
 
   auto count = sk_X509_OBJECT_num(objs);
@@ -17337,6 +17362,9 @@ inline size_t get_ca_certs(ctx_t ctx, std::vector<cert_t> &certs) {
       }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
   return certs.size();
 }
 
@@ -17348,7 +17376,11 @@ inline std::vector<std::string> get_ca_names(ctx_t ctx) {
   auto store = SSL_CTX_get_cert_store(ssl_ctx);
   if (!store) { return names; }
 
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  auto objs = X509_STORE_get1_objects(store);
+#else
   auto objs = X509_STORE_get0_objects(store);
+#endif
   if (!objs) { return names; }
 
   auto count = sk_X509_OBJECT_num(objs);
@@ -17367,6 +17399,9 @@ inline std::vector<std::string> get_ca_names(ctx_t ctx) {
       }
     }
   }
+#if OPENSSL_VERSION_NUMBER >= 0x30300000L
+  sk_X509_OBJECT_pop_free(objs, X509_OBJECT_free);
+#endif
   return names;
 }
 
@@ -17702,13 +17737,23 @@ inline bool SSLClient::verify_host_with_common_name(X509 *server_cert) const {
   const auto subject_name = X509_get_subject_name(server_cert);
 
   if (subject_name != nullptr) {
-    char name[BUFSIZ];
-    auto name_len = X509_NAME_get_text_by_NID(subject_name, NID_commonName,
-                                              name, sizeof(name));
-
-    if (name_len != -1) {
-      return detail::match_hostname(
-          std::string(name, static_cast<size_t>(name_len)), host_);
+    int idx = X509_NAME_get_index_by_NID(subject_name, NID_commonName, -1);
+    if (idx >= 0) {
+      auto entry = X509_NAME_get_entry(subject_name, idx);
+      if (entry) {
+        auto asn1_str = X509_NAME_ENTRY_get_data(entry);
+        if (asn1_str) {
+          unsigned char *utf8 = nullptr;
+          int len = ASN1_STRING_to_UTF8(&utf8, asn1_str);
+          if (len >= 0 && utf8) {
+            auto result = detail::match_hostname(
+                std::string(reinterpret_cast<char *>(utf8),
+                            static_cast<size_t>(len)), host_);
+            OPENSSL_free(utf8);
+            return result;
+          }
+        }
+      }
     }
   }
 
