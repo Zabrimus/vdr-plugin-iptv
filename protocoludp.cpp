@@ -78,16 +78,17 @@ bool cIptvProtocolUdp::SetSource(SourceParameter parameter) {
         }
 
         // Update stream address and port
-        streamAddrM = strcpyrealloc(streamAddrM, parameter.locationP);
         // <group address> or <source address>@<group address>
-
-        char *p = strstr(streamAddrM, "@");
+        // Split the caller's string, not streamAddrM: strcpyrealloc() reallocs its destination before it copies,
+        // so a source pointing into streamAddrM itself reads memory the shrink has already handed back.
+        const char *p = strchr(parameter.locationP, '@');
         if (p) {
-            *p = 0;
-            sourceAddrM = strcpyrealloc(sourceAddrM, streamAddrM);
+            free(sourceAddrM);
+            sourceAddrM = strndup(parameter.locationP, p - parameter.locationP);
             streamAddrM = strcpyrealloc(streamAddrM, p + 1);
             isIGMPv3M = true;
         } else {
+            streamAddrM = strcpyrealloc(streamAddrM, parameter.locationP);
             sourceAddrM = strcpyrealloc(sourceAddrM, streamAddrM);
             isIGMPv3M = false;
         }
