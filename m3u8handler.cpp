@@ -240,9 +240,14 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
                             debug3("m3uMax: %s -> %s, %s", m3uMax.c_str(), startsWith(m3uMax, "http://") ? "true" : "false", startsWith(m3uMax, "https://") ? "true" : "false");
 
                             if (!startsWith(m3uMax, "http://") && !startsWith(m3uMax, "https://")) {
-                                // this is a relative URL -> construct absolute URL
-                                auto last = useUri.find_last_of('/');
-                                m3uMax = useUri.substr(0, last + 1).append(m3uMax);
+                                auto myuri = splitUri(webUri);
+                                if (m3uMax[0] == '/') {
+                                    m3uMax = myuri.first.append(m3uMax);
+                                } else {
+                                    // this is a relative URL -> construct absolute URL
+                                    auto last = useUri.find_last_of('/');
+                                    m3uMax = useUri.substr(0, last + 1).append(m3uMax);
+                                }
                             }
 
                             debug3("m3uMax (neu): %s", m3uMax.c_str());
@@ -277,10 +282,15 @@ m3u_stream M3u8Handler::parseM3u(const std::string &webUri, int useYtdlp) {
                 }
 
                 if (addThis) {
+                    auto myuri = splitUri(webUri);
                     if (!startsWith(m.uri, "http://") && !startsWith(m.uri, "https://")) {
-                        // this is a relative URL -> construct absolute URL
-                        auto last = useUri.find_last_of('/');
-                        m.uri = useUri.substr(0, last + 1).append(m.uri);
+                        if (m.uri[0] == '/') {
+                            m.uri = myuri.first + m.uri;
+                        } else {
+                            // this is a relative URL -> construct absolute URL
+                            auto last = useUri.find_last_of('/');
+                            m.uri = useUri.substr(0, last + 1).append(m.uri);
+                        }
                     }
 
                     result.audio.push_back(m);
